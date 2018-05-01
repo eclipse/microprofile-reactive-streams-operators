@@ -28,42 +28,28 @@ import java.util.*;
 /**
  * Superclass of all reactive streams builders.
  *
- * @param <S> The shape of the graph being built.
  * @see ReactiveStreams
  */
-public abstract class ReactiveStreamsBuilder<S> {
+public abstract class ReactiveStreamsBuilder {
 
   private final Stage stage;
-  private final ReactiveStreamsBuilder<?> previous;
+  private final ReactiveStreamsBuilder previous;
 
-  ReactiveStreamsBuilder(Stage stage, ReactiveStreamsBuilder<?> previous) {
+  ReactiveStreamsBuilder(Stage stage, ReactiveStreamsBuilder previous) {
     this.stage = stage;
     this.previous = previous;
   }
 
-  /**
-   * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link ServiceLoader}.
-   *
-   * @return The graph of the given shape.
-   */
-  public S build() {
+  protected ReactiveStreamsEngine defaultEngine() {
     Iterator<ReactiveStreamsEngine> engines = ServiceLoader.load(ReactiveStreamsEngine.class).iterator();
 
     if (engines.hasNext()) {
-      return build(engines.next());
+      return engines.next();
     }
     else {
       throw new IllegalStateException("No implementation of ReactiveStreamsEngine service could be found.");
     }
   }
-
-  /**
-   * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
-   *
-   * @param engine The engine to build the stream with.
-   * @return The graph of the given shape.
-   */
-  public abstract S build(ReactiveStreamsEngine engine);
 
   Graph toGraph(boolean expectInlet, boolean expectOutlet) {
     ArrayDeque<Stage> deque = new ArrayDeque<>();

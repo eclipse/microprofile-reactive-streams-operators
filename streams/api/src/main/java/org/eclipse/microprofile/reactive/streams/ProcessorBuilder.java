@@ -42,9 +42,9 @@ import java.util.stream.Collectors;
  * @param <R> The type of the elements that the processor emits.
  * @see ReactiveStreams
  */
-public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder<Processor<T, R>> {
+public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
 
-  ProcessorBuilder(Stage stage, ReactiveStreamsBuilder<?> previous) {
+  ProcessorBuilder(Stage stage, ReactiveStreamsBuilder previous) {
     super(stage, previous);
   }
 
@@ -348,8 +348,22 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder<Process
     return new ProcessorBuilder<>(new Stage.ProcessorStage(processor), this);
   }
 
-  @Override
-  public Processor<T, R> build(ReactiveStreamsEngine engine) {
+  /**
+   * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
+   *
+   * @return A {@link Processor} that will run this stream.
+   */
+  public Processor<T, R> buildRs() {
+    return buildRs(defaultEngine());
+  }
+
+  /**
+   * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
+   *
+   * @param engine The engine to run the stream with.
+   * @return A {@link Processor} that will run this stream.
+   */
+  public Processor<T, R> buildRs(ReactiveStreamsEngine engine) {
     return engine.buildProcessor(toGraph(true, true));
   }
 }

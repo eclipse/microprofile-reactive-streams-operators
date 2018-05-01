@@ -46,7 +46,7 @@ public final class SubscriberWithResult<T, R> {
    *
    * @return The subscriber.
    */
-  public Subscriber<T> getSubscriber() {
+  public Subscriber<T> getRsSubscriber() {
     return subscriber;
   }
 

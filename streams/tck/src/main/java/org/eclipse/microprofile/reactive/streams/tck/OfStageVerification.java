@@ -41,7 +41,7 @@ public class OfStageVerification extends AbstractStageVerification {
     assertEquals(await(
         ReactiveStreams.of("a", "b", "c")
             .toList()
-            .build(getEngine())
+            .run(getEngine())
     ), Arrays.asList("a", "b", "c"));
   }
 
@@ -50,7 +50,7 @@ public class OfStageVerification extends AbstractStageVerification {
     assertEquals(await(
         ReactiveStreams.empty()
             .toList()
-            .build(getEngine())
+            .run(getEngine())
     ), Collections.emptyList());
   }
 
@@ -59,7 +59,7 @@ public class OfStageVerification extends AbstractStageVerification {
     assertEquals(await(
         ReactiveStreams.of("a")
             .toList()
-            .build(getEngine())
+            .run(getEngine())
     ), Collections.singletonList("a"));
   }
 
@@ -73,7 +73,7 @@ public class OfStageVerification extends AbstractStageVerification {
     public Publisher<Long> createPublisher(long elements) {
       return ReactiveStreams.fromIterable(
           () -> LongStream.rangeClosed(1, elements).boxed().iterator()
-      ).build(getEngine());
+      ).buildRs(getEngine());
     }
   }
 

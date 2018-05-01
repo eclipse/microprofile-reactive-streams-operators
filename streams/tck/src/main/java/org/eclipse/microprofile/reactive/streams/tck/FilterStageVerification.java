@@ -42,7 +42,7 @@ public class FilterStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
         .filter(i -> (i & 1) == 1)
         .toList()
-        .build(getEngine())), Arrays.asList(1, 3, 5));
+        .run(getEngine())), Arrays.asList(1, 3, 5));
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -52,7 +52,7 @@ public class FilterStageVerification extends AbstractStageVerification {
           throw new RuntimeException("failed");
         })
         .toList()
-        .build(getEngine()));
+        .run(getEngine()));
   }
 
   @Test
@@ -60,7 +60,7 @@ public class FilterStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
         .skip(2)
         .toList()
-        .build(getEngine())), Arrays.asList(3, 4));
+        .run(getEngine())), Arrays.asList(3, 4));
   }
 
   @Test
@@ -68,7 +68,7 @@ public class FilterStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
         .dropWhile(i -> i < 3)
         .toList()
-        .build(getEngine())), Arrays.asList(3, 4));
+        .run(getEngine())), Arrays.asList(3, 4));
   }
 
   @Test
@@ -78,8 +78,8 @@ public class FilterStageVerification extends AbstractStageVerification {
             .skip(3)
             .toList();
 
-    assertEquals(await(completion.build(getEngine())), Arrays.asList(4, 5, 6));
-    assertEquals(await(completion.build(getEngine())), Arrays.asList(4, 5, 6));
+    assertEquals(await(completion.run(getEngine())), Arrays.asList(4, 5, 6));
+    assertEquals(await(completion.run(getEngine())), Arrays.asList(4, 5, 6));
   }
 
 
@@ -94,13 +94,13 @@ public class FilterStageVerification extends AbstractStageVerification {
 
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().filter(i -> true).build(getEngine());
+      return ReactiveStreams.<Integer>builder().filter(i -> true).buildRs(getEngine());
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
       return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .filter(i -> true).build(getEngine());
+          .filter(i -> true).buildRs(getEngine());
     }
 
     @Override

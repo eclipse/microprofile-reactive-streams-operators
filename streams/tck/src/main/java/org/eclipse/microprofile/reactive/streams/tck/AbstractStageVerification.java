@@ -87,7 +87,7 @@ abstract class AbstractStageVerification {
 
     @Override
     public Publisher<T> createFailedPublisher() {
-      return ReactiveStreams.<T>failed(new RuntimeException("failed")).build(engine);
+      return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
     }
   }
 
@@ -103,7 +103,7 @@ abstract class AbstractStageVerification {
 
     @Override
     public Publisher<T> createFailedPublisher() {
-      return ReactiveStreams.<T>failed(new RuntimeException("failed")).build(engine);
+      return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
     }
 
     @Override

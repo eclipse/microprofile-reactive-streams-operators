@@ -42,7 +42,7 @@ public class MapStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3)
         .map(Object::toString)
         .toList()
-        .build(getEngine())), Arrays.asList("1", "2", "3"));
+        .run(getEngine())), Arrays.asList("1", "2", "3"));
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -52,7 +52,7 @@ public class MapStageVerification extends AbstractStageVerification {
           throw new RuntimeException("failed");
         })
         .toList()
-        .build(getEngine()));
+        .run(getEngine()));
   }
 
   @Override
@@ -66,13 +66,13 @@ public class MapStageVerification extends AbstractStageVerification {
 
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().map(Function.identity()).build(getEngine());
+      return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
       return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .map(Function.identity()).build(getEngine());
+          .map(Function.identity()).buildRs(getEngine());
     }
 
     @Override

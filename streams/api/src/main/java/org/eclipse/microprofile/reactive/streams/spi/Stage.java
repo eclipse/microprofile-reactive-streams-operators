@@ -182,7 +182,7 @@ public interface Stage {
      *
      * @return The publisher.
      */
-    public Publisher<?> getPublisher() {
+    public Publisher<?> getRsPublisher() {
       return publisher;
     }
   }
@@ -231,7 +231,7 @@ public interface Stage {
      *
      * @return The processor.
      */
-    public Processor<?, ?> getProcessor() {
+    public Processor<?, ?> getRsProcessor() {
       return processor;
     }
   }
@@ -273,7 +273,7 @@ public interface Stage {
      *
      * @return The subscriber.
      */
-    public Subscriber<?> getSubscriber() {
+    public Subscriber<?> getRsSubscriber() {
       return subscriber;
     }
   }

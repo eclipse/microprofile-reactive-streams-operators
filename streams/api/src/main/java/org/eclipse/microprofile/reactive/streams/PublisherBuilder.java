@@ -43,9 +43,9 @@ import java.util.stream.Collectors;
  * @param <T> The type of the elements that the publisher emits.
  * @see ReactiveStreams
  */
-public final class PublisherBuilder<T> extends ReactiveStreamsBuilder<Publisher<T>> {
+public final class PublisherBuilder<T> extends ReactiveStreamsBuilder {
 
-  PublisherBuilder(Stage stage, ReactiveStreamsBuilder<?> previous) {
+  PublisherBuilder(Stage stage, ReactiveStreamsBuilder previous) {
     super(stage, previous);
   }
 
@@ -346,8 +346,22 @@ public final class PublisherBuilder<T> extends ReactiveStreamsBuilder<Publisher<
     return toGraph(false, true);
   }
 
-  @Override
-  public Publisher<T> build(ReactiveStreamsEngine engine) {
+  /**
+   * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
+   *
+   * @return A {@link Processor} that will run this stream.
+   */
+  public Publisher<T> buildRs() {
+    return buildRs(defaultEngine());
+  }
+
+  /**
+   * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
+   *
+   * @param engine The engine to run the stream with.
+   * @return A {@link Publisher} that will run this stream.
+   */
+  public Publisher<T> buildRs(ReactiveStreamsEngine engine) {
     return engine.buildPublisher(toGraph());
   }
 }

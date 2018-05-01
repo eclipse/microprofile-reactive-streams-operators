@@ -39,7 +39,7 @@ public class EmptyProcessorVerification extends AbstractStageVerification {
   public class ProcessorVerification extends StageProcessorVerification<Integer> {
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().build(getEngine());
+      return ReactiveStreams.<Integer>builder().buildRs(getEngine());
     }
 
     @Override

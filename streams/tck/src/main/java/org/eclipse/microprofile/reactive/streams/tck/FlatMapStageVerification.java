@@ -47,7 +47,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3)
         .flatMap(n -> ReactiveStreams.of(n, n, n))
         .toList()
-        .build(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
+        .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -57,7 +57,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
           throw new RuntimeException("failed");
         })
         .toList()
-        .build(getEngine()));
+        .run(getEngine()));
   }
 
   @Test
@@ -103,7 +103,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     CompletionStage<List<Integer>> result = ReactiveStreams.of(1, 2, 3, 4, 5)
         .flatMap(id -> ReactiveStreams.fromPublisher(new ScheduledPublisher(id)))
         .toList()
-        .build(getEngine());
+        .run(getEngine());
 
     assertEquals(result.toCompletableFuture().get(2, TimeUnit.SECONDS),
         Arrays.asList(1, 2, 3, 4, 5));
@@ -122,13 +122,13 @@ public class FlatMapStageVerification extends AbstractStageVerification {
 
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().flatMap(ReactiveStreams::of).build(getEngine());
+      return ReactiveStreams.<Integer>builder().flatMap(ReactiveStreams::of).buildRs(getEngine());
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
       return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .flatMap(ReactiveStreams::of).build(getEngine());
+          .flatMap(ReactiveStreams::of).buildRs(getEngine());
     }
 
     @Override
@@ -180,7 +180,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
               probe.registerOnComplete();
             }
           })
-          .build(getEngine());
+          .run(getEngine());
 
       return (Subscriber) await(subscriber);
     }

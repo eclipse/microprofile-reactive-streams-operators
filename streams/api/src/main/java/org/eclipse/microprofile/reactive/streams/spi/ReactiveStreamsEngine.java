@@ -29,7 +29,7 @@ import java.util.concurrent.CompletionStage;
 /**
  * An engine for turning reactive streams graphs into Reactive Streams publishers/subscribers.
  * <p>
- * The zero argument {@link org.eclipse.microprofile.reactive.streams.ReactiveStreamsBuilder#build()} method will use
+ * The zero argument {@code build} and {@code run} methods on subclasses of this will use
  * the {@link java.util.ServiceLoader} to load an engine for the current context classloader. It does not cache
  * engines between invocations. If instantiating an engine is expensive (eg, it creates threads), then it is
  * recommended that the implementation does its own caching by providing the engine using a static provider method.

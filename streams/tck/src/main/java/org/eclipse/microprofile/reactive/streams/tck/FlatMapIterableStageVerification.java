@@ -40,7 +40,7 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
     assertEquals(await(ReactiveStreams.of(1, 2, 3)
         .flatMapIterable(n -> Arrays.asList(n, n, n))
         .toList()
-        .build(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
+        .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -50,7 +50,7 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
           throw new RuntimeException("failed");
         })
         .toList()
-        .build(getEngine()));
+        .run(getEngine()));
   }
 
   @Override
@@ -65,13 +65,13 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
 
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().flatMapIterable(Arrays::asList).build(getEngine());
+      return ReactiveStreams.<Integer>builder().flatMapIterable(Arrays::asList).buildRs(getEngine());
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
       return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .flatMapIterable(Arrays::asList).build(getEngine());
+          .flatMapIterable(Arrays::asList).buildRs(getEngine());
     }
 
     @Override

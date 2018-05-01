@@ -49,7 +49,7 @@ public class ConcatStageVerification extends AbstractStageVerification {
             ReactiveStreams.of(4, 5, 6)
         )
             .toList()
-            .build(getEngine())
+            .run(getEngine())
     ), Arrays.asList(1, 2, 3, 4, 5, 6));
   }
 
@@ -63,7 +63,7 @@ public class ConcatStageVerification extends AbstractStageVerification {
     )
         .forEach(e -> {
         })
-        .build(getEngine());
+        .run(getEngine());
 
     await(cancelCapture.getCancelled());
     await(completion);
@@ -79,7 +79,7 @@ public class ConcatStageVerification extends AbstractStageVerification {
     )
         .limit(5)
         .toList()
-        .build(getEngine());
+        .run(getEngine());
 
     await(cancelCapture.getCancelled());
     assertEquals(await(result), Arrays.asList(1, 2, 3, 4, 5));
@@ -102,7 +102,7 @@ public class ConcatStageVerification extends AbstractStageVerification {
           ReactiveStreams.fromIterable(
               () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()
           )
-      ).build(getEngine());
+      ).buildRs(getEngine());
     }
   }
 

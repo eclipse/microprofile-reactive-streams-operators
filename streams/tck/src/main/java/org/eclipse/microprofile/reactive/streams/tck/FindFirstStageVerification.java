@@ -38,19 +38,19 @@ public class FindFirstStageVerification extends AbstractStageVerification {
   @Test
   public void findFirstStageShouldFindTheFirstElement() {
     assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .findFirst().build(getEngine())), Optional.of(1));
+        .findFirst().run(getEngine())), Optional.of(1));
   }
 
   @Test
   public void findFirstStageShouldReturnEmpty() {
     assertEquals(await(ReactiveStreams.of()
-        .findFirst().build(getEngine())), Optional.empty());
+        .findFirst().run(getEngine())), Optional.empty());
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
   public void findFirstStageShouldPropagateErrors() {
     await(ReactiveStreams.failed(new RuntimeException("failed"))
-        .findFirst().build(getEngine()));
+        .findFirst().run(getEngine()));
   }
 
   @Override
@@ -61,7 +61,7 @@ public class FindFirstStageVerification extends AbstractStageVerification {
   class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
     @Override
     public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder().findFirst().build(getEngine()).getSubscriber();
+      return ReactiveStreams.<Integer>builder().findFirst().build(getEngine()).getRsSubscriber();
     }
 
     @Override

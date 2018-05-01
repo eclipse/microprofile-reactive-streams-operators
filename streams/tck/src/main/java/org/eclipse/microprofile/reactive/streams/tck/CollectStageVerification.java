@@ -39,25 +39,25 @@ public class CollectStageVerification extends AbstractStageVerification {
   @Test
   public void toListStageShouldReturnAList() {
     assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .toList().build(getEngine())), Arrays.asList(1, 2, 3));
+        .toList().run(getEngine())), Arrays.asList(1, 2, 3));
   }
 
   @Test
   public void toListStageShouldReturnEmpty() {
     assertEquals(await(ReactiveStreams.of()
-        .toList().build(getEngine())), Collections.emptyList());
+        .toList().run(getEngine())), Collections.emptyList());
   }
 
   @Test
   public void finisherFunctionShouldBeInvoked() {
     assertEquals(await(ReactiveStreams.of("1", "2", "3")
-        .collect(Collectors.joining(", ")).build(getEngine())), "1, 2, 3");
+        .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
   public void toListStageShouldPropagateErrors() {
     await(ReactiveStreams.failed(new RuntimeException("failed"))
-        .toList().build(getEngine()));
+        .toList().run(getEngine()));
   }
 
   @Override
@@ -68,7 +68,7 @@ public class CollectStageVerification extends AbstractStageVerification {
   class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
     @Override
     public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder().toList().build(getEngine()).getSubscriber();
+      return ReactiveStreams.<Integer>builder().toList().build(getEngine()).getRsSubscriber();
     }
 
     @Override

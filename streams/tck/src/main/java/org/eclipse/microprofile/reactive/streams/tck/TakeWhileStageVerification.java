@@ -42,7 +42,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6, 1, 2)
         .takeWhile(i -> i < 5)
         .toList()
-        .build(getEngine())), Arrays.asList(1, 2, 3, 4));
+        .run(getEngine())), Arrays.asList(1, 2, 3, 4));
   }
 
   @Test
@@ -50,7 +50,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
         .takeWhile(i -> false)
         .toList()
-        .build(getEngine())), Collections.emptyList());
+        .run(getEngine())), Collections.emptyList());
   }
 
   @Test
@@ -58,7 +58,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
         .limit(3)
         .toList()
-        .build(getEngine())), Arrays.asList(1, 2, 3));
+        .run(getEngine())), Arrays.asList(1, 2, 3));
   }
 
   @Test
@@ -78,7 +78,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
         })
     ).limit(1)
         .toList()
-        .build(getEngine());
+        .run(getEngine());
     await(cancelled);
   }
 
@@ -96,7 +96,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
             })
             .limit(3)
             .toList()
-            .build(getEngine())
+            .run(getEngine())
     ), Arrays.asList(1, 2, 3));
   }
 
@@ -106,7 +106,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
         ReactiveStreams.of(1, 2, 3, 4)
             .limit(0)
             .toList()
-            .build(getEngine())
+            .run(getEngine())
     ), Collections.emptyList());
   }
 
@@ -120,7 +120,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
       return ReactiveStreams.<Integer>builder()
           .takeWhile(t -> true)
-          .build(getEngine());
+          .buildRs(getEngine());
     }
 
     @Override

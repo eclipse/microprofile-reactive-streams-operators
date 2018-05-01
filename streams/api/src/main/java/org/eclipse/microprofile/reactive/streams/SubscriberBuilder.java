@@ -34,13 +34,27 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
  * @param <R> The type of the result that this subscriber emits.
  * @see ReactiveStreams
  */
-public final class SubscriberBuilder<T, R> extends ReactiveStreamsBuilder<SubscriberWithResult<T, R>> {
+public final class SubscriberBuilder<T, R> extends ReactiveStreamsBuilder {
 
-  SubscriberBuilder(Stage stage, ReactiveStreamsBuilder<?> previous) {
+  SubscriberBuilder(Stage stage, ReactiveStreamsBuilder previous) {
     super(stage, previous);
   }
 
-  @Override
+  /**
+   * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
+   *
+   * @return A {@link SubscriberWithResult} that will run this stream.
+   */
+  public SubscriberWithResult<T, R> build() {
+    return build(defaultEngine());
+  }
+
+  /**
+   * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
+   *
+   * @param engine The engine to run the stream with.
+   * @return A {@link SubscriberWithResult} that will run this stream.
+   */
   public SubscriberWithResult<T, R> build(ReactiveStreamsEngine engine) {
     return engine.buildSubscriber(toGraph(true, false));
   }

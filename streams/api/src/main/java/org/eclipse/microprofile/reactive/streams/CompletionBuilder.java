@@ -34,14 +34,28 @@ import java.util.concurrent.CompletionStage;
  * @param <T> The result of the stream.
  * @see ReactiveStreams
  */
-public final class CompletionBuilder<T> extends ReactiveStreamsBuilder<CompletionStage<T>> {
+public final class CompletionBuilder<T> extends ReactiveStreamsBuilder {
 
-  CompletionBuilder(Stage stage, ReactiveStreamsBuilder<?> previous) {
+  CompletionBuilder(Stage stage, ReactiveStreamsBuilder previous) {
     super(stage, previous);
   }
 
-  @Override
-  public CompletionStage<T> build(ReactiveStreamsEngine engine) {
+  /**
+   * Run this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
+   *
+   * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
+   */
+  public CompletionStage<T> run() {
+    return run(defaultEngine());
+  }
+
+  /**
+   * Run this stream, using the supplied {@link ReactiveStreamsEngine}.
+   *
+   * @param engine The engine to run the stream with.
+   * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
+   */
+  public CompletionStage<T> run(ReactiveStreamsEngine engine) {
     return engine.buildCompletion(toGraph(false, false));
   }
 }

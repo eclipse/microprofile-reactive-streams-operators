@@ -47,7 +47,7 @@ public class FlatMapCompletionStageVerification extends AbstractStageVerificatio
     CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
         .flatMapCompletionStage(Function.identity())
         .toList()
-        .build(getEngine());
+        .run(getEngine());
 
     Thread.sleep(100);
 
@@ -67,7 +67,7 @@ public class FlatMapCompletionStageVerification extends AbstractStageVerificatio
     CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
         .flatMapCompletionStage(Function.identity())
         .toList()
-        .build(getEngine());
+        .run(getEngine());
 
     three.complete(3);
     Thread.sleep(100);
@@ -92,7 +92,7 @@ public class FlatMapCompletionStageVerification extends AbstractStageVerificatio
           return i;
         })
         .toList()
-        .build(getEngine());
+        .run(getEngine());
 
     Thread.sleep(100);
     concurrentMaps.decrementAndGet();
@@ -117,7 +117,7 @@ public class FlatMapCompletionStageVerification extends AbstractStageVerificatio
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
       return ReactiveStreams.<Integer>builder()
           .flatMapCompletionStage(CompletableFuture::completedFuture)
-          .build(getEngine());
+          .buildRs(getEngine());
     }
 
     @Override

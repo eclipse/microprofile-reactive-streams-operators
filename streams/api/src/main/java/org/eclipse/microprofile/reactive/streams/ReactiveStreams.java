@@ -173,7 +173,7 @@ public class ReactiveStreams {
    * @return A publisher builder.
    */
   public static <T> PublisherBuilder<T> generate(Supplier<? extends T> s) {
-    return fromIterable(() -> Stream.<T>generate(s).iterator());
+    return fromIterable(() -> Stream.<T>generate((Supplier) s).iterator());
   }
 
   /**

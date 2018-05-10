@@ -93,13 +93,19 @@ CompletionStage<Response> response = someApi.makeRequestAsync();
 
 `CompletionStage` may also be used to signal zero or one values, by wrapping the value in an `Optional`. For example, a database API may offer a way to get a single row, if one exists. In which case, `CompletionStage<Optional<Row>>`. may be used. This is preferred over returning `null`, as it makes clear that the value may not be present.
 
-Finally, sometimes there is a need to signify completion, either succesfully or with an error, with no value. For example, a database update may not return any value. In such case, `CompletionStage<Void>` should be used, which gets redeemed with `null` when successful.
+Sometimes there is a need to signify completion, either succesfully or with an error, with no value. For example, a database update may not return any value. In such case, `CompletionStage<Void>` should be used, which gets redeemed with `null` when successful. This may be a little unfamiliar to users, and the requirement to use `null` is certainly not immediately obvious. An alternative might be to introduce a unit type, for example Akka has a singleton `Done` type for this purpose. The problem with this is though that it's not clear where `Done` should live, the JDK would probably make the most sense, but that depends on changes to the JDK.
+
+There are also some cases where a finite number of values will be made available in the future, all at once. For example, a query for paged results from a database or a REST API will return a finite number of values at once. In this case, a `CompletionStage` of an appropriate collection type, such as `List`, should be used.
+
+When using the `*Async` methods on `CompletionStage`, it is recommended that they only be used with an explicit executor, not the global executor. This recommendation is both for library implementors as well as application developers.
 
 === Reactive Streams
 
 Reactive Streams is an asynchronous streaming API, produced by a collaboration of engineers representing Netflix, Red Hat, Pivotal, Oracle, Lightbend and others. It was adopted by the JDK in JDK9.
 
 Reactive Streams provides very well defined semantics for data flow, backpressure, error propagation, completion and cancelling, thread safety, infinite recursion prevention, and other things, allowing two implementations of Reactive Streams to integrate seamlessly with no specific support beyond the Reactive Streams specification in either of them. To get a feel for how well defined the semantics are, https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md[read through the spec]. It also has https://github.com/reactive-streams/reactive-streams-jvm/blob/master/tck/README.md[a TCK] that does a thorough job of ensuring implementations implement the spec correctly and completely.
+
+Reactive Streams should be used for all cases when multiple values are being received asynchronously over time. A distinction here should be made between receiving multiple values at once (such as the paged results use case discussed above with `CompletionStage`) and receiving values asynchronously over time. Reactive Streams should not be used for the former use case, only the latter.
 
 It should be stressed that Reactive Streams is intended to be used as an integration API, not an application developer API. Libraries are meant to implement Reactive Streams interfaces, not application developers, the most that application developers should do is pass around instances of Publisher and Subscriber, and perhaps plumb them together via the subscribe method. https://medium.com/@olehdokuka/mastering-own-reactive-streams-implementation-part-1-publisher-e8eaf928a78c[This blog post] does a good job of demonstrating why application developers should never implement their own publishers or subscribers, showing how just implementing an incredibly simple publisher is incredibly difficult to get right, not just to implement the requirements of the spec, but to get the thread safety and concurrency concerns correct.
 
@@ -121,11 +127,30 @@ There are a number of strategies that should be used, depending on the API:
 * An API that returns a `Publisher` or `Subscriber` can’t be overloaded, as the Java compiler doesn’t allow overloading by return type.
 * When an API has to return a `Publisher` or `Subscriber`, or accept a `Publisher` or `Subscriber` type parameter, a way to future proof this is to decide on a way to disambiguate these methods with different names. It's recommended that the `org.reactivestreams` variant adds `Rs` to the name, for example `getRsPublisher`. When JDK9 support is added, the `Flow` types can drop the `Rs`, allowing the existing methods to coexist for backwards compatibility.
 
+For example, an API that returns an `org.reactivestreams.Subscriber` might be written like this:
+
+[source, java]
+----
+org.reactivestreams.Subscriber<T> getRsSubscriber();
+----
+
+When that API migrates to `Flow`, it will be changed to this:
+
+[source, java]
+----
+java.util.concurrent.Flow.Subscriber<T> getSubscriber();
+
+@Deprecated
+default org.reactivestreams.Subscriber<T> getRsSubscriber() {
+  return new RsSubscriberWrapper(getSubscriber());
+}
+----
+
 ==== Reactive Streams manipulation strategy
 
 One of the major shortcomings of adopting Reactive Streams at present is the lack of a standard API for manipulating them. Consider a use case where we want to connect a source, `Publisher<Foo>` to a sink, `Subscriber<Bar>`, and we have a function, `Function<Foo, Bar>` to do the transformation. There doesn’t exist any method in Reactive Streams that allows a developer to apply that transformation function to each element. Instead, they would have to write their own `Publisher`/`Subscriber` that wrapped the provided publisher/subscriber to do the transformation, which not only is a lot of boilerplate, it’s strongly discouraged that users write their own implementations of `Publisher` and `Subscriber`. A simple `map` transformation may be trivial to write, but it gets far more complex with things like filter, where you drop elements and so need to work with demand, and then substreams, asynchronous mappings, etc, get even worse.
 
-Of course, this isn’t a problem for most existing users of Reactive Streams, because there exist a number of third party libraries that provide these transformations, such as `map`/`filter`/`flatMap`. These libraries include Akka Streams, RxJava 2 and Reactor. However, for a Java standard like MicroProfile, requiring developers to bring in a third party library to do these elementary operations is not acceptable.
+Of course, this isn’t a problem for most existing users of Reactive Streams, because there exist a number of third party libraries that provide these transformations, such as `map`/`filter`/`flatMap`. These libraries include Akka Streams, RxJava 2 and Reactor. Each of these libraries has its differences, advantages and disadvantages, such as using an lifted API to declare the stream vs directly manipulating the stream, the execution model, and whether JDK types for functions and futures are embraced or not. However, for a Java standard like MicroProfile, requiring developers to bring in a third party library to do these elementary operations is not acceptable.
 
 To address this, a MicroProfile Reactive Streams specification is being developed. This specification is intended to eventually be proposed as an API for the JDK, but for now it is incubating in MicroProfile.
 

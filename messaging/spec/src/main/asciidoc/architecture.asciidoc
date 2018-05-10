@@ -1,0 +1,187 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+[[reactivemessagingarchitecture]]
+== Architecture
+
+This specification defines an API for declaring messaging handlers using Reactive Streams.
+
+=== Rationale
+
+Asynchronous communication allows temporal decoupling of services in a microservice based architecture. The implication of this temporal decoupling is that communication is allowed to occur regardless of when the parties involved in the communication are running, whether they are loaded or overloaded, and whether they are successfully processing messages or failing.
+
+In contrast, synchronous communication couples services together, binding their uptime, failure and handling of load to each other. In a chain of synchronous communication, the entire conversation will only be successful if all parties in the chain are responsive - if they are all running, processing messages successfully, and not overloaded. If just one party has a problem, all will effectively exhibit the same problem.
+
+In a microservice based architecture, temporal coupling results in a fragile system, with resilience and scaling properties that are worse than a monolith, hence, it is important for microservice based architectures to embrace asynchronous communication as much as possible. MicroProfile currently does not offer support for asynchronous messaging, only synchronous messaging using JAX-RS and MicroProfile REST client are supported.
+
+Java EE offers JMS and Message Driven Beans for handling asynchronous communication, however, there are some problems with these specifications:
+
+* Both are designed for a technology landscape where messaging was a heavy weight process used on the edge of system to hand control of a transaction from system to another, consequently there is a lot of boilerplate associated with using these technologies.
+* It is assumed their design that consistency is handled using distributed transactions. However, modern message brokers, popular in microservice deployments, such as Kafka, Amazon Kinesis and Azure Event Hubs, do not support XA transactions, rather, message acknowledgement is handled using offsets with at least once delivery guarantees.
+* They do not have support for asynchronous IO, it is assumed that message processing is done on a single thread, however many modern specs are moving to asynchronous IO.
+
+Hence a lighter weight, reactive solution to messaging is desirable for MicroProfile to ensure microservices written using MicroProfile are able to meet the demands required by the architecture.
+
+=== Design
+
+Applications declare message subscribers, publishers and processors by annotating methods on CDI beans with `@Incoming` and `@Outgoing` annotations. A method with an `@Incoming` annotation is a message subscriber, it consumes messages from a messaging provider. A method with an `@Outgoing` annotation is a message publisher, it emits messages to a messaging provider. A method with both an `@Incoming` and an `@Outgoing` annotation is a message processor, it consumes messages from one messaging provider, does some transformation to them, and emits messages to another, potentially different, messaging provider.
+
+==== Messaging providers
+
+A messaging provider is an abstract concept provided by this spec, it typically will correspond to a messaging transport, such as Kafka, Amazon Kinesis, RabbitMQ or ActiveMQ. It is up an implementation as to which and how many transports it will support. Implementations may provide a default messaging transport, and that default may be configurable, all this is left up to the implementation to decide on the mechanism for providing that. Implementations may also provide an SPI for plugging in custom messaging providers, the definition of that SPI is up to the implementation, and beyond the scope of this specification. A future iteration of this spec may provide such an SPI, for example based on the Java EE Connector Architecture, but currently this is out of scope.
+
+An implementation is expected to advertise and allow the differentiation between different messaging providers by providing subclasses of `MessagingProvider`. For example, a Kafka messaging provider may be provided by a class that looks like this:
+
+[source, java]
+----
+public class Kafka extends MessagingProvider {
+  private Kafka() { }
+}
+----
+
+Note that the class is just a marker class, it provides no actual functionality. It is up to implementations to provide mappings from this class to an implementation of a messaging provider.
+
+An application developer may specify a specific messaging provider using the `provider` property on the `@Incoming` and `@Outging` annotations.
+
+==== Message stream shapes
+
+The signature of message stream methods can have a number of different distinct types, offering differing levels of power and simplicity to application developers. Different shapes are supported depending on whether the method is a publisher, subscriber or processor, for example, a publishing stream supports returning MicroProfile Reactive Streams `PublisherBuilder`, but not `SubscriberBuilder`, the inverse is true for a subscribing stream.
+
+Implementations must validate that the stream shape matches the `@Outgoing` and `@Incoming` annotations, if they don't, a CDI definition exception should be raised to the CDI container during initialization.
+
+===== Simple method streams
+
+The simplest shape that an application may use is a simple method. This is a method that accepts an incoming message, and possible produces an outgoing message:
+
+[source, java]
+----
+@Incoming
+@Outgoing
+public OutgoingMessage processMessage(IncomingMessage msg) {
+  return convert(msg);
+}
+----
+
+In the above example, the stream is both a publishing and subscribing stream, with a 1:1 mapping of incoming to outgoing messages. Asynchronous processing may also be used, by returning a `CompletionStage`:
+
+[source, java]
+----
+@Incoming
+@Outgoing
+public CompletionStage<OutgoingMessage> processMessage(IncomingMessage msg) {
+  return asyncConvert(msg);
+}
+----
+
+Simple methods are only supported for `@Incoming` annotated methods, if there is only an `@Outgoing` annotation on the method, this is a definition error. If the method is not `@Outgoing` annotated, then the returned value is ignored - however, note that for asynchronous methods, the returned `CompletionStage` is still important for determining when message processing has completed successfully, for the purposes of message acknowledgement. When there is no `@Outgoing` annotation, `void` may also be returned.
+
+===== Reactive streams
+
+For more power, developers may use Reactive Streams shapes. Reactive Streams shaped methods accept no parameters, and return one of the following:
+
+* `org.eclipse.microprofile.reactive.streams.PublisherBuilder`
+* `org.eclipse.microprofile.reactive.streams.SubscriberBuilder`
+* `org.eclipse.microprofile.reactive.streams.ProcessorBuilder`
+* `org.reactivestreams.Publisher`
+* `org.reactivestreams.Subscriber`
+* `org.reactivestreams.Processor`
+
+Implementations may optionally support other shapes, such as JDK9 Flow publishers, subscribers and processors, or other representations of Reactive Streams. Application developers are recommended to use the MicroProfile Reactive Streams builders in order to allow for the highest level of portability.
+
+Here is a table of compatibility for processors, subscribers and publishers with `@Incoming` and `@Outgoing` annotations:
+
+[cols="s,,", options="header"]
+|======================================
+|           |Incoming     |Outgoing
+|Publisher  |Incompatible |Required
+|Subscriber |Required     |Incompatible
+|Processor  |Required     |Optional
+|======================================
+
+For example, here's a message processor:
+
+[source, java]
+----
+@Incoming
+@Outgoing
+public PublisherBuilder<IncomingMessage, OutgoingMessage> processMessages() {
+  return ReactiveStreams.<IncomingMessage>builder()
+    .map(this::convert);
+}
+----
+
+==== Message acknowledgement
+
+Messages are either acknowledged explicitly, or implicitly by the implementation.
+
+===== Explicit acknowledgement
+
+Messages may be wrapped in a `Message`, which can be used to supply metadata, and also allows messages to be acknowledged. The contract for acknowledging messages is anything that accepts a `Message` is required to acknowledge it. So, if the application receives an incoming message wrapped in `Message`, it is responsible for invoking `Message.ack()`, and if the application produces an outgoing message wrapped in `Message`, then the spec implementation is responsible for invoking `Message.ack()`.
+
+ For example, the following application code is incorrect, since it accepts a message wrapped in `Message`, but does not acknowledge the messages:
+
+[source, java]
+----
+@Incoming
+public void processMessage(Message<IncomingMessage> msg) {
+  System.out.println("Got message " + msg.getPayload());
+}
+----
+
+Here is a correct implementation:
+
+[source, java]
+----
+@Incoming
+public CompletionStage<Void> processMessage(Message<IncomingMessage> msg) {
+  System.out.println("Got message " + msg.getPayload());
+  return msg.ack();
+}
+----
+
+This implementation is also correct, since the application is returning a wrapped message back to the implementation, making it the implementations responsibility to invoke `ack()`:
+
+[source, java]
+----
+@Incoming
+public Message<?> processMessage(Message<IncomingMessage> msg) {
+  System.out.println("Got message " + msg.getPayload());
+  return msg;
+}
+----
+
+The above is particularly useful for processing messages that are also being sent to a destination, as the implementation must not invoke `ack` until after the outgoing message has been sent to the destination:
+
+[source, java]
+----
+@Incoming
+@Outgoing
+public Message<OutgoingMessage> processMessage(Message<IncomingMessage> msg) {
+  return Message.of(convert(msg.getPayload()), msg::ack);
+}
+----
+
+===== Implicit acknowledgement
+
+Incoming messages may be implicitly acknowledged if the incoming message is not wrapped in `Message`. When it is acknowledged depends on the shape of the method. For simple method streams, the message should be acknowledged after the return value of the method is redeemed - for synchronous methods, this is when the method returns, for asynchronous methods, this is when the returned `CompletionStage` is redeemed.
+
+If the method returns a subscriber, then the message should be acknowledged before being sent to the subscriber.
+
+If the method returns a processor, then it is assumed that there is a 1:1 relationship between incoming and outgoing messages, and the implementation should acknowledge incoming messages as corresponding outgoing messages are emitted.
+
+==== Custom message types
+
+Implementations may provide custom subtypes of `Message` as an end user API, for the purpose of providing additional metadata associated with the messaging provider. If an application declares that it consumes or produces a subtype of the `Message` wrapper, the implementation should validate that the messaging provider supports that message wrapper type, and raise a deployment exception if it doesn't.

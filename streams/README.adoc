@@ -1,0 +1,74 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+image:https://badges.gitter.im/eclipse/microprofile-reactive.svg[link="https://gitter.im/eclipse/microprofile-reactive"]
+
+= Reactive Streams Support for MicroProfile
+
+== Rationale
+
+https://www.reactive-streams.org[Reactive Streams] is an integration SPI - it allows two different libraries that provide asynchronous streaming to be able to stream data to and from each other.
+
+Reactive Streams is not however designed to be used directly by application developers.
+The semantics defined by Reactive Streams are very strict, and are non trivial, particularly in the areas of thread safety, to implement correctly.
+Typically, application developers are expected to use third party libraries that provide the tools necessary to manipulate and control streams.
+Examples include https://doc.akka.io/docs/akka/2.5/stream/index.html[Akka Streams], https://github.com/ReactiveX/RxJava[RxJava] and https://projectreactor.io/[Reactor].
+
+Depending on third party libraries for this essential application developer facing functionality however is not something that MicroProfile can do.
+MicroProfile specifications are not allowed to depend on anything other than the JDK and other MicroProfile specifications.
+
+Hence, for MicroProfile to provide application developer APIs that use Reactive Streams, MicroProfile must provide its own Reactive Streams manipulation and control library.
+In future, it is hoped that this library will be adopted by the JDK itself, after a period of suitable incubation in the MicroProfile project.
+Some JDK maintainers have indicated that this would be a suitable path to get this type of functionality into the JDK.
+
+== Influences and History
+
+The naming and scope of this API is inspired by the JDK8 java.util.stream API.
+The JDK8 stream API however does not capture all typical functionality that an application developer using Reactive Streams would need.
+For additional API naming and scope, Akka Streams, RxJava and Reactor have been used as an inspiration.
+
+== Implementations
+
+MicroProfile Reactive Streams does not contain an implementation itself but only provides the specified API, a TCK and documentation.
+
+The following Implementations are available 
+
+* https://github.com/lightbind/microprofile-reactive-streams/tree/master/akka[Akka Streams]
+* https://github.com/lightbind/microprofile-reactive-streams/tree/master/zerodep[Zero Dependency] - intended as a possible reference implementation for when this is proposed to the JDK, but not the reference implementation for MicroProfile as MicroProfile does not have reference implementations.
+* https://github.com/lightbind/microprofile-reactive-streams/tree/master/rxjava[RxJava]
+
+== Design
+
+MicroProfile Reactive Streams offers a series of builders for creating instances of Reactive Streams `Publisher`, `Subscriber` and `Processor`.
+`Subscriber's` are associated with a `CompletionStage` of a result of consuming the stream, this may be the result of a reduction on the elements, or in some cases just indicates the termination of the stream either as a success or with an error.
+
+The API builds a graph from a series of graph stages, which are provided as an SPI.
+A Reactive Streams engine, which is implemented by implementations of the specification, and can also manually be provided by end users, is responsible for building the graph into a running stream.
+
+Reactive Streams is available in JDK9 in the `java.util.concurrent.Flow` API, however, MicroProfile is not ready to require a baseline JDK version above 8.
+For this reason, the same interfaces provided by https://www.reactive-streams.org in the `org.reactivestreams` package are used instead.
+This does place a dependency from MicroProfile to a third party library, however, that third party library is nothing more than the four Reactive Streams interfaces (`Publisher`, `Subscriber`, `Subscription` and `Processor`), and these have been copied as is into JDK9.
+As an interim solution while JDK9 adoption catches up, this has been deemed an acceptable exception to the rule.
+The approach documented in https://docs.google.com/document/d/1PEVm6viY4fR7fQyC6i-O-PSO2ciBMCdO9b2R3bsLAnk/edit[MicroProfile Approach to Reactive] for ensuring a smooth transition to the JDK9 APIs has been adopted.
+
+== Building
+
+The whole MicroProfile Reactive Streams project can be built via Apache Maven.
+
+`$> mvn clean install`
+

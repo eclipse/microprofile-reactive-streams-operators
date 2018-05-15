@@ -27,7 +27,7 @@ import java.util.stream.Collector;
 /**
  * Reduction utilities that convert arguments supplied to reduce methods on the builders to Collectors.
  */
-class Reductions {
+final class Reductions {
 
   private Reductions() {
   }
@@ -54,14 +54,7 @@ class Reductions {
             return r;
           }
         },
-        r -> {
-          if (r.value == null) {
-            return Optional.empty();
-          }
-          else {
-            return Optional.of(r.value);
-          }
-        }
+        r -> Optional.ofNullable(r.value)
     );
   }
 

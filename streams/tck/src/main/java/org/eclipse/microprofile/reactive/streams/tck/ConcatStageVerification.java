@@ -61,8 +61,7 @@ public class ConcatStageVerification extends AbstractStageVerification {
         ReactiveStreams.failed(new RuntimeException("failed")),
         ReactiveStreams.fromPublisher(cancelCapture)
     )
-        .forEach(e -> {
-        })
+        .ignore()
         .run(getEngine());
 
     await(cancelCapture.getCancelled());

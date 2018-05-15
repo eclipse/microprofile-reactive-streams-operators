@@ -78,18 +78,18 @@ public abstract class ReactiveStreamsBuilder {
   }
 
   private void flatten(Deque<Stage> stages) {
-    if (stage == InternalStages.Identity.INSTANCE) {
-      // Ignore, no need to add an identity stage
-    }
-    else if (stage instanceof InternalStages.Nested) {
-      ((InternalStages.Nested) stage).getBuilder().flatten(stages);
-    }
-    else {
-      stages.addFirst(stage);
-    }
-
-    if (previous != null) {
-      previous.flatten(stages);
+    ReactiveStreamsBuilder thisStage = this;
+    while (thisStage != null) {
+      if (thisStage.stage == InternalStages.Identity.INSTANCE) {
+        // Ignore, no need to add an identity stage
+      }
+      else if (thisStage.stage instanceof InternalStages.Nested) {
+        ((InternalStages.Nested) thisStage.stage).getBuilder().flatten(stages);
+      }
+      else {
+        stages.addFirst(thisStage.stage);
+      }
+      thisStage = thisStage.previous;
     }
   }
 

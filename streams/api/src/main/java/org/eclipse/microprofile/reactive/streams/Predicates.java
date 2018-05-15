@@ -24,7 +24,10 @@ import java.util.function.Predicate;
 /**
  * Stateful predicates.
  */
-class Predicates {
+final class Predicates {
+
+  private Predicates() {
+  }
 
   /**
    * Predicate used to implement skip with a filter function.
@@ -67,7 +70,6 @@ class Predicates {
           return false;
         }
         else {
-          dropping = true;
           return true;
         }
       }

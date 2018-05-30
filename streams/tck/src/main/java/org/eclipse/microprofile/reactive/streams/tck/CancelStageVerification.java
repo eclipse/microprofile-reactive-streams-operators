@@ -62,7 +62,7 @@ public class CancelStageVerification extends AbstractStageVerification {
   public class SubscriberVerification extends StageSubscriberBlackboxVerification {
     @Override
     public Subscriber createSubscriber() {
-      return ReactiveStreams.builder().cancel().build(getEngine()).getRsSubscriber();
+      return ReactiveStreams.builder().cancel().build(getEngine());
     }
 
     @Override

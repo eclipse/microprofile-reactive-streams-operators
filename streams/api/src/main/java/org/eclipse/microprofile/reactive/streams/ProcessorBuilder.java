@@ -189,7 +189,7 @@ public final class ProcessorBuilder<T, R> {
   /**
    * Performs an action for each element on this stream.
    * <p>
-   * The returned {@link CompletionStage} from the {@link SubscriberWithResult} will be redeemed when the stream
+   * The returned {@link CompletionStage} from the {@link CompletionSubscriber} will be redeemed when the stream
    * completes, either successfully if the stream completes normally, or with an error if the stream completes with an
    * error or if the action throws an exception.
    *
@@ -208,7 +208,7 @@ public final class ProcessorBuilder<T, R> {
   /**
    * Ignores each element of this stream.
    * <p>
-   * The returned {@link CompletionStage} from the {@link SubscriberWithResult} will be redeemed when the stream
+   * The returned {@link CompletionStage} from the {@link CompletionSubscriber} will be redeemed when the stream
    * completes, either successfully if the stream completes normally, or with an error if the stream completes with an
    * error or if the action throws an exception.
    *
@@ -222,7 +222,7 @@ public final class ProcessorBuilder<T, R> {
   /**
    * Cancels the stream as soon as it starts.
    * <p>
-   * The returned {@link CompletionStage} from the {@link SubscriberWithResult} will be immediately redeemed as soon
+   * The returned {@link CompletionStage} from the {@link CompletionSubscriber} will be immediately redeemed as soon
    * as the stream starts.
    *
    * @return A new subscriber builder.
@@ -235,7 +235,7 @@ public final class ProcessorBuilder<T, R> {
    * Perform a reduction on the elements of this stream, using the provided identity value and the accumulation
    * function.
    * <p>
-   * The result of the reduction is returned in the {@link SubscriberWithResult}.
+   * The result of the reduction is returned in the {@link CompletionSubscriber}.
    *
    * @param identity    The identity value.
    * @param accumulator The accumulator function.
@@ -248,7 +248,7 @@ public final class ProcessorBuilder<T, R> {
   /**
    * Perform a reduction on the elements of this stream, using provided the accumulation function.
    * <p>
-   * The result of the reduction is returned in the {@link SubscriberWithResult}. If there are no elements in this stream,
+   * The result of the reduction is returned in the {@link CompletionSubscriber}. If there are no elements in this stream,
    * empty will be returned.
    *
    * @param accumulator The accumulator function.
@@ -262,7 +262,7 @@ public final class ProcessorBuilder<T, R> {
    * Perform a reduction on the elements of this stream, using the provided identity value, accumulation function and
    * combiner function.
    * <p>
-   * The result of the reduction is returned in the {@link SubscriberWithResult}.
+   * The result of the reduction is returned in the {@link CompletionSubscriber}.
    *
    * @param identity    The identity value.
    * @param accumulator The accumulator function.

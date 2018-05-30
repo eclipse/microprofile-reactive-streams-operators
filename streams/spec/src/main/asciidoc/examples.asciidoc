@@ -56,14 +56,14 @@ It assumes another library has provided a Reactive Streams Processor that parses
 ----
 Processor<ByteBuffer, MyDomainObject> parser = createParser();
 
-SubscriberWithResult<ByteBuffer, List<MyDomainObject>> sr =
+CompletionSubscriber<ByteBuffer, List<MyDomainObject>> subscriber =
   ReactiveStreams.<ByteBuffer>builder()
     .via(parser)
     .toList()
     .build();
 
-Subscriber<ByteBuffer> subscriber = sr.getRsSubscriber();
-CompletionStage<List<MyDomainObject>> result = sr.getResult();
+Subscriber<ByteBuffer> subscriber = subscriber;
+CompletionStage<List<MyDomainObject>> result = subscriber.getCompletion();
 ----
 
 === Building a processor

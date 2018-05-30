@@ -25,7 +25,7 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
 /**
  * A builder for a {@link org.reactivestreams.Subscriber} and its result.
  * <p>
- * When built, this builder returns a {@link SubscriberWithResult}, which encapsulates both a
+ * When built, this builder returns a {@link CompletionSubscriber}, which encapsulates both a
  * {@link org.reactivestreams.Subscriber} and a {@link java.util.concurrent.CompletionStage} that will be redeemed
  * with the result produced by the subscriber when the stream completes normally, or will be redeemed with an error
  * if the subscriber receives an error.
@@ -49,9 +49,9 @@ public final class SubscriberBuilder<T, R> {
   /**
    * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
    *
-   * @return A {@link SubscriberWithResult} that will run this stream.
+   * @return A {@link CompletionSubscriber} that will run this stream.
    */
-  public SubscriberWithResult<T, R> build() {
+  public CompletionSubscriber<T, R> build() {
     return build(ReactiveStreamsGraphBuilder.defaultEngine());
   }
 
@@ -59,9 +59,9 @@ public final class SubscriberBuilder<T, R> {
    * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
    *
    * @param engine The engine to run the stream with.
-   * @return A {@link SubscriberWithResult} that will run this stream.
+   * @return A {@link CompletionSubscriber} that will run this stream.
    */
-  public SubscriberWithResult<T, R> build(ReactiveStreamsEngine engine) {
+  public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
     return engine.buildSubscriber(graphBuilder.build(true, false));
   }
 

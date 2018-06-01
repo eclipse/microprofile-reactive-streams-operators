@@ -28,11 +28,11 @@ MicroProfile Reactive Messaging does not contain an implementation itself but on
 
 The following implementations are available:
 
-* https://github.com/lightbind/microprofile-reactive-messaging[Lightbend Alpakka]
+* https://github.com/lightbend/microprofile-reactive-messaging[Lightbend Alpakka]
 
 == Building
 
-The whole MicroProfile Reactive Streams project can be built via Apache Maven.
+The whole MicroProfile Reactive Messaging project can be built via Apache Maven.
 
 `$> mvn clean install`
 

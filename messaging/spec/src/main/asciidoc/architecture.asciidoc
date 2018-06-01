@@ -30,7 +30,7 @@ In a microservice based architecture, temporal coupling results in a fragile sys
 Java EE offers JMS and Message Driven Beans for handling asynchronous communication, however, there are some problems with these specifications:
 
 * Both are designed for a technology landscape where messaging was a heavy weight process used on the edge of system to hand control of a transaction from system to another, consequently there is a lot of boilerplate associated with using these technologies.
-* It is assumed their design that consistency is handled using distributed transactions. However, modern message brokers, popular in microservice deployments, such as Kafka, Amazon Kinesis and Azure Event Hubs, do not support XA transactions, rather, message acknowledgement is handled using offsets with at least once delivery guarantees.
+* It is assumed their design that consistency is handled using distributed transactions. However, modern message brokers, popular in microservice deployments, such as Apache Kafka, Amazon Kinesis and Azure Event Hubs, do not support XA transactions, rather, message acknowledgement is handled using offsets with at least once delivery guarantees.
 * They do not have support for asynchronous IO, it is assumed that message processing is done on a single thread, however many modern specs are moving to asynchronous IO.
 
 Hence a lighter weight, reactive solution to messaging is desirable for MicroProfile to ensure microservices written using MicroProfile are able to meet the demands required by the architecture.
@@ -41,7 +41,7 @@ Applications declare message subscribers, publishers and processors by annotatin
 
 ==== Messaging providers
 
-A messaging provider is an abstract concept provided by this spec, it typically will correspond to a messaging transport, such as Kafka, Amazon Kinesis, RabbitMQ or ActiveMQ. It is up an implementation as to which and how many transports it will support. Implementations may provide a default messaging transport, and that default may be configurable, all this is left up to the implementation to decide on the mechanism for providing that. Implementations may also provide an SPI for plugging in custom messaging providers, the definition of that SPI is up to the implementation, and beyond the scope of this specification. A future iteration of this spec may provide such an SPI, for example based on the Java EE Connector Architecture, but currently this is out of scope.
+A messaging provider is an abstract concept provided by this spec, it typically will correspond to a messaging transport, such as Apache Kafka, Amazon Kinesis, RabbitMQ or Apache ActiveMQ. It is up an implementation as to which and how many transports it will support. Implementations may provide a default messaging transport, and that default may be configurable, all this is left up to the implementation to decide on the mechanism for providing that. Implementations may also provide an SPI for plugging in custom messaging providers, the definition of that SPI is up to the implementation, and beyond the scope of this specification. A future iteration of this spec may provide such an SPI, for example based on the Java EE Connector Architecture, but currently this is out of scope.
 
 An implementation is expected to advertise and allow the differentiation between different messaging providers by providing subclasses of `MessagingProvider`. For example, a Kafka messaging provider may be provided by a class that looks like this:
 

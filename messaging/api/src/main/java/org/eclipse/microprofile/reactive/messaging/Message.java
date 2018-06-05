@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 /**
  * A message envelope.
- * <p/>
+ * <p>
  * Messaging providers may provide their own sub classes of this type, in order to allow messaging provider specific
  * information to be passed to and from applications.
  *

@@ -21,11 +21,11 @@ package org.eclipse.microprofile.reactive.messaging;
 
 /**
  * Marker interface to indicate which messaging provider should be used.
- * <p/>
+ * <p>
  * If a container supports more than one messaging provider, then they may use this to differentiate between messaging
  * providers by providing a subclass for each provider. Application streams can then use this subclass by passing it
  * to the {@code provider} property of their {@link Incoming} or {@link Outgoing} annotations.
- * <p/>
+ * <p>
  * Unless containers explicitly share libraries that provide the same messaging provider using the same sub class of
  * this type, then messaging providers are assumed to be specific to each container. That is to say, if one container
  * supports a messaging technology called Reactive Messaging, and provides a subclass of this called

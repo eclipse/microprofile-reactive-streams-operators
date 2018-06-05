@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams;
 
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
 
 import java.util.concurrent.CompletionStage;
 
@@ -34,11 +33,14 @@ import java.util.concurrent.CompletionStage;
  * @param <T> The result of the stream.
  * @see ReactiveStreams
  */
-public final class CompletionBuilder<T> extends ReactiveStreamsBuilder {
+public final class CompletionBuilder<T> {
 
-  CompletionBuilder(Stage stage, ReactiveStreamsBuilder previous) {
-    super(stage, previous);
+  private final ReactiveStreamsGraphBuilder graphBuilder;
+
+  CompletionBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
+    this.graphBuilder = graphBuilder;
   }
+
 
   /**
    * Run this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
@@ -46,7 +48,7 @@ public final class CompletionBuilder<T> extends ReactiveStreamsBuilder {
    * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
    */
   public CompletionStage<T> run() {
-    return run(defaultEngine());
+    return run(ReactiveStreamsGraphBuilder.defaultEngine());
   }
 
   /**
@@ -56,6 +58,6 @@ public final class CompletionBuilder<T> extends ReactiveStreamsBuilder {
    * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
    */
   public CompletionStage<T> run(ReactiveStreamsEngine engine) {
-    return engine.buildCompletion(toGraph(false, false));
+    return engine.buildCompletion(graphBuilder.build(false, false));
   }
 }

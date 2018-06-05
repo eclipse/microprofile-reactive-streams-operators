@@ -26,21 +26,29 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import java.util.*;
 
 /**
- * Superclass of all reactive streams builders.
+ * Builds graphs of reactive streams.
  *
  * @see ReactiveStreams
  */
-public abstract class ReactiveStreamsBuilder {
+final class ReactiveStreamsGraphBuilder {
 
   private final Stage stage;
-  private final ReactiveStreamsBuilder previous;
+  private final ReactiveStreamsGraphBuilder previous;
 
-  ReactiveStreamsBuilder(Stage stage, ReactiveStreamsBuilder previous) {
+  private ReactiveStreamsGraphBuilder(Stage stage, ReactiveStreamsGraphBuilder previous) {
     this.stage = stage;
     this.previous = previous;
   }
 
-  protected ReactiveStreamsEngine defaultEngine() {
+  ReactiveStreamsGraphBuilder(Stage stage) {
+    this(stage, null);
+  }
+
+  ReactiveStreamsGraphBuilder addStage(Stage stage) {
+    return new ReactiveStreamsGraphBuilder(stage, this);
+  }
+
+  static ReactiveStreamsEngine defaultEngine() {
     Iterator<ReactiveStreamsEngine> engines = ServiceLoader.load(ReactiveStreamsEngine.class).iterator();
 
     if (engines.hasNext()) {
@@ -51,7 +59,7 @@ public abstract class ReactiveStreamsBuilder {
     }
   }
 
-  Graph toGraph(boolean expectInlet, boolean expectOutlet) {
+  Graph build(boolean expectInlet, boolean expectOutlet) {
     ArrayDeque<Stage> deque = new ArrayDeque<>();
     flatten(deque);
     Graph graph = new Graph(Collections.unmodifiableCollection(deque));
@@ -78,7 +86,7 @@ public abstract class ReactiveStreamsBuilder {
   }
 
   private void flatten(Deque<Stage> stages) {
-    ReactiveStreamsBuilder thisStage = this;
+    ReactiveStreamsGraphBuilder thisStage = this;
     while (thisStage != null) {
       if (thisStage.stage == InternalStages.Identity.INSTANCE) {
         // Ignore, no need to add an identity stage

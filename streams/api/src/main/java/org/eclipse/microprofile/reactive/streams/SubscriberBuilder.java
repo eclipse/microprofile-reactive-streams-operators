@@ -34,10 +34,16 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
  * @param <R> The type of the result that this subscriber emits.
  * @see ReactiveStreams
  */
-public final class SubscriberBuilder<T, R> extends ReactiveStreamsBuilder {
+public final class SubscriberBuilder<T, R> {
 
-  SubscriberBuilder(Stage stage, ReactiveStreamsBuilder previous) {
-    super(stage, previous);
+  private final ReactiveStreamsGraphBuilder graphBuilder;
+
+  SubscriberBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
+    this.graphBuilder = graphBuilder;
+  }
+
+  SubscriberBuilder(Stage stage) {
+    this.graphBuilder = new ReactiveStreamsGraphBuilder(stage);
   }
 
   /**
@@ -46,7 +52,7 @@ public final class SubscriberBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link SubscriberWithResult} that will run this stream.
    */
   public SubscriberWithResult<T, R> build() {
-    return build(defaultEngine());
+    return build(ReactiveStreamsGraphBuilder.defaultEngine());
   }
 
   /**
@@ -56,6 +62,10 @@ public final class SubscriberBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link SubscriberWithResult} that will run this stream.
    */
   public SubscriberWithResult<T, R> build(ReactiveStreamsEngine engine) {
-    return engine.buildSubscriber(toGraph(true, false));
+    return engine.buildSubscriber(graphBuilder.build(true, false));
+  }
+
+  ReactiveStreamsGraphBuilder getGraphBuilder() {
+    return graphBuilder;
   }
 }

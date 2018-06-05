@@ -48,7 +48,7 @@ public class ReactiveStreams {
    * @return A publisher builder that wraps the given publisher.
    */
   public static <T> PublisherBuilder<T> fromPublisher(Publisher<? extends T> publisher) {
-    return new PublisherBuilder<>(new Stage.PublisherStage(publisher), null);
+    return new PublisherBuilder<>(new Stage.PublisherStage(publisher));
   }
 
   /**
@@ -59,7 +59,7 @@ public class ReactiveStreams {
    * @return A publisher builder that will emit the element.
    */
   public static <T> PublisherBuilder<T> of(T t) {
-    return new PublisherBuilder<>(new Stage.Of(Arrays.asList(t)), null);
+    return new PublisherBuilder<>(new Stage.Of(Arrays.asList(t)));
   }
 
   /**
@@ -80,7 +80,7 @@ public class ReactiveStreams {
    * @return A publisher builder that will just emit a completion signal.
    */
   public static <T> PublisherBuilder<T> empty() {
-    return new PublisherBuilder<>(Stage.Of.EMPTY, null);
+    return new PublisherBuilder<>(Stage.Of.EMPTY);
   }
 
   /**
@@ -103,7 +103,7 @@ public class ReactiveStreams {
    * @return A publisher builder that emits the elements of the iterable.
    */
   public static <T> PublisherBuilder<T> fromIterable(Iterable<? extends T> ts) {
-    return new PublisherBuilder<>(new Stage.Of(ts), null);
+    return new PublisherBuilder<>(new Stage.Of(ts));
   }
 
   /**
@@ -116,7 +116,7 @@ public class ReactiveStreams {
    * @return A publisher builder that completes the stream with an error.
    */
   public static <T> PublisherBuilder<T> failed(Throwable t) {
-    return new PublisherBuilder<>(new Stage.Failed(t), null);
+    return new PublisherBuilder<>(new Stage.Failed(t));
   }
 
   /**
@@ -126,7 +126,7 @@ public class ReactiveStreams {
    * @return The identity processor builder.
    */
   public static <T> ProcessorBuilder<T, T> builder() {
-    return new ProcessorBuilder<>(InternalStages.Identity.INSTANCE, null);
+    return new ProcessorBuilder<>(InternalStages.Identity.INSTANCE);
   }
 
   /**
@@ -138,7 +138,7 @@ public class ReactiveStreams {
    * @return A processor builder that wraps the processor.
    */
   public static <T, R> ProcessorBuilder<T, R> fromProcessor(Processor<? super T, ? extends R> processor) {
-    return new ProcessorBuilder<>(new Stage.ProcessorStage(processor), null);
+    return new ProcessorBuilder<>(new Stage.ProcessorStage(processor));
   }
 
   /**
@@ -149,7 +149,7 @@ public class ReactiveStreams {
    * @return A subscriber builder that wraps the subscriber.
    */
   public static <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? extends T> subscriber) {
-    return new SubscriberBuilder<>(new Stage.SubscriberStage(subscriber), null);
+    return new SubscriberBuilder<>(new Stage.SubscriberStage(subscriber));
   }
 
   /**
@@ -195,6 +195,6 @@ public class ReactiveStreams {
    */
   public static <T> PublisherBuilder<T> concat(PublisherBuilder<? extends T> a,
       PublisherBuilder<? extends T> b) {
-    return new PublisherBuilder<>(new Stage.Concat(a.toGraph(), b.toGraph()), null);
+    return new PublisherBuilder<>(new Stage.Concat(a.toGraph(), b.toGraph()));
   }
 }

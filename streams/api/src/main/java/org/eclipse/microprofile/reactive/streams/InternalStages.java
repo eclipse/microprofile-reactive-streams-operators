@@ -34,7 +34,7 @@ class InternalStages {
    * An identity stage - this stage simply passes is input to its output unchanged. It's used to represent processor
    * builders that have had no stages defined.
    * <p>
-   * It gets ignored by the {@link ReactiveStreamsBuilder} when encountered.
+   * It gets ignored by the {@link ReactiveStreamsGraphBuilder} when encountered.
    */
   static final class Identity implements InternalStage {
     private Identity() {
@@ -47,17 +47,17 @@ class InternalStages {
    * A nested stage. This is used to avoid having to rebuild the entire graph (which is represented as an immutable
    * cons) whenever two graphs are joined, or a stage is prepended into the graph.
    * <p>
-   * It gets flattened out by the {@link ReactiveStreamsBuilder} when building the graph.
+   * It gets flattened out by the {@link ReactiveStreamsGraphBuilder} when building the graph.
    */
   static final class Nested implements InternalStage {
-    private final ReactiveStreamsBuilder stage;
+    private final ReactiveStreamsGraphBuilder graphBuilder;
 
-    Nested(ReactiveStreamsBuilder stage) {
-      this.stage = stage;
+    Nested(ReactiveStreamsGraphBuilder graphBuilder) {
+      this.graphBuilder = graphBuilder;
     }
 
-    ReactiveStreamsBuilder getBuilder() {
-      return stage;
+    ReactiveStreamsGraphBuilder getBuilder() {
+      return graphBuilder;
     }
   }
 }

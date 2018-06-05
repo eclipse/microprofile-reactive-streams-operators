@@ -42,10 +42,16 @@ import java.util.stream.Collectors;
  * @param <R> The type of the elements that the processor emits.
  * @see ReactiveStreams
  */
-public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
+public final class ProcessorBuilder<T, R> {
 
-  ProcessorBuilder(Stage stage, ReactiveStreamsBuilder previous) {
-    super(stage, previous);
+  private final ReactiveStreamsGraphBuilder graphBuilder;
+
+  ProcessorBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
+    this.graphBuilder = graphBuilder;
+  }
+
+  ProcessorBuilder(Stage stage) {
+    this.graphBuilder = new ReactiveStreamsGraphBuilder(stage);
   }
 
   /**
@@ -56,7 +62,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder that consumes elements of type <code>T</code> and emits the mapped elements.
    */
   public <S> ProcessorBuilder<T, S> map(Function<? super R, ? extends S> mapper) {
-    return new ProcessorBuilder<>(new Stage.Map(mapper), this);
+    return addStage(new Stage.Map(mapper));
   }
 
   /**
@@ -69,7 +75,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder.
    */
   public ProcessorBuilder<T, R> filter(Predicate<? super R> predicate) {
-    return new ProcessorBuilder<>(new Stage.Filter(() -> predicate), this);
+    return addStage(new Stage.Filter(() -> predicate));
   }
 
   /**
@@ -84,7 +90,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder.
    */
   public <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper) {
-    return new ProcessorBuilder<>(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)), this);
+    return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
   }
 
   /**
@@ -100,7 +106,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder.
    */
   public <S> ProcessorBuilder<T, S> flatMapCompletionStage(Function<? super R, ? extends CompletionStage<? extends S>> mapper) {
-    return new ProcessorBuilder<>(new Stage.FlatMapCompletionStage((Function) mapper), this);
+    return addStage(new Stage.FlatMapCompletionStage((Function) mapper));
   }
 
   /**
@@ -115,7 +121,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder.
    */
   public <S> ProcessorBuilder<T, S> flatMapIterable(Function<? super R, ? extends Iterable<? extends S>> mapper) {
-    return new ProcessorBuilder<>(new Stage.FlatMapIterable((Function) mapper), this);
+    return addStage(new Stage.FlatMapIterable((Function) mapper));
   }
 
   /**
@@ -139,7 +145,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
       return takeWhile(e -> false);
     }
     else {
-      return new ProcessorBuilder<>(new Stage.TakeWhile(() -> new Predicates.LimitPredicate<>(maxSize), true), this);
+      return addStage(new Stage.TakeWhile(() -> new Predicates.LimitPredicate<>(maxSize), true));
     }
   }
 
@@ -151,7 +157,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder.
    */
   public ProcessorBuilder<T, R> skip(long n) {
-    return new ProcessorBuilder<>(new Stage.Filter(() -> new Predicates.SkipPredicate<>(n)), this);
+    return addStage(new Stage.Filter(() -> new Predicates.SkipPredicate<>(n)));
   }
 
   /**
@@ -163,7 +169,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new publisher builder.
    */
   public ProcessorBuilder<T, R> takeWhile(Predicate<? super R> predicate) {
-    return new ProcessorBuilder<>(new Stage.TakeWhile(() -> predicate, false), this);
+    return addStage(new Stage.TakeWhile(() -> predicate, false));
   }
 
   /**
@@ -177,7 +183,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new processor builder.
    */
   public ProcessorBuilder<T, R> dropWhile(Predicate<? super R> predicate) {
-    return new ProcessorBuilder<>(new Stage.Filter(() -> new Predicates.DropWhilePredicate<>(predicate)), this);
+    return addStage(new Stage.Filter(() -> new Predicates.DropWhilePredicate<>(predicate)));
   }
 
   /**
@@ -222,7 +228,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new subscriber builder.
    */
   public SubscriberBuilder<T, Void> cancel() {
-    return new SubscriberBuilder<>(Stage.Cancel.INSTANCE, this);
+    return addTerminalStage(Stage.Cancel.INSTANCE);
   }
 
   /**
@@ -236,7 +242,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new subscriber builder.
    */
   public SubscriberBuilder<T, R> reduce(R identity, BinaryOperator<R> accumulator) {
-    return new SubscriberBuilder<>(new Stage.Collect(Reductions.reduce(identity, accumulator)), this);
+    return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator)));
   }
 
   /**
@@ -249,7 +255,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A new subscriber builder.
    */
   public SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator) {
-    return new SubscriberBuilder<>(new Stage.Collect(Reductions.reduce(accumulator)), this);
+    return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
   }
 
   /**
@@ -267,7 +273,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
       BiFunction<S, ? super R, S> accumulator,
       BinaryOperator<S> combiner) {
 
-    return new SubscriberBuilder<>(new Stage.Collect(Reductions.reduce(identity, accumulator, combiner)), this);
+    return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator, combiner)));
   }
 
   /**
@@ -282,7 +288,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
    */
   public <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector) {
-    return new SubscriberBuilder<>(new Stage.Collect(collector), this);
+    return addTerminalStage(new Stage.Collect(collector));
   }
 
   /**
@@ -303,7 +309,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
    */
   public SubscriberBuilder<T, Optional<R>> findFirst() {
-    return new SubscriberBuilder<>(Stage.FindFirst.INSTANCE, this);
+    return addTerminalStage(Stage.FindFirst.INSTANCE);
   }
 
   /**
@@ -313,7 +319,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
    */
   public SubscriberBuilder<T, Void> to(Subscriber<R> subscriber) {
-    return new SubscriberBuilder<>(new Stage.SubscriberStage(subscriber), this);
+    return addTerminalStage(new Stage.SubscriberStage(subscriber));
   }
 
   /**
@@ -323,7 +329,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
    */
   public <S> SubscriberBuilder<T, S> to(SubscriberBuilder<R, S> subscriber) {
-    return new SubscriberBuilder<>(new InternalStages.Nested(subscriber), this);
+    return addTerminalStage(new InternalStages.Nested(subscriber.getGraphBuilder()));
   }
 
   /**
@@ -334,7 +340,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * outlet.
    */
   public <S> ProcessorBuilder<T, S> via(ProcessorBuilder<R, S> processor) {
-    return new ProcessorBuilder<>(new InternalStages.Nested(processor), this);
+    return addStage(new InternalStages.Nested(processor.graphBuilder));
   }
 
   /**
@@ -345,7 +351,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * processor builders outlet.
    */
   public <S> ProcessorBuilder<T, S> via(Processor<R, S> processor) {
-    return new ProcessorBuilder<>(new Stage.ProcessorStage(processor), this);
+    return addStage(new Stage.ProcessorStage(processor));
   }
 
   /**
@@ -354,7 +360,7 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link Processor} that will run this stream.
    */
   public Processor<T, R> buildRs() {
-    return buildRs(defaultEngine());
+    return buildRs(ReactiveStreamsGraphBuilder.defaultEngine());
   }
 
   /**
@@ -364,6 +370,18 @@ public final class ProcessorBuilder<T, R> extends ReactiveStreamsBuilder {
    * @return A {@link Processor} that will run this stream.
    */
   public Processor<T, R> buildRs(ReactiveStreamsEngine engine) {
-    return engine.buildProcessor(toGraph(true, true));
+    return engine.buildProcessor(graphBuilder.build(true, true));
+  }
+
+  private <S> ProcessorBuilder<T, S> addStage(Stage stage) {
+    return new ProcessorBuilder<>(graphBuilder.addStage(stage));
+  }
+
+  private <S> SubscriberBuilder<T, S> addTerminalStage(Stage stage) {
+    return new SubscriberBuilder<>(graphBuilder.addStage(stage));
+  }
+
+  ReactiveStreamsGraphBuilder getGraphBuilder() {
+    return graphBuilder;
   }
 }

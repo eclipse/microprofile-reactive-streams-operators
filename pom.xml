@@ -91,6 +91,7 @@
 
     <modules>
         <module>streams</module>
+        <module>messaging</module>
     </modules>
 
     <dependencyManagement>

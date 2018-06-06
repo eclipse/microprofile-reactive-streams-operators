@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Licensed under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (c) 2018 Contributors to the Eclipse Foundation
+  ~
+  ~ See the NOTICE file(s) distributed with this work for additional
+  ~ information regarding copyright ownership.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ You may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.eclipse.microprofile.reactive</groupId>
-    <artifactId>microprofile-reactive-parent</artifactId>
+    <groupId>org.eclipse.microprofile.reactive.messaging</groupId>
+    <artifactId>microprofile-reactive-messaging-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
-    <name>MicroProfile Reactive</name>
-    <description>Eclipse MicroProfile Reactive Project :: Parent POM</description>
-
+    <name>MicroProfile Reactive Messaging</name>
+    <description>Eclipse MicroProfile Reactive Messaging :: Parent POM</description>
     <url>http://microprofile.io</url>
 
     <properties>
@@ -31,17 +34,14 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
+        <links>https://osgi.org/javadoc/r6/annotation/</links>
+
         <checkstyle.version>2.17</checkstyle.version>
-        <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9]*$</checkstyle.methodNameFormat>
-        <!-- whether autorelease maven central staging repositories - default true to allow review and manually release repositories -->
-        <autorelease>false</autorelease>
-        <!-- keeping closed repos with failure - default is false because the errors are visible in the maven output, but true will leave the repo open for investigation in Sonatype Nexus -->
-        <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
     </properties>
 
     <licenses>
         <license>
-            <name>Apache License, Version 2.0</name>
+            <name>Apache-2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
             <comments>A business-friendly OSS license</comments>
@@ -61,9 +61,9 @@
     <developers>
         <developer>
             <name>James Roper</name>
-            <url></url>
-            <organization></organization>
-            <organizationUrl></organizationUrl>
+            <url>https://jazzy.id.au</url>
+            <organization>Lightbend</organization>
+            <organizationUrl>https://www.lightbend.com</organizationUrl>
         </developer>
     </developers>
 
@@ -71,14 +71,14 @@
         <connection>scm:git:https://github.com/eclipse/microprofile-reactive.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/microprofile-reactive.git</developerConnection>
         <url>https://github.com/eclipse/microprofile-reactive</url>
-        <tag>0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <repository>
-           <id>ossrh</id>
-           <name>Sonatype OSSRH - Release Staging Area</name>
-           <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>ossrh</id>
+            <name>Sonatype OSSRH - Release Staging Area</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
             <id>ossrh</id>
@@ -88,18 +88,39 @@
         </snapshotRepository>
     </distributionManagement>
 
-
     <modules>
-        <module>streams</module>
-        <module>messaging</module>
+        <module>api</module>
+        <module>spec</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.eclipse.microprofile.reactive.streams</groupId>
+                <artifactId>microprofile-reactive-streams-api</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.annotation.versioning</artifactId>
+                <version>1.0.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
-   
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.eclipse.org</id>
+            <name>Project Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/groups/cbi/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>microprofile.repo.eclipse.org</id>
+            <name>Microprofile Project Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/groups/microprofile/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -109,8 +130,8 @@
                     <version>2.5.3</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <localCheckout>true</localCheckout>
                         <useReleaseProfile>false</useReleaseProfile>
+                        <localCheckout>true</localCheckout>
                         <arguments>${arguments} -Prelease -Drevremark=${revremark}</arguments>
                     </configuration>
                 </plugin>
@@ -144,9 +165,20 @@
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>1.6</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.eclipse.microprofile.maven</groupId>
+                <artifactId>microprofile-maven-build-extension</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -167,77 +199,7 @@
                     <failsOnError>true</failsOnError>
                     <linkXRef>true</linkXRef>
                     <logViolationsToConsole>true</logViolationsToConsole>
-                    <checkstyleRules>
-                        <module name="Checker">
-                            <module name="SuppressionCommentFilter" />
-                            <module name="FileLength">
-                                <property name="max" value="3500" />
-                                <property name="fileExtensions" value="java" />
-                            </module>
-                            <module name="FileTabCharacter" />
-                            <module name="TreeWalker">
-                                <module name="FileContentsHolder" />
-                                <module name="ConstantName">
-                                    <property name="format" value="^(([A-Z][A-Z0-9]*(_[A-Z0-9]+)*))$" />
-                                </module>
-                                <module name="LocalVariableName" />
-                                <module name="MethodName">
-                                    <property name="format" value="${checkstyle.methodNameFormat}" />
-                                </module>
-                                <module name="PackageName" />
-                                <module name="LocalFinalVariableName" />
-                                <module name="ParameterName" />
-                                <module name="StaticVariableName" />
-
-                                <module name="TypeName">
-                                    <property name="format" value="^_?[A-Z][a-zA-Z0-9]*$|packageinfo" />
-                                </module>
-                                <module name="AvoidStarImport">
-                                    <property name="excludes" value="java.io,java.net,java.util,javax.enterprise.inject.spi,javax.enterprise.context" />
-                                </module>
-                                <module name="IllegalImport" />
-                                <module name="RedundantImport" />
-                                <module name="UnusedImports" />
-                                <module name="LineLength">
-                                    <property name="max" value="150" />
-                                    <property name="ignorePattern" value="@version|@see" />
-                                </module>
-                                <module name="MethodLength">
-                                    <property name="max" value="250" />
-                                </module>
-                                <module name="ParameterNumber">
-                                    <property name="max" value="11" />
-                                </module>
-                                <module name="EmptyBlock">
-                                    <property name="option" value="text" />
-                                </module>
-                                <module name="NeedBraces" />
-                                <module name="LeftCurly">
-                                    <property name="option" value="EOL" />
-                                </module>
-                                <module name="RightCurly">
-                                    <property name="option" value="ALONE" />
-                                </module>
-                                <module name="EmptyStatement" />
-                                <module name="EqualsHashCode" />
-                                <module name="DefaultComesLast" />
-                                <module name="MissingSwitchDefault" />
-                                <module name="FallThrough" />
-                                <module name="MultipleVariableDeclarations" />
-                                <module name="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck">
-                                    <property name="severity" value="ignore" />
-                                </module>
-                                <module name="HideUtilityClassConstructor" />
-                                <module name="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck">
-                                    <property name="packageAllowed" value="false" />
-                                    <property name="protectedAllowed" value="true" />
-                                    <property name="publicMemberPattern" value="^serialVersionUID" />
-                                    <property name="severity" value="warning" />
-                                </module>
-                                <module name="UpperEll" />
-                            </module>
-                        </module>
-                    </checkstyleRules>
+                    <configLocation>checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
 
@@ -267,13 +229,30 @@
 
         </plugins>
     </build>
-    
+
     <profiles>
+        <profile>
+            <!-- This allows custom deployments to arbitrary repositories,
+                 these properties are probably best set with profiles in 
+                 settings.xml
+            -->
+            <id>custom-deploy</id>
+            <distributionManagement>
+                <repository>
+                    <id>${custom-deploy.id}</id>
+                    <url>${custom-deploy.url}</url>
+                </repository>
+                <snapshotRepository>
+                    <id>${custom-deploy.id}</id>
+                    <url>${custom-deploy.url}</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
         <profile>
             <id>release</id>
             <build>
                 <plugins>
-                   <plugin>
+                    <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.3</version>
@@ -281,8 +260,7 @@
                         <configuration>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <serverId>ossrh</serverId>
-                            <autoReleaseAfterClose>${autorelease}</autoReleaseAfterClose>
-                            <keepStagingRepositoryOnCloseRuleFailure>${keepStagingReposOnFailure}</keepStagingRepositoryOnCloseRuleFailure>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -312,6 +290,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -325,5 +304,5 @@
                 </plugins>
             </build>
         </profile>
-</profiles>
+    </profiles>
 </project>

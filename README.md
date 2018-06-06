@@ -22,3 +22,4 @@ limitations under the License.
 This repo is the parent repository for all Reactive specifications in MicroProfile. It contains specifications for the following components:
 
 * [MicroProfile Reactive Streams](streams)
+* [MicroProfile Reactive Messaging](messaging)

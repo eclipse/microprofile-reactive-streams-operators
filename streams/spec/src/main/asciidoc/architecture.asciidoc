@@ -106,7 +106,9 @@ SubscriberBuilder<Integer, List<String>> =
 
 When MicroProfile specifications provide an API that uses Reactive Streams, it is intended that application developers can return and pass the builder interfaces directly to the MicroProfile APIs.
 In many cases, application developers will not need to run the streams themselves.
-However, should they need to run the streams directly themselves, they can do so by using the streams `build` or `run` methods. `PublisherBuilder`, `SubscriberBuilder` and `ProcessorBuilder` all provide a `build` method that returns a `Publisher`, `SubscriberWithResult` and `Processor` respectively, while `CompletionBuilder`, since building it will actually run the stream, provides a `run` method that returns a `CompletionStage`.
+However, should they need to run the streams directly themselves, they can do so by using the streams `build` or `run` methods. `PublisherBuilder`, `SubscriberBuilder` and `ProcessorBuilder` all provide a `build` method that returns a `Publisher`, `CompletionSubscriber` and `Processor` respectively, while `CompletionBuilder`, since building it will actually run the stream, provides a `run` method that returns a `CompletionStage`.
+
+The `CompletionSubscriber` class is so named because, where a `CompletionStage` is a stage of asynchronous computation that completes with a value or an error, a `CompletionSubscriber` is subscriber to an asynchronous stream that completes with a value or an error.
 
 The `build` and `run` methods both provide a zero arg variant, which uses the default Reactive Streams engine provided by the platform, as well as a overload that takes a `ReactiveStreamsEngine`, allowing application developers to use a custom engine when they please.
 

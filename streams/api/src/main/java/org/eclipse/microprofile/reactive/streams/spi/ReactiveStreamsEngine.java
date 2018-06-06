@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.spi;
 
 
-import org.eclipse.microprofile.reactive.streams.SubscriberWithResult;
+import org.eclipse.microprofile.reactive.streams.CompletionSubscriber;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 
@@ -59,7 +59,7 @@ public interface ReactiveStreamsEngine {
    * @return A subscriber that implements the passed in graph of stages.
    * @throws UnsupportedStageException If a stage in the stages is not supported by this Reactive Streams engine.
    */
-  <T, R> SubscriberWithResult<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException;
+  <T, R> CompletionSubscriber<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException;
 
   /**
    * Build a {@link Processor} from the given stages.

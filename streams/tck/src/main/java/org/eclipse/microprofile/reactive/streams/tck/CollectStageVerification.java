@@ -68,7 +68,7 @@ public class CollectStageVerification extends AbstractStageVerification {
   class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
     @Override
     public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder().toList().build(getEngine()).getRsSubscriber();
+      return ReactiveStreams.<Integer>builder().toList().build(getEngine());
     }
 
     @Override

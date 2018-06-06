@@ -61,7 +61,7 @@ public class FindFirstStageVerification extends AbstractStageVerification {
   class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
     @Override
     public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder().findFirst().build(getEngine()).getRsSubscriber();
+      return ReactiveStreams.<Integer>builder().findFirst().build(getEngine());
     }
 
     @Override

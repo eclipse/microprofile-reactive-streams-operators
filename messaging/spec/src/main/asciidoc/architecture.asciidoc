@@ -64,7 +64,7 @@ Implementations must validate that the stream shape matches the `@Outgoing` and 
 
 ===== Simple method streams
 
-The simplest shape that an application may use is a simple method. This is a method that accepts an incoming message, and possible produces an outgoing message:
+The simplest shape that an application may use is a simple method. This is a method that accepts an incoming message, and possibly produces an outgoing message:
 
 [source, java]
 ----

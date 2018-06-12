@@ -15,8 +15,8 @@
 //
 
 = MicroProfile Reactive Streams Support Specification
-:authors: James Roper
-:email: james@lightbend.com
+:authors: James Roper, Clement Escoffier
+:email: james@lightbend.com, clement.escoffier@redhat.com
 :version-label!:
 :sectanchors:
 :doctype: book

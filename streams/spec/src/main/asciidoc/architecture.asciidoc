@@ -22,15 +22,15 @@ It also provides an SPI for implementing and providing custom Reactive Streams e
 
 === Rationale
 
-The `java.util.streams` API provides functionality necessary for manipulating streams in memory.
+The `java.util.streams` API provides functionality necessary for manipulating streams in memory introducing functional programming into the Java language.
 However, manipulating potentially infinite asynchronous streams has some very different requirements which the `java.util.streams` API is not suitable for.
 
-Reactive Streams is a specification for asynchronous streaming between different streaming libraries and/or technologies, which is included in JDK9 as the `java.util.concurrent.Flow` spec.
+Reactive Streams is a specification for asynchronous streaming between different libraries and/or technologies, which is included in JDK9 as the `java.util.concurrent.Flow` spec.
 Reactive Streams itself however is an SPI for library and technology vendors to implement, it is not intended that application developers implement it as the semantics are very complex.
 
-Commonly, Reactive Streams requires more than just plumbing publishers to subscribers, the stream typically needs to be manipulated in some way, such as applying operations such as `map`, `filter` and `flatMap`.
+Commonly, Reactive Streams requires more than just plumbing `publishers` to `subscribers`, the stream typically needs to be manipulated in some way, such as applying operations such as `map`, `filter` and `flatMap`.
 Neither Reactive Streams, nor the JDK, provides an API for doing these manipulations.
-Since users are not meant to implement Reactive Streams themselves, this means the only way to do these manipulations currently is to depend on a third party library, such as https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams], https://github.com/ReactiveX/RxJava[RxJava] or https://projectreactor.io/[Reactor].
+Since users are not meant to implement Reactive Streams themselves, this means the only way to do these manipulations currently is to depend on a third party library providing operators, such as https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams], https://github.com/ReactiveX/RxJava[RxJava] or https://projectreactor.io/[Reactor].
 
 This API seeks to fill that gap, so that MicroProfile application developers can manipulate Reactive Streams without bringing in a third party dependency.
 By itself, this API is not interesting to MicroProfile, but with the addition of other Reactive features, such as the MicroProfile Reactive Messaging proposal, it is essential.
@@ -60,18 +60,18 @@ Given that the `org.reactivestreams` dependency is a jar that contains only thes
 To facilitate an eventual migration to the JDK9 interfaces, once MicroProfile adopts JDK9 or later as a baseline JDK version, all methods that pass `org.reactivestreams` interfaces to the user (either as a return value, or by virtue of a user providing a callback to the method to receive it) will have `Rs` added to their name.
 For example, `getSubscriber` will be called `getRsSubscriber`.
 This will allow new methods to be added in future that return `java.util.concurrent.Flow` interfaces, without the `Rs` in the name, allowing the existing `Rs` methods to be kept for a limited time for backwards compatibility.
-Methods that accept a `org.reactivestreams` interface do not need to be given the same treatment, as support for the JDK9 interfaces can be added by overloading them, with backwards compatibility being maintained.
+Methods that accept a `org.reactivestreams` interface do not need to be given the same treatment, as support for the JDK9 interfaces can be added by overloading them, with backwards compatibility being maintained (see https://github.com/eclipse/microprofile-reactive/blob/master/approach.asciidoc[reactive approach for MicroProfile]).
 
 === Design
 
 ==== API
 
-The design of MicroProfile Reactive Streams is centered around builders for the various shapes of streams.
+The design of MicroProfile Reactive Streams is centered around **builders** for the various shapes of streams.
 There are four different shapes of streams that can be built:
 
-* Processors. A processor has an inlet and an outlet, and is represented as a Reactive Streams `Processor` when built. This is called a `ProcessorBuilder`.
-* Publishers. A publisher has an outlet but no inlet, and is represented as a Reactive Streams `Publisher` when built. This is called a `PublisherBuilder`
-* Subscribers. A subscriber has an inlet but no outlet, and it also has a result. It is represented as a product of a Reactive Streams `Subscriber` and a `CompletionStage` that is redeemed with the result, or error if the stream fails, when built. This is called a `SubscriberBuilder`.
+* Processors. A processor has one inlet and one outlet, and is represented as a Reactive Streams `Processor` when built. This is called a `ProcessorBuilder`.
+* Publishers. A publisher has one outlet but no inlet, and is represented as a Reactive Streams `Publisher` when built. This is called a `PublisherBuilder`
+* Subscribers. A subscriber has one inlet but no outlet, and it also has a result. It is represented as a product of a Reactive Streams `Subscriber` and a `CompletionStage` that is redeemed with the result, or error if the stream fails, when built. This is called a `SubscriberBuilder`.
 * Closed graphs. A closed graph has no inlet or outlet, both having being provided in during the construction of the graph. It is represented as a `CompletionStage` of the result of the stream, when built. This is called a `CompletionBuilder`.
 
 While building a stream, the stream may change shape during its construction.
@@ -114,7 +114,7 @@ The `build` and `run` methods both provide a zero arg variant, which uses the de
 
 ==== SPI
 
-The API is responsible for building graphs of stages.
+The API is responsible for building graphs of stages based on the operators the user invoked.
 The stages form an SPI for `ReactiveStreamsEngine` implementations to build into a running stream.
 Examples of stages include:
 

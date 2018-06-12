@@ -24,7 +24,7 @@ This document outlines the approach that MicroProfile will use to adopting the r
 
 Reactive systems are described in https://www.reactivemanifesto.org/[The Reactive Manifesto]. This calls for a coherent approach for architecting systems that allows them to be responsive, by creating loosely coupled components that are resilient to failure and elastic in the face of changing load. At the heart of the approach to loosely coupling components is the idea of being non blocking, using asynchronous message passing to ensure components are not impacted by each others availability.
 
-Reactive is popularly associated with asynchronous programming, using non blocking IO. While asynchronous programming is certainly an important part of reactive, as it applies to a microservice platform such as MicroProfile, it is also much bigger than just asynchronous programming. Reactive impacts the way we architect our systems, and this most prominently features in the way services communicate with each other - services that communicate asynchronously, and hence are able to run autonomously, are able to scale, fail and evolve independently. Not only does this help a system to be reactive, it allows a microservice based system to realise the full benefits of the microservice architecture, and overcome many of the problems that microservices introduce when compared to monoliths.
+Reactive is associated with asynchronous programming, using non blocking IO. While asynchronous programming is certainly an important part of reactive, as it applies to a microservice platform such as MicroProfile, it is also much bigger than just asynchronous programming. Reactive impacts the way we architect our systems, and this most prominently features in the way services communicate with each other - services that communicate asynchronously, and hence are able to run autonomously, are able to scale, fail and evolve independently. Not only does this help a system to be reactive, it allows a microservice based system to realise the full agility of the microservice architecture, and overcome many of the problems that microservices introduce when compared to monoliths.
 
 Hence there are two primary concerns when applying reactive to MicroProfile. The first is the application of reactive programming to the APIs offered by MicroProfile. The second is in deciding what new features, APIs or projects, if any, are needed to allow developers to create reactive system architectures.
 
@@ -32,7 +32,7 @@ Hence there are two primary concerns when applying reactive to MicroProfile. The
 
 In order to provide reactive programming APIs, abstractions are required to allow developers to compose multiple asynchronous operations together.
 
-A naïve approach to offering an asynchronous API called Foo may be to offer a way to register a callback to receive an asynchronously provided value. For example, that callback interface might look like:
+A naïve approach to offering an asynchronous API called `Foo` may be to offer a way to register a callback to receive an asynchronously provided value. For example, that callback interface might look like:
 
 [source, java]
 ----
@@ -43,44 +43,52 @@ interface FooEventListener {
 
 Just considering the above API, there are a number of problems with this:
 
-* This specific API require/s specific code to implement it. If I want to connect this API to the asynchronous API offered by another component, say `Bar`, I need to write an adapter that adapts the API offered by `Bar` to the API offered by `Foo`. And then I need another adapter for every permutation of APIs that I might want to integrate each other. Of course, this isn’t so bad given that `FooEventListener` is a SAM and so I can use method references, but...
-* The above listener offers no way to handle errors. There are multiple ways that this can be addressed, but none of them are ideal. For example, we might add another method, `onError(Throwable)`. The addition of this method means it’s no longer a SAM, and so can no longer exploit the convenience of Java 8 method references, and also means when connecting two APIs, I now need to adapt the error handling semantics of each API, which may be subtly different.
-* This API offers no mechanism for exerting backpressure asynchronously. The best I can do is to synchronously block the thread before returning from onFooEvent. If in my handling of the event I want to use an asynchronous database API to persist something, there’s no way for me to tell the invoker of the listener to wait until I’ve finished with my database call. If my database operation is slower than the incoming events are arriving, I have two options, buffer the events I receive and risk running out of memory, or drop the events. Even if it did offer a backpressure mechanism, there are many different ways that backpressure can be implemented, and adapting them to each other is non trivial.
-* This API offers no mechanism for ensuring thread safety, especially if I am integrating multiple APIs with callbacks registered with all of them. If I’m updating some state using this API, and I also have a `BarEventListener` registered that could execute at the same time to update the state, how do I ensure that these two callbacks execute with exclusion? How do I ensure that the right memory fences are in place before they are executed? The use of the `synchronized` keyword results in blocking, the use of `AtomicReference` and other `java.util.concurrent` constructs is overly burdensome for an application developer who just wants to solve their domain problem.
+* This specific API require/s specific code to implement it. If the developer wants to connect this API to an asynchronous API offered by another component, say `Bar`, the developer needs to write an adapter that adapts the API offered by `Bar` to the API offered by `Foo`. And then someone needs to build another adapter for every permutation of APIs that we might want to integrate each other. Of course, this isn’t so bad given that `FooEventListener` is a SAM   (Single Abstract Method) and so I can use method references, but...
+
+* The above listener offers no way to receive errors. There are multiple ways that this can be addressed, but none of them are ideal. For example, we might add another method, `onError(Throwable)`. The addition of this method means it’s no longer a SAM, and so can no longer exploit the convenience of Java 8 method references, and also means when connecting two APIs, We now need to adapt the error handling semantics of each API, which may be subtly different.
+
+* This API offers no mechanism for exerting backpressure asynchronously. The best we can do is to synchronously block the thread before returning from `onFooEvent`. If in our processing of the event we want to use an asynchronous database API to persist data, there’s no way to tell the invoker of the listener to wait until the database call is finished. If the database operation is slower than the incoming events are arriving, we have two options, buffer the events we receive and risk running out of memory, or drop the events. Even if it did offer a backpressure mechanism, there are many different ways that backpressure can be implemented, and adapting them to each other is non trivial.
+
+* This API offers no mechanism for ensuring thread safety, especially if we are integrating multiple APIs with callbacks registered with all of them. If we are updating some state using this API, and we also have a `BarEventListener` registered that could execute at the same time to update the state, how do we ensure that these two callbacks execute with exclusion? How do we ensure that the right memory fences are in place before they are executed? The use of the `synchronized` keyword results in blocking, and opens a risk of deadlocks, the use of `AtomicReference` and other `java.util.concurrent` constructs is overly burdensome for an application developer who just wants to solve their domain problem.
+
 * When using Java 8 lambdas to implement an API like this, this API is susceptible to callback hell. This is a phenomenon that shows itself in two primary ways, firstly the code becomes unreadable due to sequential operations being spread out through deeply nested lambdas. Secondly, its very easy to drop signals, particularly error signals, by forgetting to handle them correctly. The result is that a process just stops mid way through, leaving the developer with no idea why it stopped, with no way to find out, not even with a thread dump.
-* There is no explicitly defined execution context for this API, and no way to customise that context. If thread locals are needed, there’s no way to ensure that this API executes its callbacks with those thread locals.
-* Any monitoring solutions that want to trace the flow of control through this API need to be explicitly aware of the API and what it does, so they can explicitly instrument it to carry correlation identifiers.
+
+* There is no explicitly defined execution context for this API, and no way to customise that context. If thread locals are needed, there’s no way to ensure that this API executes its callbacks with those thread locals and that the stored objects have not be erased by another call using the same thread.
+
+* Any monitoring solutions that want to trace the flow of control through this API need to be explicitly aware of the API and what it does, so they can explicitly instrument it to carry correlation identifiers. Otherwise, explicit propagation of monitoring structures is required.
 
 And that’s just the problems with one possible trivial API for asynchronous programming. In order to safely provide asynchronous programming features, high level, generally applicable patterns and components are needed to ensure compatibility, correct error propagation, backpressure propagation, thread safety, and clean code when using these features. Unfortunately, there already exist APIs in Java EE (such as JSR 356 WebSockets) that suffer from many of these problems (and I should point out that APIs like JSR 356 were created before standard solutions to these problems existed, so they shouldn’t be blamed for this). It’s important that going forward, we ensure that these same problems aren’t reintroduced.
 
-In general, there are two different types of operations that we want to do when doing asynchronous programming. The first is an operation that produces exactly one value, or fails. Examples of such operations include:
+In general, there are two different types of operations that we want to do when doing asynchronous programming. The first is an operation that produces exactly one value or signals, or fails. Examples of such operations include:
 
 * Producing an asynchronous response for an incoming HTTP request
-* Making asynchronous HTTP requests on remote systems
-* Asynchronous database queries and updates
+* Making asynchronous requests on remote systems using async and non-blocking IOs
+* Asynchronous database queries and updates using an async and non-blocking client
+* Executing an asynchronous operation and _waiting_ for its completion
 
 The second is an operation that produces many, or a stream of values, with failure and completion at the stream level. Examples of such operations include:
 
-* Sending and receiving messages to/from a message broker
 * Sending and receiving messages to/from a WebSocket
-* Streaming results from a large database result set
 * Streaming bytes to/from an HTTP request/response body
+* Streaming results from a large database result set
+* Sending and receiving messages to/from a message broker
 
 There exist two standard APIs in the JDK that provide abstractions for representing these operations, they are `java.util.concurrent.CompletionStage`, and Reactive Streams à la `java.util.concurrent.Flow`.
 
-=== `CompletionStage`
+=== Asynchronous operations producing one value or signal: `CompletionStage`
 
-`CompletionStage` is a great abstraction for handling a single value. It offers the following features:
+`CompletionStage` is a great abstraction for handling a single value or signal. It offers the following features:
 
 * A standard interface that can be shared/passed between many asynchronous APIs
-* Values can be transformed using `thenApply`.
-* Multiple CompletionStages produced by different asynchronous APIs can be composed using `thenCompose`.
+* Values can be transformed using `thenApply` operator.
+* Sequential composition can be achieved using the `thenCompose` operator allowing to chain asynchronous operations
+* Parallel composition can be achieved using the `allOf` method
 * Error handling is well defined - errors propagate through chains of completion stages, with features for recovering from and handling errors at any point in the chain.
 * Thread safety is well defined, with callbacks running between memory fences.
 * Backpressure inherent in the redemption of the value.
 * Customizable execution contexts, allowed by passing an explicit executor into methods like `thenApplyAsync`, `thenComposeAsync`.
 
-`CompletionStage` should be used for all APIs that asynchronously produce or consume *exactly one* value. In some places the `CompletionStage` may be returned by an API, like so:
+`CompletionStage` should be used for all APIs that asynchronously produce or consume *exactly one* value or signal. In some places the `CompletionStage` may be returned by an API, like so:
 
 [source, java]
 ----
@@ -101,32 +109,53 @@ class MyResource {
 }
 ----
 
-The above examples are similar to the way JAX-RS 2.1 handles asynchronous calls. Sometimes, an API might have an existing blocking variant, and the asynchronous API is being added alongside it. To support that, it is recommended that Async be added to the asynchronous variant of the method, for example:
+The above examples are similar to the way JAX-RS 2.1 handles asynchronous calls. Sometimes, an API might have an existing blocking variant, and the asynchronous API is being added alongside it. To support that, it is recommended to append the `Async` suffix to the asynchronous variant of the method, for example:
 
 [source, java]
 ----
-CompletionStage<Response> response = someApi.makeRequestAsync();
+Response response1 = someApi.makeRequest();
+CompletionStage<Response> response2 = someApi.makeRequestAsync();
 ----
+
+==== Producing 0 or 1 result
 
 `CompletionStage` may also be used to signal zero or one values, by wrapping the value in an `Optional`. For example, a database API may offer a way to get a single row, if one exists. In which case, `CompletionStage<Optional<Row>>`. may be used. This is preferred over returning `null`, as it makes clear that the value may not be present.
 
-Sometimes there is a need to signify completion, either succesfully or with an error, with no value. For example, a database update may not return any value. In such case, `CompletionStage<Void>` should be used, which gets redeemed with `null` when successful. This may be a little unfamiliar to users, and the requirement to use `null` is certainly not immediately obvious. An alternative might be to introduce a unit type, for example Akka has a singleton `Done` type for this purpose. The problem with this is though that it's not clear where `Done` should live, the JDK would probably make the most sense, but that depends on changes to the JDK.
+[source, java]
+----
+CompletionStage<Optional<Person>> maybe = someApi.findByName("john");
+----
 
-There are also some cases where a finite number of values will be made available in the future, all at once. For example, a query for paged results from a database or a REST API will return a finite number of values at once. In this case, a `CompletionStage` of an appropriate collection type, such as `List`, should be used.
+==== Signaling completion or failure
 
-When using the `*Async` methods on `CompletionStage`, it is recommended that they only be used with an explicit executor, not the global executor. This recommendation is both for library implementors as well as application developers.
+Sometimes there is a need to signify completion, either successfully or with an error, with no value. For example, a database update may not return any value. In such case, `CompletionStage<Void>` should be used, which gets redeemed with `null` when successful. This may be a little unfamiliar to users, and the requirement to use `null` is certainly not immediately obvious. An alternative might be to introduce a unit type or a sentinel object, for example Akka has a singleton `Done` type for this purpose. The problem with this is though that it's not clear where `Done` should live, the JDK would probably make the most sense, but that depends on changes to the JDK.
 
-=== Reactive Streams
+==== Handling finite sets of values
+
+There are also some cases where a finite number of values will be made available in the future, **all at once**. For example, a query for paged results from a database or a REST API will return a finite number of values at once. In this case, a `CompletionStage` of an appropriate collection type, such as `List`, should be used.
+
+[source, java]
+----
+CompletionStage<List<Person>> maybe = someApi.retrieveTop10();
+----
+
+==== Execution Context
+
+When using the `*Async` methods on `CompletionStage`, it is recommended that they only be used with an explicit executor, not the global / default executor. This recommendation is both for library implementors as well as application developers.
+
+=== Dealing with streams of data: Reactive Streams
 
 Reactive Streams is an asynchronous streaming API, produced by a collaboration of engineers representing Netflix, Red Hat, Pivotal, Oracle, Lightbend and others. It was adopted by the JDK in JDK9.
 
-Reactive Streams provides very well defined semantics for data flow, backpressure, error propagation, completion and cancelling, thread safety, infinite recursion prevention, and other things, allowing two implementations of Reactive Streams to integrate seamlessly with no specific support beyond the Reactive Streams specification in either of them. To get a feel for how well defined the semantics are, https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md[read through the spec]. It also has https://github.com/reactive-streams/reactive-streams-jvm/blob/master/tck/README.md[a TCK] that does a thorough job of ensuring implementations implement the spec correctly and completely.
+Reactive Streams provides well defined semantics for data flow, backpressure, error propagation, completion and cancelling, thread safety, infinite recursion prevention, and other things, allowing two implementations of Reactive Streams to integrate seamlessly with no specific support beyond the Reactive Streams specification in either of them. To get a feel for how well defined the semantics are, https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md[read through the spec]. It also has https://github.com/reactive-streams/reactive-streams-jvm/blob/master/tck/README.md[a TCK] that does a thorough job of ensuring implementations implement the spec correctly and completely.
 
 Reactive Streams should be used for all cases when multiple values are being received asynchronously over time. A distinction here should be made between receiving multiple values at once (such as the paged results use case discussed above with `CompletionStage`) and receiving values asynchronously over time. Reactive Streams should not be used for the former use case, only the latter.
 
-It should be stressed that Reactive Streams is intended to be used as an integration API, not an application developer API. Libraries are meant to implement Reactive Streams interfaces, not application developers, the most that application developers should do is pass around instances of Publisher and Subscriber, and perhaps plumb them together via the subscribe method. https://medium.com/@olehdokuka/mastering-own-reactive-streams-implementation-part-1-publisher-e8eaf928a78c[This blog post] does a good job of demonstrating why application developers should never implement their own publishers or subscribers, showing how just implementing an incredibly simple publisher is incredibly difficult to get right, not just to implement the requirements of the spec, but to get the thread safety and concurrency concerns correct.
+==== When implementing Reactive Streams types
 
-==== Byte streams
+It should be stressed that Reactive Streams is intended to be used as an **integration API**, not an application developer API. Libraries are meant to implement Reactive Streams interfaces, not application developers, the most that application developers should do is pass around instances of Publisher and Subscriber, and perhaps plumb them together via the subscribe method. https://medium.com/@olehdokuka/mastering-own-reactive-streams-implementation-part-1-publisher-e8eaf928a78c[This blog post] does a good job of demonstrating why application developers should never implement their own publishers or subscribers, showing how just implementing an incredibly simple publisher is incredibly difficult to get right, not just to implement the requirements of the spec, but to get the thread safety and concurrency concerns correct.
+
+==== Handling binary: Byte streams
 
 When offering byte streams, eg, request/response bodies, or database blobs, then `Publisher<ByteBuffer>`/`Subscriber<ByteBuffer>` should be offered as the API. The byte buffers passed to application developer code should be *unpooled, non reusable, unmodifiable* buffers, and byte buffers received from application developer code should not be mutated by the library.
 
@@ -136,15 +165,21 @@ There currently exist two Reactive Streams APIs. The first is provided by http:/
 
 For APIs that are introduced before that happens, we need a strategy for how to support Reactive Streams using the `org.reactivestreams` version that will be backwards compatible with adding support for the JDK9 version in future, while giving us a path to phase out, rather than breaking, the `org.reactivestreams` support.
 
-There are a number of strategies that should be used, depending on the API:
+There are a number of strategies that should be used, depending on the use case:
 
-* Some CDI based APIs are not strongly typed, eg a user might implement a method that returns a `Publisher`, and annotates it to indicate that it’s a messaging stream. The framework interacts with this method using reflection, and so can transparently add support for JDK9 flows later, with no impact on user code.
+* Some CDI based APIs are not strongly typed, eg. a user might implement a method that returns a `Publisher`, and annotates it to indicate that it’s a messaging stream. The framework interacts with this method using reflection, and so can transparently add support for JDK9 flows later, with no impact on user code.
+
 * An API that accepts a `Publisher` or `Subscriber` can be overloaded to support the JDK9 types in future.
-* An API that accepts a `Publisher` or `Subscriber` as a generic type of another type can’t be overloaded, since they will have the same binary signature after erasure. For example, something accepts a `Supplier<Subscriber>`. A possible option here would be to accept purpose built SAMs, this solves the binary problem, however in practice this often doesn’t work well with Java type inference with lambdas, it’s far too easy for developers to run into edge cases that javac can’t resolve.
-* An API that returns a `Publisher` or `Subscriber` can’t be overloaded, as the Java compiler doesn’t allow overloading by return type.
+
 * When an API has to return a `Publisher` or `Subscriber`, or accept a `Publisher` or `Subscriber` type parameter, a way to future proof this is to decide on a way to disambiguate these methods with different names. It's recommended that the `org.reactivestreams` variant adds `Rs` to the name, for example `getRsPublisher`. When JDK9 support is added, the `Flow` types can drop the `Rs`, allowing the existing methods to coexist for backwards compatibility.
 
-For example, an API that returns an `org.reactivestreams.Subscriber` might be written like this:
+The reason behind this last strategy are the following:
+
+* An API that accepts a `Publisher` or `Subscriber` as a generic type of another type can’t be overloaded, since they will have the same binary signature after erasure. For example, something accepts a `Supplier<Subscriber>`. A possible option here would be to accept purpose built SAMs, this solves the binary problem, however in practice this often doesn’t work well with Java type inference with lambdas, it’s far too easy for developers to run into edge cases that javac can’t resolve.
+* An API that returns a `Publisher` or `Subscriber` can’t be overloaded, as the Java compiler doesn’t allow overloading by return type.
+
+
+As a result, an API that returns an `org.reactivestreams.Subscriber` might be written like this:
 
 [source, java]
 ----
@@ -165,9 +200,9 @@ default org.reactivestreams.Subscriber<T> getRsSubscriber() {
 
 ==== Reactive Streams manipulation strategy
 
-One of the major shortcomings of adopting Reactive Streams at present is the lack of a standard API for manipulating them. Consider a use case where we want to connect a source, `Publisher<Foo>` to a sink, `Subscriber<Bar>`, and we have a function, `Function<Foo, Bar>` to do the transformation. There doesn’t exist any method in Reactive Streams that allows a developer to apply that transformation function to each element. Instead, they would have to write their own `Publisher`/`Subscriber` that wrapped the provided publisher/subscriber to do the transformation, which not only is a lot of boilerplate, it’s strongly discouraged that users write their own implementations of `Publisher` and `Subscriber`. A simple `map` transformation may be trivial to write, but it gets far more complex with things like filter, where you drop elements and so need to work with demand, and then substreams, asynchronous mappings, etc, get even worse.
+One of the major shortcomings of adopting Reactive Streams at present is the lack of a standard API for manipulating them unlike `CompletableFuture/CompletionStage`. Consider a use case where we want to connect a source, `Publisher<Foo>` to a sink, `Subscriber<Bar>`, and we have a function, `Function<Foo, Bar>` to do the transformation. There doesn’t exist any method in Reactive Streams that allows a developer to apply that transformation function to each element. Instead, they would have to write their own `Publisher`/`Subscriber` that wrapped the provided publisher/subscriber to do the transformation, which not only is a lot of boilerplate, it’s strongly discouraged that users write their own implementations of `Publisher` and `Subscriber`. A simple `map` transformation may be trivial to write, but it gets far more complex with things like filter, where you drop elements and so need to work with demand, and then substreams, asynchronous mappings, etc, get even worse.
 
-Of course, this isn’t a problem for most existing users of Reactive Streams, because there exist a number of third party libraries that provide these transformations, such as `map`/`filter`/`flatMap`. These libraries include Akka Streams, RxJava 2 and Reactor. Each of these libraries has its differences, advantages and disadvantages, such as using an lifted API to declare the stream vs directly manipulating the stream, the execution model, and whether JDK types for functions and futures are embraced or not. However, for a Java standard like MicroProfile, requiring developers to bring in a third party library to do these elementary operations is not acceptable.
+Of course, this isn’t a problem for most existing users of Reactive Streams, because there exist a number of third party libraries that provide these transformations, such as `map`/`filter`/`flatMap`. These libraries include https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams], https://github.com/ReactiveX/RxJava[RxJava 2] or https://projectreactor.io/[Reactor]. Each of these libraries has its differences, advantages and disadvantages, such as using an lifted API to declare the stream vs directly manipulating the stream, the execution model, and whether JDK types for functions and futures are embraced or not. However, for a Java standard like MicroProfile, requiring developers to bring in a third party library to do these elementary operations is not acceptable.
 
 To address this, a MicroProfile Reactive Streams specification is being developed. This specification is intended to eventually be proposed as an API for the JDK, but for now it is incubating in MicroProfile.
 

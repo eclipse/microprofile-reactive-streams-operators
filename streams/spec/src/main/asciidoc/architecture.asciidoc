@@ -44,6 +44,12 @@ Implementors of this spec will provide a default implementation, however users c
 This specification started as a proposal for the JDK, but after discussions there, it was decided that the JDK was not the right place to incubate such an API.
 It is the intention that once incubated in MicroProfile, this specification will be put to the JDK again as a proposal.
 
+=== Scope
+
+This specification aims to define a set of operators to manipulate Reactive Streams. The proposed API is voluntary closed to the `java.utils.Stream` API.
+
+It does not define CDI and container API integrations but implementations may provide integrations.
+
 === Reactive Streams API dependency
 
 Reactive Streams has been included in the JDK9 as the `java.util.concurrent.Flow` API, which contains the `Publisher`, `Subscriber`, `Subscription` and `Processor` interfaces as nested interfaces of `Flow`.

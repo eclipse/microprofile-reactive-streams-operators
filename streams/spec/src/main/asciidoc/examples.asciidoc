@@ -34,7 +34,7 @@ CompletionStage<Optional<Integer>> result = ReactiveStreams
 
 === Building a publisher
 
-This shows building a publisher, transforming a list of objects to CSV file represented as a stream of bytes.
+This shows how common collection types can be converted to a `Publisher` of the elements in the collection.
 
 [source, java]
 ----
@@ -42,11 +42,20 @@ List<MyDomainObject> domainObjects = ...
 
 Publisher<ByteBuffer> publisher = ReactiveStreams
     .fromIterable(domainObjects)
-    .map(obj -> String.format("%s,%s\n", obj.getField1(), obj.getField2()))
-    .map(line -> ByteBuffer.wrap(line.getBytes()))
     .buildRs(); <1>
 ----
 <1> The `Rs` suffix indicates the method produces a Reactive Streams `Publisher`.
+
+
+The above example shows a very simple conversion of a `List` to a `Publisher`, of course other operations can be done on the elements before building the `Publisher`, in this case we go on to transform each object to a line in a CSV file, and then represent it as a stream of bytes.
+
+[source, java]
+----
+Publisher<ByteBuffer> publisher = ReactiveStreams
+    .map(obj -> String.format("%s,%s\n", obj.getField1(), obj.getField2()))
+    .map(line -> ByteBuffer.wrap(line.getBytes()))
+    .buildRs();
+----
 
 === Building a subscriber
 

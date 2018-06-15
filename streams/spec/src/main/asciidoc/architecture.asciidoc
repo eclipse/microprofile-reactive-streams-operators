@@ -46,7 +46,7 @@ It is the intention that once incubated in MicroProfile, this specification will
 
 === Scope
 
-This specification aims to define a set of operators to manipulate Reactive Streams. The proposed API is voluntary closed to the `java.utils.Stream` API.
+This specification aims to define a set of operators to manipulate Reactive Streams. The proposed API is voluntarily close to the `java.utils.Stream` API.
 
 It does not define CDI and container API integrations but implementations may provide integrations.
 

@@ -76,9 +76,16 @@ The design of MicroProfile Reactive Streams is centered around **builders** for 
 There are four different shapes of streams that can be built:
 
 * Processors. A processor has one inlet and one outlet, and is represented as a Reactive Streams `Processor` when built. This is called a `ProcessorBuilder`.
+
 * Publishers. A publisher has one outlet but no inlet, and is represented as a Reactive Streams `Publisher` when built. This is called a `PublisherBuilder`
+
 * Subscribers. A subscriber has one inlet but no outlet, and it also has a result. It is represented as a product of a Reactive Streams `Subscriber` and a `CompletionStage` that is redeemed with the result, or error if the stream fails, when built. This is called a `SubscriberBuilder`.
+
+image::shapes.png[Shapes,400,400,align="center"]
+
 * Closed graphs. A closed graph has no inlet or outlet, both having being provided in during the construction of the graph. It is represented as a `CompletionStage` of the result of the stream, when built. This is called a `CompletionBuilder`.
+
+image::graph.png[Closed graph,250,250,align="center"]
 
 While building a stream, the stream may change shape during its construction.
 For example, a publisher may be collected into a `List` of elements.

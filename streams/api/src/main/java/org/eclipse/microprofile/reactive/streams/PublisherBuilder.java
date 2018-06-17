@@ -67,6 +67,18 @@ public final class PublisherBuilder<T> {
   }
 
   /**
+   * Returns a stream containing all the elements from this stream, 
+   * additionaly perfoming the provided action on each element.
+   *
+   * @param consumer The function called for every element.
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between, the given function 
+   * is called for each element.
+   */
+  public PublisherBuilder<T> peek(Consumer<? super T> consumer) {
+    return addStage(new Stage.Peek(consumer));
+  }
+
+  /**
    * Filter elements emitted by this publisher using the given {@link Predicate}.
    * <p>
    * Any elements that return {@code true} when passed to the {@link Predicate} will be emitted, all other

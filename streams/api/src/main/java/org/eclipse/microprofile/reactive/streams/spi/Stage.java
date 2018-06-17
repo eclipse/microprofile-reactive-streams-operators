@@ -25,6 +25,7 @@ import org.reactivestreams.Subscriber;
 
 import java.util.Collections;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -101,6 +102,31 @@ public interface Stage {
      */
     public Function<?, ?> getMapper() {
       return mapper;
+    }
+  }
+
+  /**
+   * A stage returning a stream containing all the elements from this stream, 
+   * additionaly perfoming the provided action on each element.
+   * <p>
+   * The given consumer function should be invoked on each element consumed. 
+   * <p>
+   * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
+   */
+  final class Peek implements Inlet, Outlet {
+    private final Consumer<?> consumer;
+
+    public Peek(Consumer<?> consumer) {
+      this.consumer = consumer;
+    }
+
+    /**
+     * The consumer function.
+     *
+     * @return The consumer function.
+     */
+    public Consumer<?> getConsumer() {
+      return consumer;
     }
   }
 

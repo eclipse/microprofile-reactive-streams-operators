@@ -48,9 +48,9 @@ MicroProfile Reactive Streams does not contain an implementation itself but only
 
 The following Implementations are available 
 
-* https://github.com/lightbind/microprofile-reactive-streams/tree/master/akka[Akka Streams]
-* https://github.com/lightbind/microprofile-reactive-streams/tree/master/zerodep[Zero Dependency] - intended as a possible reference implementation for when this is proposed to the JDK, but not the reference implementation for MicroProfile as MicroProfile does not have reference implementations.
-* https://github.com/lightbind/microprofile-reactive-streams/tree/master/rxjava[RxJava]
+* https://github.com/lightbend/microprofile-reactive-streams/tree/master/akka[Akka Streams]
+* https://github.com/lightbend/microprofile-reactive-streams/tree/master/zerodep[Zero Dependency] - intended as a possible reference implementation for when this is proposed to the JDK, but not the reference implementation for MicroProfile as MicroProfile does not have reference implementations.
+* https://github.com/lightbend/microprofile-reactive-streams/tree/master/rxjava[RxJava]
 
 == Design
 

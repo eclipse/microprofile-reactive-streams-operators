@@ -27,10 +27,10 @@
     </parent>
 
     <groupId>org.eclipse.microprofile.reactive.streams</groupId>
-    <artifactId>microprofile-reactive-streams-spec</artifactId>
+    <artifactId>microprofile-reactive-streams-operators-spec</artifactId>
     <packaging>pom</packaging>
-    <name>MicroProfile Reactive Streams Specification</name>
-    <description>MicroProfile Reactive Streams :: Specification</description>
+    <name>MicroProfile Reactive Streams Operators Specification</name>
+    <description>MicroProfile Reactive Streams Operators :: Specification</description>
 
     <properties>
         <asciidoctor-maven.version>1.5.5</asciidoctor-maven.version>
@@ -88,7 +88,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDocumentName>microprofile-reactive-streams-spec.asciidoc</sourceDocumentName>
+                    <sourceDocumentName>microprofile-reactive-streams-operators-spec.asciidoc</sourceDocumentName>
                     <sourceHighlighter>coderay</sourceHighlighter>
                     <attributes>
                         <license>Apache License v2.0</license>

@@ -32,9 +32,9 @@
         <bnd.baseline.include.distribution.management>false</bnd.baseline.include.distribution.management>
     </properties>
     <groupId>org.eclipse.microprofile.reactive.streams</groupId>
-    <artifactId>microprofile-reactive-streams-api</artifactId>
-    <name>MicroProfile Reactive Streams API</name>
-    <description>MicroProfile Reactive Streams Support :: API</description>
+    <artifactId>microprofile-reactive-streams-operators</artifactId>
+    <name>MicroProfile Reactive Streams Operators</name>
+    <description>MicroProfile Reactive Streams Operators :: API</description>
     <dependencies>
         <dependency>
             <groupId>org.reactivestreams</groupId>
@@ -91,7 +91,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <Bundle-SymbolicName>org.eclipse.microprofile.reactive.streams</Bundle-SymbolicName>
-                    <Bundle-Name>MicroProfile Reactive Streams Bundle</Bundle-Name>
+                    <Bundle-Name>MicroProfile Reactive Streams Operators Bundle</Bundle-Name>
                     <archive>
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>

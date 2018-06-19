@@ -18,9 +18,9 @@
  *******************************************************************************/
 
 /**
- * Reactive streams support.
+ * MicroProfile Reactive Streams Operators.
  * <p>
- * This provides utilities for building stream graphs that consume or produce elements using the
+ * This provides operators for building stream graphs that consume or produce elements using the
  * {@link org.reactivestreams.Publisher}, {@link org.reactivestreams.Subscriber} and
  * {@link org.reactivestreams.Processor} interfaces.
  * <p>

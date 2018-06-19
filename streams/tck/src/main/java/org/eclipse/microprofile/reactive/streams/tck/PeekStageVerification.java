@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static org.testng.Assert.assertEquals;
 
@@ -39,7 +39,7 @@ public class PeekStageVerification extends AbstractStageVerification {
   }
 
   @Test
-  public void mapStageShouldNotModifyElements() {
+  public void peekStageShouldNotModifyElements() {
     AtomicInteger count = new AtomicInteger();  
     assertEquals(await(ReactiveStreams.of(1, 2, 3)
         .peek(i -> {
@@ -69,15 +69,17 @@ public class PeekStageVerification extends AbstractStageVerification {
 
   public class ProcessorVerification extends StageProcessorVerification<Integer> {
 
+    private Consumer<Integer> noop = x -> {};
+
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
+      return ReactiveStreams.<Integer>builder().peek(noop).buildRs(getEngine());
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
       return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .map(Function.identity()).buildRs(getEngine());
+          .peek(noop).buildRs(getEngine());
     }
 
     @Override

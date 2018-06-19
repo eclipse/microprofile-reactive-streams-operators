@@ -37,3 +37,5 @@ include::license-alv2.asciidoc[]
 include::architecture.asciidoc[]
 
 include::examples.asciidoc[]
+
+include::spi.asciidoc[]

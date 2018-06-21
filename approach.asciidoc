@@ -204,7 +204,7 @@ One of the major shortcomings of adopting Reactive Streams at present is the lac
 
 Of course, this isn’t a problem for most existing users of Reactive Streams, because there exist a number of third party libraries that provide these transformations, such as `map`/`filter`/`flatMap`. These libraries include https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams], https://github.com/ReactiveX/RxJava[RxJava 2] or https://projectreactor.io/[Reactor]. Each of these libraries has its differences, advantages and disadvantages, such as using an lifted API to declare the stream vs directly manipulating the stream, the execution model, and whether JDK types for functions and futures are embraced or not. However, for a Java standard like MicroProfile, requiring developers to bring in a third party library to do these elementary operations is not acceptable.
 
-The link:streams[MicroProfile Reactive Streams] seeks to fill this gap. This specification is intended to eventually be proposed as an API for the JDK, but for now it is incubating in MicroProfile.
+The link:streams[MicroProfile Reactive Streams Operators] seeks to fill this gap. This specification is intended to eventually be proposed as an API for the JDK, but for now it is incubating in MicroProfile.
 
 == Reactive system architecture features
 

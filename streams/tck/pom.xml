@@ -43,9 +43,9 @@
     </parent>
 
     <groupId>org.eclipse.microprofile.reactive.streams</groupId>
-    <artifactId>microprofile-reactive-streams-tck</artifactId>
-    <name>MicroProfile Reactive Streams TCK</name>
-    <description>MicroProfile Reactive Streams :: TCK</description>
+    <artifactId>microprofile-reactive-streams-operators-tck</artifactId>
+    <name>MicroProfile Reactive Streams Operators TCK</name>
+    <description>MicroProfile Reactive Streams Operators :: TCK</description>
 
     <properties>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
@@ -54,7 +54,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.microprofile.reactive.streams</groupId>
-            <artifactId>microprofile-reactive-streams-api</artifactId>
+            <artifactId>microprofile-reactive-streams-operators</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

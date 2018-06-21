@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-= MicroProfile Reactive Streams Support Specification
+= MicroProfile Reactive Streams Operators Specification
 :authors: James Roper, Clement Escoffier
 :email: james@lightbend.com, clement.escoffier@redhat.com
 :version-label!:
@@ -32,7 +32,7 @@ endif::[]
 
 include::license-alv2.asciidoc[]
 
-== MicroProfile Reactive Streams Support
+== MicroProfile Reactive Streams Operators
 
 include::architecture.asciidoc[]
 

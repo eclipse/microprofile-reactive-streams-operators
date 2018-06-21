@@ -24,7 +24,7 @@
     <artifactId>microprofile-reactive-streams-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>MicroProfile Reactive Streams</name>
+    <name>MicroProfile Reactive Streams Support</name>
     <description>Eclipse MicroProfile Reactive Streams Support :: Parent POM</description>
     <url>http://microprofile.io</url>
 

@@ -86,7 +86,7 @@ public final class CompletionSubscriber<T, R> implements Subscriber<T> {
    * @param completion The completion stage.
    * @return A completion subscriber.
    */
-  static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
+  public static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
     return new CompletionSubscriber<>(subscriber, completion);
   }
 

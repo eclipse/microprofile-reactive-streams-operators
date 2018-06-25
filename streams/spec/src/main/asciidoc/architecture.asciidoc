@@ -107,9 +107,9 @@ Or, a processor may be plumbed to a subscriber, in which case, the resulting bui
 ----
 ProcessorBuilder<Integer, String> toStringProcessor =
   ReactiveStreams.<Integer>builder()
-    .map(Integer::toString); <1>
+    .map(Object::toString); <1>
 
-SubscriberBuilder<Integer, List<String>> =
+SubscriberBuilder<Integer, List<String>> toListSubscriber =
   toStringProcessor.toList(); <2>
 ----
 <1> A processor that receives integers and emits them as strings.

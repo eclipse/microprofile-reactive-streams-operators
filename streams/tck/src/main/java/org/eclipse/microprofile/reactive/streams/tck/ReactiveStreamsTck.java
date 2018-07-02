@@ -91,6 +91,7 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         FindFirstStageVerification::new,
         CollectStageVerification::new,
         TakeWhileStageVerification::new,
+        FlatMapPublisherStageVerification::new,
         FlatMapCompletionStageVerification::new,
         FlatMapIterableStageVerification::new,
         ConcatStageVerification::new,

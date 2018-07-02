@@ -361,6 +361,34 @@ public interface Stage {
   }
 
   /**
+   * A flat map stage similar to {@link FlatMap} but the mapper function returns a {@link Publisher} instead of a
+   * {@link Graph}.
+   * <p>
+   * The flat map stage should execute the given mapper on each element, and concatenate the publishers emitted by
+   * the mapper function into the resulting stream.
+   * <p>
+   * The graph emitted by the mapper function is guaranteed to have an outlet but no inlet.
+   * <p>
+   * The engine must be careful to ensure only one publisher emitted by the mapper function is running at a time.
+   */
+  final class FlatMapPublisher implements Inlet, Outlet {
+      private final Function<?, Publisher<?>> mapper;
+
+      public FlatMapPublisher(Function<?, Publisher<?>> mapper) {
+          this.mapper = mapper;
+      }
+
+      /**
+       * The mapper function.
+       *
+       * @return The mapper function.
+       */
+       public Function<?, Publisher<?>> getMapper() {
+            return mapper;
+        }
+  }
+
+  /**
    * A flat map stage that emits and flattens {@link CompletionStage}.
    * <p>
    * The flat map stage should execute the given mapper on each element, and concatenate the values redeemed by the

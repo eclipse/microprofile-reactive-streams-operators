@@ -22,6 +22,7 @@ package org.eclipse.microprofile.reactive.streams;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.List;
@@ -96,6 +97,9 @@ public final class ProcessorBuilder<T, R> {
    * <p>
    * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
    * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMapPublisher(Function)}, the mapper function returns a {@link PublisherBuilder} and not a
+   * {@link Publisher}.
    *
    * @param mapper The mapper function.
    * @param <S>    The type of the elements emitted from the new processor.
@@ -103,6 +107,25 @@ public final class ProcessorBuilder<T, R> {
    */
   public <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper) {
     return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
+  }
+
+  /**
+   * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
+   * {@code mapper} function are emitted from this stream.
+   * <p>
+   * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
+   * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link Publisher} and not a {@link PublisherBuilder}.
+   *
+   * @param mapper The mapper function.
+   * @param <S>    The type of the elements emitted from the new processor.
+   * @return A new processor builder.
+   */
+  public <S> ProcessorBuilder<T, S> flatMapPublisher(Function<? super R, Publisher<? extends S>> mapper) {
+      return addStage(new Stage.FlatMap(mapper
+          .andThen(ReactiveStreams::fromPublisher)
+          .andThen(PublisherBuilder::toGraph)));
   }
 
   /**

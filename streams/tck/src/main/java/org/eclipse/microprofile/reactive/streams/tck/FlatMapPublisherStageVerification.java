@@ -101,7 +101,7 @@ public class FlatMapPublisherStageVerification extends AbstractStageVerification
         }
 
         CompletionStage<List<Integer>> result = ReactiveStreams.of(1, 2, 3, 4, 5)
-            .flatMapPublisher(ScheduledPublisher::new)
+            .flatMapPublisher(id -> new ScheduledPublisher(id))
             .toList()
             .run(getEngine());
 

@@ -97,6 +97,9 @@ public final class PublisherBuilder<T> {
    * <p>
    * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
    * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMapPublisher(Function)}}, the mapper function returns a {@link PublisherBuilder} instead of a
+   * {@link Publisher}.
    *
    * @param mapper The mapper function.
    * @param <S>    The type of the elements emitted from the new publisher.
@@ -104,6 +107,26 @@ public final class PublisherBuilder<T> {
    */
   public <S> PublisherBuilder<S> flatMap(Function<? super T, PublisherBuilder<? extends S>> mapper) {
     return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
+  }
+
+  /**
+   * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
+   * {@code mapper} function are emitted from this stream.
+   * <p>
+   * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
+   * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link Publisher} instead of a
+   * {@link PublisherBuilder}.
+   *
+   * @param mapper The mapper function.
+   * @param <S>    The type of the elements emitted from the new publisher.
+   * @return A new publisher builder.
+   */
+  public <S> PublisherBuilder<S> flatMapPublisher(Function<? super T, Publisher<? extends S>> mapper) {
+      return addStage(new Stage.FlatMap(mapper
+          .andThen(ReactiveStreams::fromPublisher)
+          .andThen(PublisherBuilder::toGraph)));
   }
 
   /**

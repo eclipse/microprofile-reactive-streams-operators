@@ -91,6 +91,15 @@ public final class ProcessorBuilder<T, R> {
   }
 
   /**
+   * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
+   *
+   * @return A new publisher builder emitting the distinct elements from this stream.
+   */
+  public ProcessorBuilder<T, T> distinct() {
+    return addStage(Stage.Distinct.INSTANCE);
+  }
+
+  /**
    * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
    * {@code mapper} function are emitted from this stream.
    * <p>

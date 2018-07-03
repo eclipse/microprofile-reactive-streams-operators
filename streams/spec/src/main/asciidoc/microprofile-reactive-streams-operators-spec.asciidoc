@@ -38,4 +38,6 @@ include::architecture.asciidoc[]
 
 include::examples.asciidoc[]
 
+include::java-streams.asciidoc[]
+
 include::spi.asciidoc[]

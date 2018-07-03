@@ -29,11 +29,13 @@ import org.reactivestreams.Subscriber;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -308,6 +310,24 @@ public final class PublisherBuilder<T> {
    */
   public <R, A> CompletionBuilder<R> collect(Collector<? super T, A, R> collector) {
     return addTerminalStage(new Stage.Collect(collector));
+  }
+
+  /**
+   * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
+   * {@link Supplier supplier} and {@link BiConsumer accumulator}.
+   * <p>
+   * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does not
+   * accept a <em>combiner</em> method.
+   *
+   * @param supplier a function that creates a new result container. It creates objects of type {@code <A>}.
+   * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
+   *              result
+   * @param <R>  The result of the collector.
+   * @return A {@link CompletionBuilder} that emits the collected result.
+   */
+  public <R> CompletionBuilder<R> collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator) {
+    // The combiner is not used, so the used, but should not be null
+    return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
   }
 
   /**

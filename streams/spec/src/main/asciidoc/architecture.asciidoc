@@ -81,7 +81,9 @@ There are four different shapes of streams that can be built:
 
 image::shapes.png[Shapes,400,400,align="center"]
 
-* Closed graphs. A closed graph has no inlet or outlet, both having being provided in during the construction of the graph. It is represented as a `CompletionStage` of the result of the stream, when built. This is called a `CompletionBuilder`.
+* Closed graphs. A closed graph has no inlet or outlet, both having being provided in during the construction of the graph
+. It is represented as a `CompletionStage` of the result of the stream. This is called a `CompletionRunner`. The result is
+ retrieved using the `run` method.
 
 image::graph.png[Closed graph,250,250,align="center"]
 
@@ -94,7 +96,7 @@ When this happens, the stream becomes a closed graph, since there is no longer a
 PublisherBuilder<Integer> intsPublisher =
   ReactiveStreams.of(1, 2, 3); <1>
 
-CompletionBuilder<List<Integer>> intsResult =
+CompletionRunner<List<Integer>> intsResult =
   intsPublisher.toList(); <2>
 ----
 <1> A publisher of integers 1, 2 and 3.
@@ -117,7 +119,10 @@ SubscriberBuilder<Integer, List<String>> toListSubscriber =
 
 When MicroProfile specifications provide an API that uses Reactive Streams, it is intended that application developers can return and pass the builder interfaces directly to the MicroProfile APIs.
 In many cases, application developers will not need to run the streams themselves.
-However, should they need to run the streams directly themselves, they can do so by using the streams `build` or `run` methods. `PublisherBuilder`, `SubscriberBuilder` and `ProcessorBuilder` all provide a `build` method that returns a `Publisher`, `CompletionSubscriber` and `Processor` respectively, while `CompletionBuilder`, since building it will actually run the stream, provides a `run` method that returns a `CompletionStage`.
+However, should they need to run the streams directly themselves, they can do so by using the streams `build` or `run`
+methods. `PublisherBuilder`, `SubscriberBuilder` and `ProcessorBuilder` all provide a `build` method that returns a
+`Publisher`, `CompletionSubscriber` and `Processor` respectively, while `CompletionRunner`, since it actually
+runs the stream, provides a `run` method that returns a `CompletionStage`.
 
 The `CompletionSubscriber` class is so named because, where a `CompletionStage` is a stage of asynchronous computation that completes with a value or an error, a `CompletionSubscriber` is subscriber to an asynchronous stream that completes with a value or an error.
 

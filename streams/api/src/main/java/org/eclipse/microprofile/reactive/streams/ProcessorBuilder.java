@@ -73,7 +73,7 @@ public final class ProcessorBuilder<T, R> {
    * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
    * the given function is called for each element.
    */
-  public ProcessorBuilder<T, T> peek(Consumer<? super T> consumer) {
+  public ProcessorBuilder<T, R> peek(Consumer<? super R> consumer) {
     return addStage(new Stage.Peek(consumer));
   }
 

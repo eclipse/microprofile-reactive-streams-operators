@@ -37,12 +37,13 @@
     <description>MicroProfile Reactive Messaging :: API</description>
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.microprofile.reactive.streams</groupId>
-            <artifactId>microprofile-reactive-streams-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.annotation.versioning</artifactId>
+        </dependency>
+        <dependency>
+           <groupId>org.eclipse.microprofile.reactive.streams</groupId>
+            <artifactId>microprofile-reactive-streams-operators</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

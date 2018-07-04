@@ -17,10 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.tck.mocks.SimpleMessage;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
@@ -31,6 +30,7 @@ import org.reactivestreams.Subscription;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,35 +41,35 @@ import java.util.stream.Collectors;
  */
 public class MockedSender<T> {
 
-  private final ArrayDeque<Message<T>> queue = new ArrayDeque<>();
+  private final Deque<Message<T>> queue = new ArrayDeque<>();
   private final List<MessageProcessor> publishers = new CopyOnWriteArrayList<>();
 
-  int numPublishers() {
+  public int numPublishers() {
     return publishers.size();
   }
 
-  ProcessorBuilder<Void, Message<T>> createWrappedProcessor() {
+  public ProcessorBuilder<Void, Message<T>> createWrappedProcessor() {
     return ReactiveStreams.fromProcessor(new MessageProcessor());
   }
 
-  ProcessorBuilder<Void, T> createProcessor() {
+  public ProcessorBuilder<Void, T> createProcessor() {
     return createWrappedProcessor().map(Message::getPayload);
   }
 
-  PublisherBuilder<Message<T>> createWrappedPublisher() {
+  public PublisherBuilder<Message<T>> createWrappedPublisher() {
     return ReactiveStreams.fromPublisher(new MessageProcessor());
   }
 
-  PublisherBuilder<T> createPublisher() {
+  public PublisherBuilder<T> createPublisher() {
     return createWrappedPublisher().map(Message::getPayload);
   }
 
-  void send(T... message) {
+  public void send(T... message) {
     queue.addAll(Arrays.asList(message).stream().map(SimpleMessage::new).collect(Collectors.toList()));
     trySend();
   }
 
-  void send(Message<T>... message) {
+  public void send(Message<T>... message) {
     queue.addAll(Arrays.asList(message));
     trySend();
   }
@@ -83,7 +83,7 @@ public class MockedSender<T> {
     }
   }
 
-  void completeAll() {
+  public void completeAll() {
     List<MessageProcessor> all = new ArrayList<>(publishers);
     all.clear();
     for (MessageProcessor publisher : all) {
@@ -91,7 +91,7 @@ public class MockedSender<T> {
     }
   }
 
-  void failAll(Throwable error) {
+  public void failAll(Throwable error) {
     List<MessageProcessor> all = new ArrayList<>(publishers);
     all.clear();
     for (MessageProcessor publisher : all) {

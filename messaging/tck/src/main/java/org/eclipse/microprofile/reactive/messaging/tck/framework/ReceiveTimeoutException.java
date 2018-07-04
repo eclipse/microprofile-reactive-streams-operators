@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 /**
  * Exception thrown when a message isn't received in the given timeout.

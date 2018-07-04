@@ -17,10 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.tck.mocks.SimpleMessage;
 import org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
@@ -51,25 +50,25 @@ public class MockedReceiver<T> {
     this.topic = topic;
   }
 
-  int numSubscriptions() {
+  public int numSubscriptions() {
     return subscriptions.size();
   }
 
-  ProcessorBuilder<Message<T>, Void> createWrappedProcessor() {
+  public ProcessorBuilder<Message<T>, Void> createWrappedProcessor() {
     return ReactiveStreams.fromProcessor(new MessageProcessor());
   }
 
-  ProcessorBuilder<T, Void> createProcessor() {
+  public ProcessorBuilder<T, Void> createProcessor() {
     return ReactiveStreams.<T>builder()
         .<Message<T>>map(SimpleMessage::new)
         .via(new MessageProcessor());
   }
 
-  SubscriberBuilder<Message<T>, Void> createWrappedSubscriber() {
+  public SubscriberBuilder<Message<T>, Void> createWrappedSubscriber() {
     return ReactiveStreams.fromSubscriber(new MessageProcessor());
   }
 
-  SubscriberBuilder<T, Void> createSubscriber() {
+  public SubscriberBuilder<T, Void> createSubscriber() {
     return ReactiveStreams.<T>builder()
         .<Message<T>>map(SimpleMessage::new)
         .to(new MessageProcessor());
@@ -78,7 +77,7 @@ public class MockedReceiver<T> {
   /**
    * Cancel all subscriptions.
    */
-  void cancelAll() {
+  public void cancelAll() {
     List<Subscription> subscriptions = new ArrayList<>(this.subscriptions);
     this.subscriptions.clear();
     subscriptions.forEach(Subscription::cancel);
@@ -87,7 +86,7 @@ public class MockedReceiver<T> {
   /**
    * Expect the next message to have the given payload.
    */
-  Message<T> expectNextMessageWithPayload(T payload) {
+  public Message<T> expectNextMessageWithPayload(T payload) {
     Message<T> msg = receiveMessageWithPayload(payload, testEnvironment.receiveTimeout().toMillis());
     if (!msg.getPayload().equals(payload)) {
       throw new AssertionError("Expected a message on topic " + topic + " with payload " + payload + " but got " + msg);
@@ -100,7 +99,7 @@ public class MockedReceiver<T> {
    * <p>
    * Any messages not matching the payload will be acknowledged and ignored.
    */
-  Message<T> expectEventualMessageWithPayload(T payload) throws InterruptedException {
+  public Message<T> expectEventualMessageWithPayload(T payload) throws InterruptedException {
     long start = System.currentTimeMillis();
     Message<T> msg = receiveMessageWithPayload(payload, testEnvironment.receiveTimeout().toMillis());
     List<String> ignored = new ArrayList<>();
@@ -121,7 +120,7 @@ public class MockedReceiver<T> {
   /**
    * Expect no more messages.
    */
-  void expectNoMessages(String errorMsg) {
+  public void expectNoMessages(String errorMsg) {
     try {
       Message<T> msg = queue.poll(testEnvironment.noMessageTimeout().toMillis(), TimeUnit.MILLISECONDS);
       if (msg != null) {
@@ -133,11 +132,11 @@ public class MockedReceiver<T> {
     }
   }
 
-  void receiveMessage(T payload) {
+  public void receiveMessage(T payload) {
     receiveWrappedMessage(new SimpleMessage<>(payload));
   }
 
-  void receiveWrappedMessage(Message<T> msg) {
+  public void receiveWrappedMessage(Message<T> msg) {
     queue.add(msg);
   }
 

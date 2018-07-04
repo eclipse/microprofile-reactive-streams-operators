@@ -17,10 +17,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TckLocalContainerController;
+import org.eclipse.microprofile.reactive.messaging.tck.spi.TckMessagingPuppet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ import java.io.ByteArrayOutputStream;
 public class ContainerController {
 
   @Inject
-  private TckLocalContainerController container;
+  private TckMessagingPuppet container;
 
   private final Jsonb jsonb = JsonbBuilder.create();
 

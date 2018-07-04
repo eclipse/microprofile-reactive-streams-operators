@@ -17,22 +17,36 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.mocks;
-
-import org.eclipse.microprofile.reactive.messaging.Message;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 import java.util.Objects;
 
-public class SimpleMessage<T> implements Message<T> {
-  private final T payload;
+public class MockPayload {
+  private String field1;
+  private int field2;
 
-  public SimpleMessage(T payload) {
-    this.payload = payload;
+  public MockPayload(String field1, int field2) {
+    this.field1 = field1;
+    this.field2 = field2;
   }
 
-  @Override
-  public T getPayload() {
-    return payload;
+  public MockPayload() {
+  }
+
+  public String getField1() {
+    return field1;
+  }
+
+  public int getField2() {
+    return field2;
+  }
+
+  public void setField1(String field1) {
+    this.field1 = field1;
+  }
+
+  public void setField2(int field2) {
+    this.field2 = field2;
   }
 
   @Override
@@ -43,24 +57,22 @@ public class SimpleMessage<T> implements Message<T> {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SimpleMessage<?> that = (SimpleMessage<?>) o;
-    return Objects.equals(payload, that.payload);
+    MockPayload that = (MockPayload) o;
+    return field2 == that.field2 &&
+        Objects.equals(field1, that.field1);
   }
 
   @Override
   public int hashCode() {
 
-    return Objects.hash(payload);
+    return Objects.hash(field1, field2);
   }
 
   @Override
   public String toString() {
-    return "SimpleMessage{" +
-        "payload=" + payload +
+    return "MockPayload{" +
+        "field1='" + field1 + '\'' +
+        ", field2=" + field2 +
         '}';
-  }
-
-  public static <T> SimpleMessage<T> wrap(T payload) {
-    return new SimpleMessage<>(payload);
   }
 }

@@ -19,14 +19,7 @@
 
 package org.eclipse.microprofile.reactive.messaging.tck.arquillian;
 
-import org.eclipse.microprofile.reactive.messaging.tck.ContainerController;
-import org.eclipse.microprofile.reactive.messaging.tck.MockedReceiver;
-import org.eclipse.microprofile.reactive.messaging.tck.MockedSender;
-import org.eclipse.microprofile.reactive.messaging.tck.ReceiveTimeoutException;
-import org.eclipse.microprofile.reactive.messaging.tck.TckMessagingManager;
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment;
-import org.eclipse.microprofile.reactive.messaging.tck.mocks.MockPayload;
-import org.eclipse.microprofile.reactive.messaging.tck.mocks.SimpleMessage;
+import org.eclipse.microprofile.reactive.messaging.tck.framework.TckMessagingManager;
 import org.eclipse.microprofile.reactive.messaging.tck.spi.TckContainer;
 import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
@@ -37,6 +30,7 @@ import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 import java.util.ArrayList;
@@ -52,18 +46,12 @@ public class TckArquillianDeployListener {
 
   private final Map<Class<?>, List<DeploymentDescription>> activeDeployments = new ConcurrentHashMap<>();
 
-  /**
-   * I don't know how deployments work in arquillian, I assume I need to explicitly deploy everything?
-   */
+  private final Archive<?> frameworkClasses = ShrinkWrap.create(JavaArchive.class)
+      .addPackage(TckMessagingManager.class.getPackage().getName());
+
   private final Archive<?> frameworkArchive = ShrinkWrap.create(JavaArchive.class)
-      .addClass(MockedReceiver.class)
-      .addClass(MockedSender.class)
-      .addClass(ReceiveTimeoutException.class)
-      .addClass(TestEnvironment.class)
-      .addClass(MockPayload.class)
-      .addClass(SimpleMessage.class)
-      .addClass(TckMessagingManager.class)
-      .addClass(ContainerController.class);
+      .addPackage(TckMessagingManager.class.getPackage().getName())
+      .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
 
   public TckArquillianDeployListener() {
@@ -80,25 +68,16 @@ public class TckArquillianDeployListener {
   }
 
   public void onBeforeDeploy(@Observes BeforeDeploy beforeDeploy, TestClass testClass) throws DeploymentException {
-    Topics topics = testClass.getAnnotation(Topics.class);
-    String[] topicNames;
-    if (topics != null) {
-      topicNames = topics.value();
-    }
-    else {
-      topicNames = new String[0];
-    }
+
+    String[] topicNames = getTopicsUsedByTestClass(testClass);
 
     DeployableContainer<?> container = beforeDeploy.getDeployableContainer();
     DeploymentDescription description = beforeDeploy.getDeployment();
 
-    if (description.isArchiveDeployment()) {
-      description.getArchive().merge(frameworkArchive);
-    }
-
-    List<DeploymentDescription> deployments = tckContainer.createDeployments(topicNames);
     List<DeploymentDescription> deployed = new ArrayList<>();
     activeDeployments.put(testClass.getJavaClass(), deployed);
+
+    List<DeploymentDescription> deployments = tckContainer.createDeployments(topicNames);
     for (DeploymentDescription deployable: deployments) {
       if (!tckContainer.mergeArchives() || deployable.isDescriptorDeployment() || description.isDescriptorDeployment()) {
         deployed.add(deployable);
@@ -108,17 +87,19 @@ public class TckArquillianDeployListener {
         description.getArchive().merge(deployable.getArchive());
       }
     }
+
+    if (description.isArchiveDeployment()) {
+      description.getArchive().merge(frameworkClasses);
+    }
+    else {
+      deployed.add(new DeploymentDescription("reactive-messaging-tck-framework.jar", frameworkArchive));
+      container.deploy(frameworkArchive);
+    }
   }
 
   public void onAfterUnDeploy(@Observes AfterUnDeploy afterUnDeploy, TestClass testClass) throws DeploymentException {
-    Topics topics = testClass.getAnnotation(Topics.class);
-    String[] topicNames;
-    if (topics != null) {
-      topicNames = topics.value();
-    }
-    else {
-      topicNames = new String[0];
-    }
+
+    String[] topicNames = getTopicsUsedByTestClass(testClass);
 
     DeployableContainer<?> container = afterUnDeploy.getDeployableContainer();
 
@@ -136,6 +117,18 @@ public class TckArquillianDeployListener {
     }
 
     tckContainer.teardownTopics(topicNames);
+  }
+
+  private String[] getTopicsUsedByTestClass(TestClass testClass) {
+    Topics topics = testClass.getAnnotation(Topics.class);
+    String[] topicNames;
+    if (topics != null) {
+      topicNames = topics.value();
+    }
+    else {
+      topicNames = new String[0];
+    }
+    return topicNames;
   }
 
 }

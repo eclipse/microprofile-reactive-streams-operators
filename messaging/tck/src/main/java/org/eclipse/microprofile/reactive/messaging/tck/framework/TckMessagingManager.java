@@ -17,9 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TckLocalContainerController;
+import org.eclipse.microprofile.reactive.messaging.tck.spi.TckMessagingPuppet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ public class TckMessagingManager {
   private final Map<String, MockedSender<?>> senders = new ConcurrentHashMap<>();
 
   @Inject
-  private TckLocalContainerController tckLocalContainerController;
+  private TckMessagingPuppet tckLocalContainerController;
 
   public <T> MockedReceiver<T> getReceiver(String topic) {
     return (MockedReceiver<T>) receivers.computeIfAbsent(topic, t -> new MockedReceiver<T>(tckLocalContainerController.testEnvironment(), topic));

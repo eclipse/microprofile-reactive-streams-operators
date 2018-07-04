@@ -75,13 +75,13 @@ public interface TckContainer {
    * Create some deployments for the given topics.
    *
    * One of the deployments must be an archive that provides an {@link javax.enterprise.context.ApplicationScoped} instance of
-   * {@link TckLocalContainerController} for injection.
+   * {@link TckMessagingPuppet} for injection.
    *
    * Implementations may return one deployment per topic, or one deployment for all topics, or whatever they want, as long as the tests are able to
    * send/receive on the topics specified.
    *
    * This method must ensure that if the topics need to be created or reset, that they are, so that any tests will start with a blank slate.
-   * Additionally, the TckLocalContainerController must be able to send/receive on the specified topics.
+   * Additionally, the TckMessagingPuppet must be able to send/receive on the specified topics.
    *
    * @param topics The topics to create and create the deployments for.
    * @return The deployments.

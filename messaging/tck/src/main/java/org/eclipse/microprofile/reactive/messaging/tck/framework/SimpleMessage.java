@@ -17,36 +17,50 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.spi;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
 
-import java.time.Duration;
-import java.util.Optional;
+import java.util.Objects;
 
-/**
- * A local container controller.
- *
- * This is used to send/receive messages on topics.
- */
-public interface TckLocalContainerController {
+public class SimpleMessage<T> implements Message<T> {
+  private final T payload;
 
-  /**
-   * Send a message to the given incoming topic.
-   */
-  void sendMessage(String topic, Message<byte[]> message);
+  public SimpleMessage(T payload) {
+    this.payload = payload;
+  }
 
-  /**
-   * Receive a message from the given outgoing topic.
-   *
-   * If no message is received within the given timeout, empty should be returned.
-   */
-  Optional<Message<byte[]>> receiveMessage(String topic, Duration timeout);
+  @Override
+  public T getPayload() {
+    return payload;
+  }
 
-  /**
-   * The test environment.
-   */
-  default TestEnvironment testEnvironment() {
-    return TestEnvironment.DEFAULT;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    SimpleMessage<?> that = (SimpleMessage<?>) o;
+    return Objects.equals(payload, that.payload);
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(payload);
+  }
+
+  @Override
+  public String toString() {
+    return "SimpleMessage{" +
+        "payload=" + payload +
+        '}';
+  }
+
+  public static <T> SimpleMessage<T> wrap(T payload) {
+    return new SimpleMessage<>(payload);
   }
 }

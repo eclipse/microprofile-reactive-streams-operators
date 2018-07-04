@@ -21,7 +21,10 @@ package org.eclipse.microprofile.reactive.messaging.tck;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.tck.arquillian.Topics;
-import org.eclipse.microprofile.reactive.messaging.tck.mocks.MockPayload;
+import org.eclipse.microprofile.reactive.messaging.tck.framework.ContainerController;
+import org.eclipse.microprofile.reactive.messaging.tck.framework.MockedReceiver;
+import org.eclipse.microprofile.reactive.messaging.tck.framework.MockPayload;
+import org.eclipse.microprofile.reactive.messaging.tck.framework.TckMessagingManager;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;

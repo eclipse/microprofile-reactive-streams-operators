@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
@@ -49,6 +50,34 @@ public class CollectStageVerification extends AbstractStageVerification {
   }
 
   @Test
+  public void collectShouldAccumulateResult() {
+    assertEquals(await(ReactiveStreams.of(1, 2, 3)
+      .collect(
+        () -> new AtomicInteger(0),
+        AtomicInteger::addAndGet
+      ).run(getEngine())).get(), 6);
+  }
+
+  @Test
+  public void collectShouldSupportEmptyStreams() {
+    assertEquals(await(ReactiveStreams.<Integer>empty()
+      .collect(
+        () -> new AtomicInteger(42),
+        AtomicInteger::addAndGet
+      ).run(getEngine())).get(), 42);
+  }
+
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+  public void collectShouldPropagateErrors() {
+    await(ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+      .collect(
+        () -> new AtomicInteger(0),
+        AtomicInteger::addAndGet
+      ).run(getEngine()));
+  }
+
+
+  @Test
   public void finisherFunctionShouldBeInvoked() {
     assertEquals(await(ReactiveStreams.of("1", "2", "3")
         .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
@@ -62,13 +91,29 @@ public class CollectStageVerification extends AbstractStageVerification {
 
   @Override
   List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new SubscriberVerification());
+    return Arrays.asList(new ToListSubscriberVerification(), new CollectSubscriberVerification());
   }
 
-  class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
+  class ToListSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
     @Override
     public Subscriber<Integer> createSubscriber() {
       return ReactiveStreams.<Integer>builder().toList().build(getEngine());
+    }
+
+    @Override
+    public Integer createElement(int element) {
+      return element;
+    }
+  }
+
+  class CollectSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
+    @Override
+    public Subscriber<Integer> createSubscriber() {
+      return ReactiveStreams.<Integer>builder()
+        .collect(
+          () -> new AtomicInteger(0),
+          AtomicInteger::addAndGet)
+        .build(getEngine());
     }
 
     @Override

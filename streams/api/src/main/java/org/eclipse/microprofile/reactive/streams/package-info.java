@@ -33,7 +33,7 @@
  * {@link org.eclipse.microprofile.reactive.streams.CompletionSubscriber}</li>
  * <li>{@link org.eclipse.microprofile.reactive.streams.ProcessorBuilder}, which when built produces a
  * {@link org.reactivestreams.Processor}</li>
- * <li>{@link org.eclipse.microprofile.reactive.streams.CompletionBuilder}, which when built produces a
+ * <li>{@link org.eclipse.microprofile.reactive.streams.CompletionRunner}, which when built produces a
  * {@link java.util.concurrent.CompletionStage}</li>
  * </ul>
  * <p>
@@ -56,9 +56,10 @@
  * result is the {@link java.lang.Void} type, and the {@link java.util.concurrent.CompletionStage} is only useful for
  * signalling normal or error termination of the stream.
  * <p>
- * The {@link CompletionBuilder} builds a closed graph, in that case both a {@link org.reactivestreams.Publisher}
- * and {@link org.reactivestreams.Subscriber} have been provided, and building the graph will run it and return
- * the result of the {@link org.reactivestreams.Subscriber} as a {@link java.util.concurrent.CompletionStage}.
+ * The {@link org.eclipse.microprofile.reactive.streams.CompletionRunner} builds a closed graph, in that case both a
+ * {@link org.reactivestreams.Publisher} and {@link org.reactivestreams.Subscriber} have been provided, and building the
+ * graph will run it and return the result of the {@link org.reactivestreams.Subscriber} as a
+ * {@link java.util.concurrent.CompletionStage}.
  * <p>
  * An example use of this API is perhaps you have a {@link org.reactivestreams.Publisher} of rows from a database,
  * and you want to output it as a comma separated list of lines to publish to an HTTP client request body, which

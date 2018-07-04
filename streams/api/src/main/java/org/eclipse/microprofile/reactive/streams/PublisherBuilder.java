@@ -29,11 +29,13 @@ import org.reactivestreams.Subscriber;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -92,11 +94,23 @@ public final class PublisherBuilder<T> {
   }
 
   /**
+   * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
+   *
+   * @return A new publisher builder emitting the distinct elements from this stream.
+   */
+  public PublisherBuilder<T> distinct() {
+    return addStage(Stage.Distinct.INSTANCE);
+  }
+
+  /**
    * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
    * {@code mapper} function are emitted from this stream.
    * <p>
    * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
    * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMapPublisher(Function)}}, the mapper function returns a {@link PublisherBuilder} instead of a
+   * {@link Publisher}.
    *
    * @param mapper The mapper function.
    * @param <S>    The type of the elements emitted from the new publisher.
@@ -104,6 +118,26 @@ public final class PublisherBuilder<T> {
    */
   public <S> PublisherBuilder<S> flatMap(Function<? super T, PublisherBuilder<? extends S>> mapper) {
     return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
+  }
+
+  /**
+   * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
+   * {@code mapper} function are emitted from this stream.
+   * <p>
+   * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
+   * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link Publisher} instead of a
+   * {@link PublisherBuilder}.
+   *
+   * @param mapper The mapper function.
+   * @param <S>    The type of the elements emitted from the new publisher.
+   * @return A new publisher builder.
+   */
+  public <S> PublisherBuilder<S> flatMapPublisher(Function<? super T, Publisher<? extends S>> mapper) {
+      return addStage(new Stage.FlatMap(mapper
+          .andThen(ReactiveStreams::fromPublisher)
+          .andThen(PublisherBuilder::toGraph)));
   }
 
   /**
@@ -204,7 +238,7 @@ public final class PublisherBuilder<T> {
    * @param action The action.
    * @return A new completion builder.
    */
-  public CompletionBuilder<Void> forEach(Consumer<? super T> action) {
+  public CompletionRunner<Void> forEach(Consumer<? super T> action) {
     return collect(Collector.<T, Void, Void>of(
         () -> null,
         (n, t) -> action.accept(t),
@@ -222,7 +256,7 @@ public final class PublisherBuilder<T> {
    *
    * @return A new completion builder.
    */
-  public CompletionBuilder<Void> ignore() {
+  public CompletionRunner<Void> ignore() {
     return forEach(r -> {
     });
   }
@@ -234,7 +268,7 @@ public final class PublisherBuilder<T> {
    *
    * @return A new completion builder.
    */
-  public CompletionBuilder<Void> cancel() {
+  public CompletionRunner<Void> cancel() {
     return addTerminalStage(Stage.Cancel.INSTANCE);
   }
 
@@ -248,7 +282,7 @@ public final class PublisherBuilder<T> {
    * @param accumulator The accumulator function.
    * @return A new completion builder.
    */
-  public CompletionBuilder<T> reduce(T identity, BinaryOperator<T> accumulator) {
+  public CompletionRunner<T> reduce(T identity, BinaryOperator<T> accumulator) {
     return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator)));
   }
 
@@ -261,7 +295,7 @@ public final class PublisherBuilder<T> {
    * @param accumulator The accumulator function.
    * @return A new completion builder.
    */
-  public CompletionBuilder<Optional<T>> reduce(BinaryOperator<T> accumulator) {
+  public CompletionRunner<Optional<T>> reduce(BinaryOperator<T> accumulator) {
     return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
   }
 
@@ -276,9 +310,9 @@ public final class PublisherBuilder<T> {
    * @param combiner    The combiner function.
    * @return A new completion builder.
    */
-  public <S> CompletionBuilder<S> reduce(S identity,
-      BiFunction<S, ? super T, S> accumulator,
-      BinaryOperator<S> combiner) {
+  public <S> CompletionRunner<S> reduce(S identity,
+                                        BiFunction<S, ? super T, S> accumulator,
+                                        BinaryOperator<S> combiner) {
 
     return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator, combiner)));
   }
@@ -289,9 +323,9 @@ public final class PublisherBuilder<T> {
    * <p>
    * If the stream is completed before a single element is emitted, then {@link Optional#empty()} will be emitted.
    *
-   * @return A {@link CompletionBuilder} that emits the element when found.
+   * @return A {@link CompletionRunner} that emits the element when found.
    */
-  public CompletionBuilder<Optional<T>> findFirst() {
+  public CompletionRunner<Optional<T>> findFirst() {
     return addTerminalStage(Stage.FindFirst.INSTANCE);
   }
 
@@ -304,18 +338,36 @@ public final class PublisherBuilder<T> {
    * @param collector The collector to collect the elements.
    * @param <R>       The result of the collector.
    * @param <A>       The accumulator type.
-   * @return A {@link CompletionBuilder} that emits the collected result.
+   * @return A {@link CompletionRunner} that emits the collected result.
    */
-  public <R, A> CompletionBuilder<R> collect(Collector<? super T, A, R> collector) {
+  public <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector) {
     return addTerminalStage(new Stage.Collect(collector));
+  }
+
+  /**
+   * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
+   * {@link Supplier supplier} and {@link BiConsumer accumulator}.
+   * <p>
+   * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does not
+   * accept a <em>combiner</em> method.
+   *
+   * @param supplier a function that creates a new result container. It creates objects of type {@code <A>}.
+   * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
+   *              result
+   * @param <R>  The result of the collector.
+   * @return A {@link CompletionRunner} that emits the collected result.
+   */
+  public <R> CompletionRunner<R> collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator) {
+    // The combiner is not used, so the used, but should not be null
+    return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
   }
 
   /**
    * Collect the elements emitted by this publisher builder into a {@link List}
    *
-   * @return A {@link CompletionBuilder} that emits the list.
+   * @return A {@link CompletionRunner} that emits the list.
    */
-  public CompletionBuilder<List<T>> toList() {
+  public CompletionRunner<List<T>> toList() {
     return collect(Collectors.toList());
   }
 
@@ -323,9 +375,9 @@ public final class PublisherBuilder<T> {
    * Connect the outlet of the {@link Publisher} built by this builder to the given {@link Subscriber}.
    *
    * @param subscriber The subscriber to connect.
-   * @return A {@link CompletionBuilder} that completes when the stream completes.
+   * @return A {@link CompletionRunner} that completes when the stream completes.
    */
-  public CompletionBuilder<Void> to(Subscriber<T> subscriber) {
+  public CompletionRunner<Void> to(Subscriber<T> subscriber) {
     return addTerminalStage(new Stage.SubscriberStage(subscriber));
   }
 
@@ -333,9 +385,9 @@ public final class PublisherBuilder<T> {
    * Connect the outlet of this publisher builder to the given {@link SubscriberBuilder} graph.
    *
    * @param subscriber The subscriber builder to connect.
-   * @return A {@link CompletionBuilder} that completes when the stream completes.
+   * @return A {@link CompletionRunner} that completes when the stream completes.
    */
-  public <R> CompletionBuilder<R> to(SubscriberBuilder<T, R> subscriber) {
+  public <R> CompletionRunner<R> to(SubscriberBuilder<T, R> subscriber) {
     return addTerminalStage(new InternalStages.Nested(subscriber.getGraphBuilder()));
   }
 
@@ -386,7 +438,7 @@ public final class PublisherBuilder<T> {
     return new PublisherBuilder<>(graphBuilder.addStage(stage));
   }
 
-  private <R> CompletionBuilder<R> addTerminalStage(Stage stage) {
-    return new CompletionBuilder<>(graphBuilder.addStage(stage));
+  private <R> CompletionRunner<R> addTerminalStage(Stage stage) {
+    return new CompletionRunner<>(graphBuilder.addStage(stage));
   }
 }

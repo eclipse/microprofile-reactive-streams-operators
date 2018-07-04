@@ -91,13 +91,15 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         FindFirstStageVerification::new,
         CollectStageVerification::new,
         TakeWhileStageVerification::new,
+        FlatMapPublisherStageVerification::new,
         FlatMapCompletionStageVerification::new,
         FlatMapIterableStageVerification::new,
         ConcatStageVerification::new,
         EmptyProcessorVerification::new,
         CancelStageVerification::new,
         SubscriberStageVerification::new,
-        PeekStageVerification::new
+        PeekStageVerification::new,
+        DistinctStageVerification::new
     );
 
     List<Object> allTests = new ArrayList<>();

@@ -22,16 +22,19 @@ package org.eclipse.microprofile.reactive.streams;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -91,11 +94,23 @@ public final class ProcessorBuilder<T, R> {
   }
 
   /**
+   * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
+   *
+   * @return A new publisher builder emitting the distinct elements from this stream.
+   */
+  public ProcessorBuilder<T, T> distinct() {
+    return addStage(Stage.Distinct.INSTANCE);
+  }
+
+  /**
    * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
    * {@code mapper} function are emitted from this stream.
    * <p>
    * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
    * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMapPublisher(Function)}, the mapper function returns a {@link PublisherBuilder} and not a
+   * {@link Publisher}.
    *
    * @param mapper The mapper function.
    * @param <S>    The type of the elements emitted from the new processor.
@@ -103,6 +118,25 @@ public final class ProcessorBuilder<T, R> {
    */
   public <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper) {
     return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
+  }
+
+  /**
+   * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
+   * {@code mapper} function are emitted from this stream.
+   * <p>
+   * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
+   * publishers produced by the mapper function.
+   * <p>
+   * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link Publisher} and not a {@link PublisherBuilder}.
+   *
+   * @param mapper The mapper function.
+   * @param <S>    The type of the elements emitted from the new processor.
+   * @return A new processor builder.
+   */
+  public <S> ProcessorBuilder<T, S> flatMapPublisher(Function<? super R, Publisher<? extends S>> mapper) {
+      return addStage(new Stage.FlatMap(mapper
+          .andThen(ReactiveStreams::fromPublisher)
+          .andThen(PublisherBuilder::toGraph)));
   }
 
   /**
@@ -301,6 +335,24 @@ public final class ProcessorBuilder<T, R> {
    */
   public <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector) {
     return addTerminalStage(new Stage.Collect(collector));
+  }
+
+  /**
+   * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
+   * {@link Supplier supplier} and {@link BiConsumer accumulator}.
+   * <p>
+   * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does not
+   * accept a <em>combiner</em> method.
+   *
+   * @param supplier a function that creates a new result container. It creates objects of type {@code <S>}.
+   * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
+   *              result
+   * @param <S>  The accumulator type.
+   * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
+   */
+  public <S> SubscriberBuilder<T, S> collect(Supplier<S> supplier, BiConsumer<S,? super R> accumulator) {
+    // The combiner is not used, so the used, but should not be null
+    return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
   }
 
   /**

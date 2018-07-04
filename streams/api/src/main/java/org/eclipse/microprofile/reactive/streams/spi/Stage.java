@@ -156,6 +156,20 @@ public interface Stage {
   }
 
   /**
+   * A stage returning a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this
+   * stream.
+   */
+  final class Distinct implements Inlet, Outlet {
+
+    private Distinct() {
+      // Avoid direct instantiation.
+    }
+
+    public static final Distinct INSTANCE = new Distinct();
+  }
+
+
+  /**
    * A take while stage.
    * <p>
    * The given predicate should be supplied when the stream is first run, and then invoked on each element consumed.

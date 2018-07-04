@@ -355,9 +355,9 @@ public final class PublisherBuilder<T> {
    * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
    *              result
    * @param <R>  The result of the collector.
-   * @return A {@link CompletionBuilder} that emits the collected result.
+   * @return A {@link CompletionRunner} that emits the collected result.
    */
-  public <R> CompletionBuilder<R> collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator) {
+  public <R> CompletionRunner<R> collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator) {
     // The combiner is not used, so the used, but should not be null
     return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
   }

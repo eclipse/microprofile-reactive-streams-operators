@@ -67,11 +67,11 @@ public final class PublisherBuilder<T> {
   }
 
   /**
-   * Returns a stream containing all the elements from this stream, 
+   * Returns a stream containing all the elements from this stream,
    * additionaly perfoming the provided action on each element.
    *
    * @param consumer The function called for every element.
-   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between, the given function 
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between, the given function
    * is called for each element.
    */
   public PublisherBuilder<T> peek(Consumer<? super T> consumer) {
@@ -236,7 +236,7 @@ public final class PublisherBuilder<T> {
    * @param action The action.
    * @return A new completion builder.
    */
-  public CompletionBuilder<Void> forEach(Consumer<? super T> action) {
+  public CompletionRunner<Void> forEach(Consumer<? super T> action) {
     return collect(Collector.<T, Void, Void>of(
         () -> null,
         (n, t) -> action.accept(t),
@@ -254,7 +254,7 @@ public final class PublisherBuilder<T> {
    *
    * @return A new completion builder.
    */
-  public CompletionBuilder<Void> ignore() {
+  public CompletionRunner<Void> ignore() {
     return forEach(r -> {
     });
   }
@@ -266,7 +266,7 @@ public final class PublisherBuilder<T> {
    *
    * @return A new completion builder.
    */
-  public CompletionBuilder<Void> cancel() {
+  public CompletionRunner<Void> cancel() {
     return addTerminalStage(Stage.Cancel.INSTANCE);
   }
 
@@ -280,7 +280,7 @@ public final class PublisherBuilder<T> {
    * @param accumulator The accumulator function.
    * @return A new completion builder.
    */
-  public CompletionBuilder<T> reduce(T identity, BinaryOperator<T> accumulator) {
+  public CompletionRunner<T> reduce(T identity, BinaryOperator<T> accumulator) {
     return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator)));
   }
 
@@ -293,7 +293,7 @@ public final class PublisherBuilder<T> {
    * @param accumulator The accumulator function.
    * @return A new completion builder.
    */
-  public CompletionBuilder<Optional<T>> reduce(BinaryOperator<T> accumulator) {
+  public CompletionRunner<Optional<T>> reduce(BinaryOperator<T> accumulator) {
     return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
   }
 
@@ -308,9 +308,9 @@ public final class PublisherBuilder<T> {
    * @param combiner    The combiner function.
    * @return A new completion builder.
    */
-  public <S> CompletionBuilder<S> reduce(S identity,
-      BiFunction<S, ? super T, S> accumulator,
-      BinaryOperator<S> combiner) {
+  public <S> CompletionRunner<S> reduce(S identity,
+                                        BiFunction<S, ? super T, S> accumulator,
+                                        BinaryOperator<S> combiner) {
 
     return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator, combiner)));
   }
@@ -321,9 +321,9 @@ public final class PublisherBuilder<T> {
    * <p>
    * If the stream is completed before a single element is emitted, then {@link Optional#empty()} will be emitted.
    *
-   * @return A {@link CompletionBuilder} that emits the element when found.
+   * @return A {@link CompletionRunner} that emits the element when found.
    */
-  public CompletionBuilder<Optional<T>> findFirst() {
+  public CompletionRunner<Optional<T>> findFirst() {
     return addTerminalStage(Stage.FindFirst.INSTANCE);
   }
 
@@ -336,18 +336,18 @@ public final class PublisherBuilder<T> {
    * @param collector The collector to collect the elements.
    * @param <R>       The result of the collector.
    * @param <A>       The accumulator type.
-   * @return A {@link CompletionBuilder} that emits the collected result.
+   * @return A {@link CompletionRunner} that emits the collected result.
    */
-  public <R, A> CompletionBuilder<R> collect(Collector<? super T, A, R> collector) {
+  public <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector) {
     return addTerminalStage(new Stage.Collect(collector));
   }
 
   /**
    * Collect the elements emitted by this publisher builder into a {@link List}
    *
-   * @return A {@link CompletionBuilder} that emits the list.
+   * @return A {@link CompletionRunner} that emits the list.
    */
-  public CompletionBuilder<List<T>> toList() {
+  public CompletionRunner<List<T>> toList() {
     return collect(Collectors.toList());
   }
 
@@ -355,9 +355,9 @@ public final class PublisherBuilder<T> {
    * Connect the outlet of the {@link Publisher} built by this builder to the given {@link Subscriber}.
    *
    * @param subscriber The subscriber to connect.
-   * @return A {@link CompletionBuilder} that completes when the stream completes.
+   * @return A {@link CompletionRunner} that completes when the stream completes.
    */
-  public CompletionBuilder<Void> to(Subscriber<T> subscriber) {
+  public CompletionRunner<Void> to(Subscriber<T> subscriber) {
     return addTerminalStage(new Stage.SubscriberStage(subscriber));
   }
 
@@ -365,9 +365,9 @@ public final class PublisherBuilder<T> {
    * Connect the outlet of this publisher builder to the given {@link SubscriberBuilder} graph.
    *
    * @param subscriber The subscriber builder to connect.
-   * @return A {@link CompletionBuilder} that completes when the stream completes.
+   * @return A {@link CompletionRunner} that completes when the stream completes.
    */
-  public <R> CompletionBuilder<R> to(SubscriberBuilder<T, R> subscriber) {
+  public <R> CompletionRunner<R> to(SubscriberBuilder<T, R> subscriber) {
     return addTerminalStage(new InternalStages.Nested(subscriber.getGraphBuilder()));
   }
 
@@ -418,7 +418,7 @@ public final class PublisherBuilder<T> {
     return new PublisherBuilder<>(graphBuilder.addStage(stage));
   }
 
-  private <R> CompletionBuilder<R> addTerminalStage(Stage stage) {
-    return new CompletionBuilder<>(graphBuilder.addStage(stage));
+  private <R> CompletionRunner<R> addTerminalStage(Stage stage) {
+    return new CompletionRunner<>(graphBuilder.addStage(stage));
   }
 }

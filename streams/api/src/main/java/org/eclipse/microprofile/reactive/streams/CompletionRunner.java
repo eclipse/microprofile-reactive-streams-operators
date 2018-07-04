@@ -33,11 +33,11 @@ import java.util.concurrent.CompletionStage;
  * @param <T> The result of the stream.
  * @see ReactiveStreams
  */
-public final class CompletionBuilder<T> {
+public final class CompletionRunner<T> {
 
   private final ReactiveStreamsGraphBuilder graphBuilder;
 
-  CompletionBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
+  CompletionRunner(ReactiveStreamsGraphBuilder graphBuilder) {
     this.graphBuilder = graphBuilder;
   }
 

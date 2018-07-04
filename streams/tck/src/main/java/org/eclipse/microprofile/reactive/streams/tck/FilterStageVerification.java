@@ -19,7 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.tck;
 
-import org.eclipse.microprofile.reactive.streams.CompletionBuilder;
+import org.eclipse.microprofile.reactive.streams.CompletionRunner;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -73,7 +73,7 @@ public class FilterStageVerification extends AbstractStageVerification {
 
   @Test
   public void filterStageShouldInstantiatePredicateOncePerRun() {
-    CompletionBuilder<List<Integer>> completion =
+    CompletionRunner<List<Integer>> completion =
         ReactiveStreams.of(1, 2, 3, 4, 5, 6)
             .skip(3)
             .toList();

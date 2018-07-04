@@ -69,12 +69,12 @@ public final class ProcessorBuilder<T, R> {
   }
 
   /**
-   * Returns a stream containing all the elements from this stream, 
-   * additionaly perfoming the provided action on each element.
+   * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
+   * element.
    *
    * @param consumer The function called for every element.
-   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between, the given function 
-   * is called for each element.
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
+   * the given function is called for each element.
    */
   public ProcessorBuilder<T, R> peek(Consumer<? super R> consumer) {
     return addStage(new Stage.Peek(consumer));

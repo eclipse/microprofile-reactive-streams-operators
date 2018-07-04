@@ -69,12 +69,12 @@ public final class PublisherBuilder<T> {
   }
 
   /**
-   * Returns a stream containing all the elements from this stream,
-   * additionaly perfoming the provided action on each element.
+   * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
+   * element.
    *
    * @param consumer The function called for every element.
-   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between, the given function
-   * is called for each element.
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
+   * the given function is called for each element.
    */
   public PublisherBuilder<T> peek(Consumer<? super T> consumer) {
     return addStage(new Stage.Peek(consumer));
@@ -355,9 +355,9 @@ public final class PublisherBuilder<T> {
    * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
    *              result
    * @param <R>  The result of the collector.
-   * @return A {@link CompletionBuilder} that emits the collected result.
+   * @return A {@link CompletionRunner} that emits the collected result.
    */
-  public <R> CompletionBuilder<R> collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator) {
+  public <R> CompletionRunner<R> collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator) {
     // The combiner is not used, so the used, but should not be null
     return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
   }

@@ -426,7 +426,8 @@ public final class PublisherBuilder<T> {
   /**
    * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
    * stream completes or failed. The given action does not know if the stream failed or completed. If you need to
-   * distinguish use {@link #onError(Consumer)} and {@link #onComplete(Runnable)}.
+   * distinguish use {@link #onError(Consumer)} and {@link #onComplete(Runnable)}. In addition, the action is called if
+   * the stream is cancelled downstream.
    *
    * @param action The function called when the stream completes or failed.
    * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given

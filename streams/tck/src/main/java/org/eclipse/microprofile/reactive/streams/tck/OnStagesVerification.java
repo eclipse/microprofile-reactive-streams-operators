@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -110,9 +111,40 @@ public class OnStagesVerification extends AbstractStageVerification {
   }
 
   @Test
+  public void onErrorStageShouldBeCalledWhenTheStreamFailedBecauseOfAnIntermediateStage() {
+    AtomicReference<Throwable> called = new AtomicReference<>();
+    await(ReactiveStreams.of(1, 2, 3)
+      .map(x -> {
+        throw new RuntimeException("failed");
+      })
+      .onError(called::set)
+      .toList()
+      .run(getEngine())
+      .exceptionally(t -> Collections.emptyList())
+    );
+    assertNotNull(called.get());
+    assertTrue(called.get().getMessage().equalsIgnoreCase("failed"));
+  }
+
+  @Test
   public void onTerminateStageShouldBeCalledWhenTheStreamFailed() {
     AtomicBoolean called = new AtomicBoolean();
     await(ReactiveStreams.failed(new Exception("failed"))
+      .onTerminate(() -> called.set(true))
+      .toList()
+      .run(getEngine())
+      .exceptionally(t -> Collections.emptyList())
+    );
+    assertTrue(called.get());
+  }
+
+  @Test
+  public void onTerminateStageShouldBeCalledWhenTheStreamFailedBecauseOfAnIntermediateStage() {
+    AtomicBoolean called = new AtomicBoolean();
+    await(ReactiveStreams.of(1, 2, 3)
+      .map(x -> {
+        throw new RuntimeException("failed");
+      })
       .onTerminate(() -> called.set(true))
       .toList()
       .run(getEngine())
@@ -160,6 +192,17 @@ public class OnStagesVerification extends AbstractStageVerification {
     );
     assertTrue(onTerminateCalled.get());
     assertEquals(onErrorCalled.get().getMessage(), "failed");
+  }
+
+  @Test
+  public void onTerminateShouldBeCalledWhenTheStreamIsCancelledFromDownstream() {
+    CompletableFuture<Void> onTerminateCalled = new CompletableFuture<>();
+    ReactiveStreams.of(1)
+      .flatMapCompletionStage(i -> new CompletableFuture())
+      .onTerminate(() -> onTerminateCalled.complete(null))
+      .cancel()
+      .run(getEngine());
+    await(onTerminateCalled);
   }
 
   @Override

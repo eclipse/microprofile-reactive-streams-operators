@@ -106,10 +106,10 @@ public interface Stage {
   }
 
   /**
-   * A stage returning a stream containing all the elements from this stream, 
+   * A stage returning a stream containing all the elements from this stream,
    * additionaly perfoming the provided action on each element.
    * <p>
-   * The given consumer function should be invoked on each element consumed. 
+   * The given consumer function should be invoked on each element consumed.
    * <p>
    * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
    */
@@ -454,7 +454,8 @@ public interface Stage {
    * additionally performing the provided action if this stream terminates with an error or completes.
    * <p>
    * The given action cannot determine in which case the stream is (error or completed). Use {@link OnError} and
-   * {@link OnComplete} if you need to distinguish the two cases.
+   * {@link OnComplete} if you need to distinguish the two cases. In addition, the action is called if the stream is
+   * cancelled downstream.
    * <p>
    * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
    */

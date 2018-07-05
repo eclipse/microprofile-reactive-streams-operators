@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 
@@ -62,7 +63,11 @@ public final class SubscriberBuilder<T, R> {
    * @return A {@link CompletionSubscriber} that will run this stream.
    */
   public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
-    return engine.buildSubscriber(graphBuilder.build(true, false));
+    return engine.buildSubscriber(toGraph());
+  }
+
+  Graph toGraph() {
+    return graphBuilder.build(true, false);
   }
 
   ReactiveStreamsGraphBuilder getGraphBuilder() {

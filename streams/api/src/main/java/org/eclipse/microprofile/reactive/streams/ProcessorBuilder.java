@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
@@ -432,7 +433,11 @@ public final class ProcessorBuilder<T, R> {
    * @return A {@link Processor} that will run this stream.
    */
   public Processor<T, R> buildRs(ReactiveStreamsEngine engine) {
-    return engine.buildProcessor(graphBuilder.build(true, true));
+    return engine.buildProcessor(toGraph());
+  }
+
+  Graph toGraph() {
+    return graphBuilder.build(true, true);
   }
 
   private <S> ProcessorBuilder<T, S> addStage(Stage stage) {

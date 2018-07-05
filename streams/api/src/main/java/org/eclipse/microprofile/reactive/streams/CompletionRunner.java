@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 
 import java.util.concurrent.CompletionStage;
@@ -58,6 +59,10 @@ public final class CompletionRunner<T> {
    * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
    */
   public CompletionStage<T> run(ReactiveStreamsEngine engine) {
-    return engine.buildCompletion(graphBuilder.build(false, false));
+    return engine.buildCompletion(toGraph());
+  }
+
+  Graph toGraph() {
+    return graphBuilder.build(false, false);
   }
 }

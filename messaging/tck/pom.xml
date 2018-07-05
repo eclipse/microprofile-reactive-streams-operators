@@ -56,7 +56,6 @@
             <groupId>org.eclipse.microprofile.reactive.messaging</groupId>
             <artifactId>microprofile-reactive-messaging-api</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.reactivestreams</groupId>
@@ -123,6 +122,53 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>run-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.20</version>
+                        <configuration>
+                            <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
+                            <testSourceDirectory>${project.build.sourceDirectory}</testSourceDirectory>
+                            <includes>
+                                <include>**/ReactiveMessagingTck.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>lightbend-kafka</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.lightbend.microprofile.reactive.messaging</groupId>
+                    <artifactId>lightbend-microprofile-reactive-messaging-kafka-tck</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.typesafe.akka</groupId>
+                        <artifactId>akka-actor_2.12</artifactId>
+                        <version>${akka.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.typesafe.akka</groupId>
+                        <artifactId>akka-stream_2.12</artifactId>
+                        <version>${akka.version}</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+            <properties>
+                <akka.version>2.5.13</akka.version>
+            </properties>
         </profile>
     </profiles>
 

@@ -21,8 +21,10 @@ package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.reactive.messaging.tck.spi.TckMessagingPuppet;
+import org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -53,6 +55,11 @@ public class ContainerController {
       jsonb.toJson(payload, baos);
       container.sendMessage(topic, Message.of(baos.toByteArray()));
     }
+  }
+
+  @Produces
+  public TestEnvironment produceTestEnvironment() {
+    return container.testEnvironment();
   }
 
 }

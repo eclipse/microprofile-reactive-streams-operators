@@ -17,22 +17,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
-
-import org.testng.annotations.Factory;
+package org.eclipse.microprofile.reactive.messaging.tck.framework;
 
 /**
- * The TCK.
- *
- * Run this class to run all TCK tests.
+ * RuntimeException with no stack trace for expected failures, to make logging not so noisy.
  */
-public class ReactiveMessagingTck {
-
-  @Factory
-  public Object[] getAllTests() {
-    return new Object[] {
-        new CompletionStageIncomingMethodVerification()
-    };
+public class QuietRuntimeException extends RuntimeException {
+  public QuietRuntimeException() {
+    this(null, null);
   }
 
+  public QuietRuntimeException(String message) {
+    this(message, null);
+  }
+
+  public QuietRuntimeException(String message, Throwable cause) {
+    super(message, cause, true, false);
+  }
+
+  public QuietRuntimeException(Throwable cause) {
+    this(null, cause);
+  }
 }

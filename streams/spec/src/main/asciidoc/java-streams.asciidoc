@@ -78,4 +78,5 @@ methods from `Collectors`.
 * `max` and `min` can be achieved using `.collect(Collectors.maxBy(...))` and `.collect(Collectors.minBy(...))`
 * `sorted` is not supported
 * `toArray` is not supported, `toList` can be used instead
+* `onClose` is replaced by `onComplete`. Notice that the API also provides the `onError` and `onTerminate` methods.
 

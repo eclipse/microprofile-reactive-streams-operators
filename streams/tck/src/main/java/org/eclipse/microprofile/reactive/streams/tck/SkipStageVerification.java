@@ -30,28 +30,30 @@ import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
-public class FilterStageVerification extends AbstractStageVerification {
+public class SkipStageVerification extends AbstractStageVerification {
 
-  FilterStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+  SkipStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
     super(deps);
   }
 
   @Test
-  public void filterStageShouldFilterElements() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
-        .filter(i -> (i & 1) == 1)
+  public void skipStageShouldSkipElements() {
+    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+        .skip(2)
         .toList()
-        .run(getEngine())), Arrays.asList(1, 3, 5));
+        .run(getEngine())), Arrays.asList(3, 4));
   }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void filterStageShouldPropagateRuntimeExceptions() {
-    await(ReactiveStreams.of("foo")
-        .filter(foo -> {
-          throw new RuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void skipOnPublisherShouldRefuseToSkipNegativeElements() {
+    ReactiveStreams.of(1)
+        .skip(-1);
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void skipOnProcessorShouldRefuseToSkipNegativeElements() {
+    ReactiveStreams.builder()
+        .skip(-1);
   }
 
   @Override
@@ -65,13 +67,13 @@ public class FilterStageVerification extends AbstractStageVerification {
 
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().filter(i -> true).buildRs(getEngine());
+      return ReactiveStreams.<Integer>builder().skip(0).buildRs(getEngine());
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
       return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .filter(i -> true).buildRs(getEngine());
+          .skip(1).buildRs(getEngine());
     }
 
     @Override

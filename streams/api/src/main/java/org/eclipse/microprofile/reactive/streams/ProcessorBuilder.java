@@ -90,7 +90,7 @@ public final class ProcessorBuilder<T, R> {
    * @return A new processor builder.
    */
   public ProcessorBuilder<T, R> filter(Predicate<? super R> predicate) {
-    return addStage(new Stage.Filter(() -> predicate));
+    return addStage(new Stage.Filter(predicate));
   }
 
   /**
@@ -178,20 +178,14 @@ public final class ProcessorBuilder<T, R> {
    *
    * @param maxSize The maximum size of the returned stream.
    * @return A new processor builder.
+   * @throws IllegalArgumentException If {@code maxSize} is less than zero.
    */
   public ProcessorBuilder<T, R> limit(long maxSize) {
     if (maxSize < 0) {
       throw new IllegalArgumentException("Cannot limit a stream to less than zero elements.");
     }
-    else if (maxSize == 0) {
-      // todo this is perhaps not the desired behaviour - it means an element must be received before the stream will
-      // be completed. but then again, limiting a stream to have zero size is a strange thing to do, as running the
-      // stream in theory will then achieve nothing, so this edge case behavior probably isn't important to worry too
-      // much about.
-      return takeWhile(e -> false);
-    }
     else {
-      return addStage(new Stage.TakeWhile(() -> new Predicates.LimitPredicate<>(maxSize), true));
+      return addStage(new Stage.Limit(maxSize));
     }
   }
 
@@ -201,9 +195,13 @@ public final class ProcessorBuilder<T, R> {
    *
    * @param n The number of elements to discard.
    * @return A new processor builder.
+   * @throws IllegalArgumentException If {@code n} is less than zero.
    */
   public ProcessorBuilder<T, R> skip(long n) {
-    return addStage(new Stage.Filter(() -> new Predicates.SkipPredicate<>(n)));
+    if (n < 0) {
+      throw new IllegalArgumentException("Cannot skip less than zero elements");
+    }
+    return addStage(new Stage.Skip(n));
   }
 
   /**
@@ -215,7 +213,7 @@ public final class ProcessorBuilder<T, R> {
    * @return A new publisher builder.
    */
   public ProcessorBuilder<T, R> takeWhile(Predicate<? super R> predicate) {
-    return addStage(new Stage.TakeWhile(() -> predicate, false));
+    return addStage(new Stage.TakeWhile(predicate));
   }
 
   /**
@@ -229,7 +227,7 @@ public final class ProcessorBuilder<T, R> {
    * @return A new processor builder.
    */
   public ProcessorBuilder<T, R> dropWhile(Predicate<? super R> predicate) {
-    return addStage(new Stage.Filter(() -> new Predicates.DropWhilePredicate<>(predicate)));
+    return addStage(new Stage.DropWhile(predicate));
   }
 
   /**

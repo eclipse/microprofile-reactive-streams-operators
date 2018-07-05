@@ -28,7 +28,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
@@ -133,15 +132,15 @@ public interface Stage {
   /**
    * A filter stage.
    * <p>
-   * The given predicate should be supplied when the stream is first run, and then invoked on each element consumed.
-   * If it returns true, the element should be emitted.
+   * The given predicate should be invoked on each element consumed. If it returns true, the element should be
+   * emitted.
    * <p>
    * Any {@link RuntimeException} thrown by the predicate should be propagated down the stream as an error.
    */
   final class Filter implements Inlet, Outlet {
-    private final Supplier<Predicate<?>> predicate;
+    private final Predicate<?> predicate;
 
-    public Filter(Supplier<Predicate<?>> predicate) {
+    public Filter(Predicate<?> predicate) {
       this.predicate = predicate;
     }
 
@@ -150,8 +149,77 @@ public interface Stage {
      *
      * @return The predicate.
      */
-    public Supplier<Predicate<?>> getPredicate() {
+    public Predicate<?> getPredicate() {
       return predicate;
+    }
+  }
+
+  /**
+   * A drop while stage.
+   * <p>
+   * The given predicate should be invoked on each element consumed, until it returns true. Each element that it
+   * returns true for should be dropped, once it returns false, then all elements should be emitted.
+   * <p>
+   * Any {@link RuntimeException} thrown by the predicate should be propagated down the stream as an error.
+   */
+  final class DropWhile implements Inlet, Outlet {
+    private final Predicate<?> predicate;
+
+    public DropWhile(Predicate<?> predicate) {
+      this.predicate = predicate;
+    }
+
+    /**
+     * The predicate.
+     *
+     * @return The predicate.
+     */
+    public Predicate<?> getPredicate() {
+      return predicate;
+    }
+  }
+
+  /**
+   * A skip stage.
+   * <p>
+   * The first {@code skip} elements should be skipped, after that all elements should be emitted.
+   */
+  final class Skip implements Inlet, Outlet {
+    private final long skip;
+
+    public Skip(long skip) {
+      this.skip = skip;
+    }
+
+    /**
+     * The number of elements to skip.
+     *
+     * @return The number of elements to skip.
+     */
+    public long getSkip() {
+      return skip;
+    }
+  }
+
+  /**
+   * A limit stage.
+   * <p>
+   * Only {@code limit} elements should be emitted, once that many elements are emitted, the stream should be completed.
+   */
+  final class Limit implements Inlet, Outlet {
+    private final long limit;
+
+    public Limit(long limit) {
+      this.limit = limit;
+    }
+
+    /**
+     * The limit.
+     *
+     * @return The limit.
+     */
+    public long getLimit() {
+      return limit;
     }
   }
 
@@ -173,18 +241,15 @@ public interface Stage {
    * A take while stage.
    * <p>
    * The given predicate should be supplied when the stream is first run, and then invoked on each element consumed.
-   * When it returns true, the element should be emitted, when it returns false, the element should only be emitted if
-   * inclusive is true, and then the stream should be completed.
+   * When it returns true, the element should be emitted, when it returns false the stream should be completed.
    * <p>
    * Any {@link RuntimeException} thrown by the predicate should be propagated down the stream as an error.
    */
   final class TakeWhile implements Inlet, Outlet {
-    private final Supplier<Predicate<?>> predicate;
-    private final boolean inclusive;
+    private final Predicate<?> predicate;
 
-    public TakeWhile(Supplier<Predicate<?>> predicate, boolean inclusive) {
+    public TakeWhile(Predicate<?> predicate) {
       this.predicate = predicate;
-      this.inclusive = inclusive;
     }
 
     /**
@@ -192,15 +257,8 @@ public interface Stage {
      *
      * @return The predicate.
      */
-    public Supplier<Predicate<?>> getPredicate() {
+    public Predicate<?> getPredicate() {
       return predicate;
-    }
-
-    /**
-     * Whether the element that this returns false on should be emitted or not.
-     */
-    public boolean isInclusive() {
-      return inclusive;
     }
   }
 

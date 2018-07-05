@@ -90,7 +90,7 @@ public final class PublisherBuilder<T> {
    * @return A new publisher builder.
    */
   public PublisherBuilder<T> filter(Predicate<? super T> predicate) {
-    return addStage(new Stage.Filter(() -> predicate));
+    return addStage(new Stage.Filter(predicate));
   }
 
   /**
@@ -179,16 +179,14 @@ public final class PublisherBuilder<T> {
    *
    * @param maxSize The maximum size of the returned stream.
    * @return A new publisher builder.
+   * @throws IllegalArgumentException If {@code maxSize} is less than zero.
    */
   public PublisherBuilder<T> limit(long maxSize) {
     if (maxSize < 0) {
       throw new IllegalArgumentException("Cannot limit a stream to less than zero elements.");
     }
-    else if (maxSize == 0) {
-      return takeWhile(e -> false);
-    }
     else {
-      return addStage(new Stage.TakeWhile(() -> new Predicates.LimitPredicate<>(maxSize), true));
+      return addStage(new Stage.Limit(maxSize));
     }
   }
 
@@ -198,9 +196,13 @@ public final class PublisherBuilder<T> {
    *
    * @param n The number of elements to discard.
    * @return A new publisher builder.
+   * @throws IllegalArgumentException If {@code n} is less than zero.
    */
   public PublisherBuilder<T> skip(long n) {
-    return addStage(new Stage.Filter(() -> new Predicates.SkipPredicate<>(n)));
+    if (n < 0) {
+      throw new IllegalArgumentException("Cannot skip less than zero elements");
+    }
+    return addStage(new Stage.Skip(n));
   }
 
   /**
@@ -212,7 +214,7 @@ public final class PublisherBuilder<T> {
    * @return A new publisher builder.
    */
   public PublisherBuilder<T> takeWhile(Predicate<? super T> predicate) {
-    return addStage(new Stage.TakeWhile(() -> predicate, false));
+    return addStage(new Stage.TakeWhile(predicate));
   }
 
   /**
@@ -226,7 +228,7 @@ public final class PublisherBuilder<T> {
    * @return A new publisher builder.
    */
   public PublisherBuilder<T> dropWhile(Predicate<? super T> predicate) {
-    return addStage(new Stage.Filter(() -> new Predicates.DropWhilePredicate<>(predicate)));
+    return addStage(new Stage.DropWhile(predicate));
   }
 
   /**

@@ -99,7 +99,8 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         CancelStageVerification::new,
         SubscriberStageVerification::new,
         PeekStageVerification::new,
-        DistinctStageVerification::new
+        DistinctStageVerification::new,
+        OnStagesVerification::new
     );
 
     List<Object> allTests = new ArrayList<>();

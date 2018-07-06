@@ -37,6 +37,7 @@
         <links>https://osgi.org/javadoc/r6/annotation/</links>
 
         <checkstyle.version>2.17</checkstyle.version>
+        <microprofile.reactive.streams.operators.version>1.0-SNAPSHOT</microprofile.reactive.streams.operators.version>
     </properties>
 
     <licenses>
@@ -98,8 +99,8 @@
         <dependencies>
             <dependency>
                 <groupId>org.eclipse.microprofile.reactive.streams</groupId>
-                <artifactId>microprofile-reactive-streams-api</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <artifactId>microprofile-reactive-streams-operators</artifactId>
+                <version>${microprofile.reactive.streams.operators.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>

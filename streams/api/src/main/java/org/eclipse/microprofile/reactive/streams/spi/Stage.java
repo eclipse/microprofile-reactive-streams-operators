@@ -105,10 +105,10 @@ public interface Stage {
   }
 
   /**
-   * A stage returning a stream containing all the elements from this stream, 
+   * A stage returning a stream containing all the elements from this stream,
    * additionaly perfoming the provided action on each element.
    * <p>
-   * The given consumer function should be invoked on each element consumed. 
+   * The given consumer function should be invoked on each element consumed.
    * <p>
    * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
    */
@@ -478,6 +478,85 @@ public interface Stage {
      */
     public Function<?, Iterable<?>> getMapper() {
       return mapper;
+    }
+  }
+
+  /**
+   * A stage returning a stream containing all the elements from this stream,
+   * additionally performing the provided action if this stream conveys an error.
+   * <p>
+   * The given consumer function is invoked with the conveyed failure.
+   * <p>
+   * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
+   */
+  final class OnError implements Inlet, Outlet {
+    private final Consumer<Throwable> consumer;
+
+
+    public OnError(Consumer<Throwable> consumer) {
+      this.consumer = consumer;
+    }
+
+    /**
+     * The error handler.
+     *
+     * @return  the error handler.
+     */
+    public Consumer<Throwable> getConsumer() {
+      return consumer;
+    }
+  }
+
+  /**
+   * A stage returning a stream containing all the elements from this stream,
+   * additionally performing the provided action if this stream terminates with an error or completes.
+   * <p>
+   * The given action cannot determine in which case the stream is (error or completed). Use {@link OnError} and
+   * {@link OnComplete} if you need to distinguish the two cases. In addition, the action is called if the stream is
+   * cancelled downstream.
+   * <p>
+   * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
+   */
+  final class OnTerminate implements Inlet, Outlet {
+    private final Runnable action;
+
+    public OnTerminate(Runnable runnable) {
+      this.action = runnable;
+    }
+
+    /**
+     * The action to execute.
+     *
+     * @return  the action to execute.
+     */
+    public Runnable getAction() {
+      return action;
+    }
+  }
+
+  /**
+   * A stage returning a stream containing all the elements from this stream,
+   * additionally performing the provided action when this stream completes.
+   * <p>
+   * The given action is called when the stream completes successfully. Use {@link OnError} to handle failures, and
+   * {@link OnTerminate} if the action needs to be called for both completion and error.
+   * <p>
+   * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
+   */
+  final class OnComplete implements Inlet, Outlet {
+    private final Runnable action;
+
+    public OnComplete(Runnable runnable) {
+      this.action = runnable;
+    }
+
+    /**
+     * The action to execute.
+     *
+     * @return  the action to execute.
+     */
+    public Runnable getAction() {
+      return action;
     }
   }
 

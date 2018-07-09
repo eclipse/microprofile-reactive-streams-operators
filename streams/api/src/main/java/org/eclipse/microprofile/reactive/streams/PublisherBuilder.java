@@ -413,6 +413,44 @@ public final class PublisherBuilder<T> {
     return addStage(new Stage.ProcessorStage(processor));
   }
 
+  /**
+   * Returns a stream containing all the elements from this stream, additionally performing the provided action if this
+   * stream conveys an error. The given consumer is called with the failure.
+   *
+   * @param errorHandler The function called with the failure.
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. If the
+   * stream conveys a failure, the given error handler is called.
+   */
+  public PublisherBuilder<T> onError(Consumer<Throwable> errorHandler) {
+    return addStage(new Stage.OnError(errorHandler));
+  }
+
+  /**
+   * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
+   * stream completes or failed. The given action does not know if the stream failed or completed. If you need to
+   * distinguish use {@link #onError(Consumer)} and {@link #onComplete(Runnable)}. In addition, the action is called if
+   * the stream is cancelled downstream.
+   *
+   * @param action The function called when the stream completes or failed.
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
+   * action is called when the stream completes or fails.
+   */
+  public PublisherBuilder<T> onTerminate(Runnable action) {
+    return addStage(new Stage.OnTerminate(action));
+  }
+
+  /**
+   * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
+   * stream completes.
+   *
+   * @param action The function called when the stream completes.
+   * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
+   * action is called when the stream completes.
+   */
+  public PublisherBuilder<T> onComplete(Runnable action) {
+    return addStage(new Stage.OnComplete(action));
+  }
+
   Graph toGraph() {
     return graphBuilder.build(false, true);
   }

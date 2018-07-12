@@ -31,53 +31,53 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 
 public class FlatMapIterableStageVerification extends AbstractStageVerification {
-  FlatMapIterableStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    FlatMapIterableStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void flatMapIterableStageShouldMapElements() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .flatMapIterable(n -> Arrays.asList(n, n, n))
-        .toList()
-        .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
-  }
+    @Test
+    public void flatMapIterableStageShouldMapElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .flatMapIterable(n -> Arrays.asList(n, n, n))
+            .toList()
+            .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void flatMapIterableStageShouldPropagateRuntimeExceptions() {
-    await(ReactiveStreams.of("foo")
-        .flatMapIterable(foo -> {
-          throw new RuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new ProcessorVerification());
-  }
-
-  /**
-   * Verifies the outer processor.
-   */
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().flatMapIterable(Arrays::asList).buildRs(getEngine());
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapIterableStageShouldPropagateRuntimeExceptions() {
+        await(ReactiveStreams.of("foo")
+            .flatMapIterable(foo -> {
+                throw new RuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine()));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .flatMapIterable(Arrays::asList).buildRs(getEngine());
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new ProcessorVerification());
     }
 
-    @Override
-    public Integer createElement(int element) {
-      return element;
+    /**
+     * Verifies the outer processor.
+     */
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder().flatMapIterable(Arrays::asList).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .flatMapIterable(Arrays::asList).buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
     }
-  }
 
 }

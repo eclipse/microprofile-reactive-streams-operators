@@ -34,98 +34,98 @@ import static org.testng.Assert.assertEquals;
 
 public class TakeWhileStageVerification extends AbstractStageVerification {
 
-  TakeWhileStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    TakeWhileStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void takeWhileStageShouldTakeWhileConditionIsTrue() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6, 1, 2)
-        .takeWhile(i -> i < 5)
-        .toList()
-        .run(getEngine())), Arrays.asList(1, 2, 3, 4));
-  }
-
-  @Test
-  public void takeWhileStageShouldEmitEmpty() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
-        .takeWhile(i -> false)
-        .toList()
-        .run(getEngine())), Collections.emptyList());
-  }
-
-  @Test
-  public void takeWhileShouldCancelUpStreamWhenDone() {
-    CompletableFuture<Void> cancelled = new CompletableFuture<>();
-    ReactiveStreams.<Integer>fromPublisher(subscriber ->
-        subscriber.onSubscribe(new Subscription() {
-          @Override
-          public void request(long n) {
-            subscriber.onNext(1);
-          }
-
-          @Override
-          public void cancel() {
-            cancelled.complete(null);
-          }
-        })
-    ).takeWhile(t -> false)
-        .toList()
-        .run(getEngine());
-    await(cancelled);
-  }
-
-  @Test
-  public void takeWhileShouldIgnoreSubsequentErrorsWhenDone() {
-    assertEquals(await(
-        ReactiveStreams.of(1, 2, 3, 4)
-            .flatMap(i -> {
-              if (i == 4) {
-                return ReactiveStreams.failed(new RuntimeException("failed"));
-              }
-              else {
-                return ReactiveStreams.of(i);
-              }
-            })
-            .takeWhile(t -> t < 3)
+    @Test
+    public void takeWhileStageShouldTakeWhileConditionIsTrue() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6, 1, 2)
+            .takeWhile(i -> i < 5)
             .toList()
-            .run(getEngine())
-    ), Arrays.asList(1, 2));
-  }
+            .run(getEngine())), Arrays.asList(1, 2, 3, 4));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void takeWhileStageShouldHandleErrors() {
-    await(ReactiveStreams.of(1, 2, 3, 4)
-        .dropWhile(i -> {
-          throw new RuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
-  }
+    @Test
+    public void takeWhileStageShouldEmitEmpty() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
+            .takeWhile(i -> false)
+            .toList()
+            .run(getEngine())), Collections.emptyList());
+    }
 
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new ProcessorVerification());
-  }
+    @Test
+    public void takeWhileShouldCancelUpStreamWhenDone() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        ReactiveStreams.<Integer>fromPublisher(subscriber ->
+            subscriber.onSubscribe(new Subscription() {
+                @Override
+                public void request(long n) {
+                    subscriber.onNext(1);
+                }
 
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder()
-          .takeWhile(t -> true)
-          .buildRs(getEngine());
+                @Override
+                public void cancel() {
+                    cancelled.complete(null);
+                }
+            })
+        ).takeWhile(t -> false)
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+    }
+
+    @Test
+    public void takeWhileShouldIgnoreSubsequentErrorsWhenDone() {
+        assertEquals(await(
+            ReactiveStreams.of(1, 2, 3, 4)
+                .flatMap(i -> {
+                    if (i == 4) {
+                        return ReactiveStreams.failed(new RuntimeException("failed"));
+                    }
+                    else {
+                        return ReactiveStreams.of(i);
+                    }
+                })
+                .takeWhile(t -> t < 3)
+                .toList()
+                .run(getEngine())
+        ), Arrays.asList(1, 2));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void takeWhileStageShouldHandleErrors() {
+        await(ReactiveStreams.of(1, 2, 3, 4)
+            .dropWhile(i -> {
+                throw new RuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine()));
     }
 
     @Override
-    public Integer createElement(int element) {
-      return element;
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new ProcessorVerification());
     }
 
-    @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .takeWhile(t -> true)
-          .buildRs(getEngine());
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder()
+                .takeWhile(t -> true)
+                .buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .takeWhile(t -> true)
+                .buildRs(getEngine());
+        }
     }
-  }
 }

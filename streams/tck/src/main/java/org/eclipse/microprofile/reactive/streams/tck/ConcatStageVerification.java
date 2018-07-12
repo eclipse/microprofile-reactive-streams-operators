@@ -37,94 +37,94 @@ import static org.testng.Assert.assertEquals;
 
 public class ConcatStageVerification extends AbstractStageVerification {
 
-  ConcatStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    ConcatStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void concatStageShouldConcatTwoGraphs() {
-    assertEquals(await(
-        ReactiveStreams.concat(
-            ReactiveStreams.of(1, 2, 3),
-            ReactiveStreams.of(4, 5, 6)
+    @Test
+    public void concatStageShouldConcatTwoGraphs() {
+        assertEquals(await(
+            ReactiveStreams.concat(
+                ReactiveStreams.of(1, 2, 3),
+                ReactiveStreams.of(4, 5, 6)
+            )
+                .toList()
+                .run(getEngine())
+        ), Arrays.asList(1, 2, 3, 4, 5, 6));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void concatStageShouldCancelSecondStageIfFirstFails() {
+        CancelCapturingPublisher<Integer> cancelCapture = new CancelCapturingPublisher<>();
+
+        CompletionStage<Void> completion = ReactiveStreams.concat(
+            ReactiveStreams.failed(new RuntimeException("failed")),
+            ReactiveStreams.fromPublisher(cancelCapture)
         )
+            .ignore()
+            .run(getEngine());
+
+        await(cancelCapture.getCancelled());
+        await(completion);
+    }
+
+    @Test
+    public void concatStageShouldCancelSecondStageIfFirstCancellationOccursDuringFirst() {
+        CancelCapturingPublisher<Integer> cancelCapture = new CancelCapturingPublisher<>();
+
+        CompletionStage<List<Integer>> result = ReactiveStreams.concat(
+            ReactiveStreams.fromIterable(() -> IntStream.range(1, 1000000).boxed().iterator()),
+            ReactiveStreams.fromPublisher(cancelCapture)
+        )
+            .limit(5)
             .toList()
-            .run(getEngine())
-    ), Arrays.asList(1, 2, 3, 4, 5, 6));
-  }
+            .run(getEngine());
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void concatStageShouldCancelSecondStageIfFirstFails() {
-    CancelCapturingPublisher<Integer> cancelCapture = new CancelCapturingPublisher<>();
-
-    CompletionStage<Void> completion = ReactiveStreams.concat(
-        ReactiveStreams.failed(new RuntimeException("failed")),
-        ReactiveStreams.fromPublisher(cancelCapture)
-    )
-        .ignore()
-        .run(getEngine());
-
-    await(cancelCapture.getCancelled());
-    await(completion);
-  }
-
-  @Test
-  public void concatStageShouldCancelSecondStageIfFirstCancellationOccursDuringFirst() {
-    CancelCapturingPublisher<Integer> cancelCapture = new CancelCapturingPublisher<>();
-
-    CompletionStage<List<Integer>> result = ReactiveStreams.concat(
-        ReactiveStreams.fromIterable(() -> IntStream.range(1, 1000000).boxed().iterator()),
-        ReactiveStreams.fromPublisher(cancelCapture)
-    )
-        .limit(5)
-        .toList()
-        .run(getEngine());
-
-    await(cancelCapture.getCancelled());
-    assertEquals(await(result), Arrays.asList(1, 2, 3, 4, 5));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new PublisherVerification());
-  }
-
-  class PublisherVerification extends StagePublisherVerification<Long> {
-    @Override
-    public Publisher<Long> createPublisher(long elements) {
-      long toEmitFromFirst = elements / 2;
-
-      return ReactiveStreams.concat(
-          ReactiveStreams.fromIterable(
-              () -> LongStream.rangeClosed(1, toEmitFromFirst).boxed().iterator()
-          ),
-          ReactiveStreams.fromIterable(
-              () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()
-          )
-      ).buildRs(getEngine());
+        await(cancelCapture.getCancelled());
+        assertEquals(await(result), Arrays.asList(1, 2, 3, 4, 5));
     }
-  }
-
-  private static class CancelCapturingPublisher<T> implements Publisher<T> {
-    private final CompletableFuture<T> cancelled = new CompletableFuture<>();
 
     @Override
-    public void subscribe(Subscriber<? super T> subscriber) {
-      subscriber.onSubscribe(new Subscription() {
-        @Override
-        public void request(long n) {
-        }
-
-        @Override
-        public void cancel() {
-          cancelled.complete(null);
-        }
-      });
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new PublisherVerification());
     }
 
-    public CompletableFuture<T> getCancelled() {
-      return cancelled;
+    private static class CancelCapturingPublisher<T> implements Publisher<T> {
+        private final CompletableFuture<T> cancelled = new CompletableFuture<>();
+
+        @Override
+        public void subscribe(Subscriber<? super T> subscriber) {
+            subscriber.onSubscribe(new Subscription() {
+                @Override
+                public void request(long n) {
+                }
+
+                @Override
+                public void cancel() {
+                    cancelled.complete(null);
+                }
+            });
+        }
+
+        public CompletableFuture<T> getCancelled() {
+            return cancelled;
+        }
     }
-  }
+
+    class PublisherVerification extends StagePublisherVerification<Long> {
+        @Override
+        public Publisher<Long> createPublisher(long elements) {
+            long toEmitFromFirst = elements / 2;
+
+            return ReactiveStreams.concat(
+                ReactiveStreams.fromIterable(
+                    () -> LongStream.rangeClosed(1, toEmitFromFirst).boxed().iterator()
+                ),
+                ReactiveStreams.fromIterable(
+                    () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()
+                )
+            ).buildRs(getEngine());
+        }
+    }
 
 }

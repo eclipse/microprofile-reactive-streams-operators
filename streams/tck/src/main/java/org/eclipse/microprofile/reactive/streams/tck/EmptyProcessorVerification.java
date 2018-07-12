@@ -27,24 +27,24 @@ import java.util.List;
 
 public class EmptyProcessorVerification extends AbstractStageVerification {
 
-  public EmptyProcessorVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new ProcessorVerification());
-  }
-
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().buildRs(getEngine());
+    public EmptyProcessorVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
     }
 
     @Override
-    public Integer createElement(int element) {
-      return element;
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new ProcessorVerification());
     }
-  }
+
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder().buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+    }
 }

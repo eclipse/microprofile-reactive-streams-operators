@@ -32,69 +32,69 @@ import static org.testng.Assert.assertEquals;
 
 public class DropWhileStageVerification extends AbstractStageVerification {
 
-  DropWhileStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    DropWhileStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void dropWhileStageShouldSupportDroppingElements() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
-        .dropWhile(i -> i < 3)
-        .toList()
-        .run(getEngine())), Arrays.asList(3, 4));
-  }
+    @Test
+    public void dropWhileStageShouldSupportDroppingElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+            .dropWhile(i -> i < 3)
+            .toList()
+            .run(getEngine())), Arrays.asList(3, 4));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void dropWhileStageShouldHandleErrors() {
-    await(ReactiveStreams.of(1, 2, 3, 4)
-        .dropWhile(i -> {
-          throw new RuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
-  }
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void dropWhileStageShouldHandleErrors() {
+        await(ReactiveStreams.of(1, 2, 3, 4)
+            .dropWhile(i -> {
+                throw new RuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine()));
+    }
 
-  @Test
-  public void dropWhileStageShouldNotRunPredicateOnceItsFinishedDropping() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
-        .dropWhile(i -> {
-          if (i < 3) {
-            return true;
-          }
-          else if (i == 4) {
-            throw new RuntimeException("4 was passed");
-          }
-          else {
-            return false;
-          }
-        })
-        .toList()
-        .run(getEngine())), Arrays.asList(3, 4));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(
-        new ProcessorVerification()
-    );
-  }
-
-  class ProcessorVerification extends StageProcessorVerification<Integer> {
-
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().dropWhile(i -> false).buildRs(getEngine());
+    @Test
+    public void dropWhileStageShouldNotRunPredicateOnceItsFinishedDropping() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+            .dropWhile(i -> {
+                if (i < 3) {
+                    return true;
+                }
+                else if (i == 4) {
+                    throw new RuntimeException("4 was passed");
+                }
+                else {
+                    return false;
+                }
+            })
+            .toList()
+            .run(getEngine())), Arrays.asList(3, 4));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .dropWhile(i -> false).buildRs(getEngine());
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(
+            new ProcessorVerification()
+        );
     }
 
-    @Override
-    public Integer createElement(int element) {
-      return element;
+    class ProcessorVerification extends StageProcessorVerification<Integer> {
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder().dropWhile(i -> false).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .dropWhile(i -> false).buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
     }
-  }
 }

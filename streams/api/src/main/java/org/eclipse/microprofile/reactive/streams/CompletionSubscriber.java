@@ -38,78 +38,78 @@ import java.util.concurrent.CompletionStage;
  */
 public final class CompletionSubscriber<T, R> implements Subscriber<T> {
 
-  private final Subscriber<T> subscriber;
-  private final CompletionStage<R> completion;
+    private final Subscriber<T> subscriber;
+    private final CompletionStage<R> completion;
 
-  private CompletionSubscriber(Subscriber<T> subscriber, CompletionStage<R> completion) {
-    this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
-    this.completion = Objects.requireNonNull(completion, "CompletionStage must not be null");
-  }
-
-  /**
-   * Get the completion stage.
-   * <p>
-   * This should be redeemed by the subscriber either when it cancels, or when it receives an
-   * {@link Subscriber#onComplete} signal or an {@link Subscriber#onError(Throwable)} signal. Generally, the redeemed
-   * value or error should be the result of consuming the stream.
-   *
-   * @return The completion stage.
-   */
-  public CompletionStage<R> getCompletion() {
-    return completion;
-  }
-
-  @Override
-  public void onSubscribe(Subscription subscription) {
-    subscriber.onSubscribe(subscription);
-  }
-
-  @Override
-  public void onNext(T t) {
-    subscriber.onNext(t);
-  }
-
-  @Override
-  public void onError(Throwable throwable) {
-    subscriber.onError(throwable);
-  }
-
-  @Override
-  public void onComplete() {
-    subscriber.onComplete();
-  }
-
-  /**
-   * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
-   *
-   * @param subscriber The subscriber.
-   * @param completion The completion stage.
-   * @return A completion subscriber.
-   */
-  public static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
-    return new CompletionSubscriber<>(subscriber, completion);
-  }
-
-  @Override
-  public String toString() {
-    return "CompletionSubscriber(" + subscriber + ", " + completion + ")";
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    private CompletionSubscriber(Subscriber<T> subscriber, CompletionStage<R> completion) {
+        this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
+        this.completion = Objects.requireNonNull(completion, "CompletionStage must not be null");
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    CompletionSubscriber<?, ?> that = (CompletionSubscriber<?, ?>) o;
-    return Objects.equals(subscriber, that.subscriber) &&
-        Objects.equals(completion, that.completion);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(subscriber, completion);
-  }
+    /**
+     * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
+     *
+     * @param subscriber The subscriber.
+     * @param completion The completion stage.
+     * @return A completion subscriber.
+     */
+    public static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
+        return new CompletionSubscriber<>(subscriber, completion);
+    }
+
+    /**
+     * Get the completion stage.
+     * <p>
+     * This should be redeemed by the subscriber either when it cancels, or when it receives an
+     * {@link Subscriber#onComplete} signal or an {@link Subscriber#onError(Throwable)} signal. Generally, the redeemed
+     * value or error should be the result of consuming the stream.
+     *
+     * @return The completion stage.
+     */
+    public CompletionStage<R> getCompletion() {
+        return completion;
+    }
+
+    @Override
+    public void onSubscribe(Subscription subscription) {
+        subscriber.onSubscribe(subscription);
+    }
+
+    @Override
+    public void onNext(T t) {
+        subscriber.onNext(t);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        subscriber.onError(throwable);
+    }
+
+    @Override
+    public void onComplete() {
+        subscriber.onComplete();
+    }
+
+    @Override
+    public String toString() {
+        return "CompletionSubscriber(" + subscriber + ", " + completion + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CompletionSubscriber<?, ?> that = (CompletionSubscriber<?, ?>) o;
+        return Objects.equals(subscriber, that.subscriber) &&
+            Objects.equals(completion, that.completion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subscriber, completion);
+    }
 }

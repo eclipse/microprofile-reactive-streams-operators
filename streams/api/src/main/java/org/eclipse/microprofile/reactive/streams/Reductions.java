@@ -29,69 +29,69 @@ import java.util.stream.Collector;
  */
 final class Reductions {
 
-  private Reductions() {
-  }
-
-  static <T> Collector<T, ?, Optional<T>> reduce(BinaryOperator<T> reducer) {
-
-    return Collector.of(Reduction<T>::new,
-        (r, t) -> {
-          if (r.value == null) {
-            r.value = t;
-          }
-          else {
-            r.value = reducer.apply(r.value, t);
-          }
-        },
-        (r, s) -> {
-          if (r.value == null) {
-            return r.replace(s.value);
-          }
-          else if (s.value != null) {
-            return r.replace(reducer.apply(r.value, s.value));
-          }
-          else {
-            return r;
-          }
-        },
-        r -> Optional.ofNullable(r.value)
-    );
-  }
-
-  static <T> Collector<T, ?, T> reduce(T identity, BinaryOperator<T> reducer) {
-
-    return Collector.of(() -> new Reduction<>(identity),
-        (r, t) -> r.value = reducer.apply(r.value, t),
-        (r, s) -> r.replace(reducer.apply(r.value, s.value)),
-        r -> r.value
-    );
-  }
-
-  static <T, S> Collector<T, ?, S> reduce(S identity,
-      BiFunction<S, ? super T, S> accumulator,
-      BinaryOperator<S> combiner) {
-
-    return Collector.of(() -> new Reduction<>(identity),
-        (r, t) -> r.value = accumulator.apply(r.value, t),
-        (r, s) -> r.replace(combiner.apply(r.value, s.value)),
-        r -> r.value
-    );
-  }
-
-  private static class Reduction<T> {
-    private T value;
-
-    Reduction() {
+    private Reductions() {
     }
 
-    Reduction(T value) {
-      this.value = value;
+    static <T> Collector<T, ?, Optional<T>> reduce(BinaryOperator<T> reducer) {
+
+        return Collector.of(Reduction<T>::new,
+            (r, t) -> {
+                if (r.value == null) {
+                    r.value = t;
+                }
+                else {
+                    r.value = reducer.apply(r.value, t);
+                }
+            },
+            (r, s) -> {
+                if (r.value == null) {
+                    return r.replace(s.value);
+                }
+                else if (s.value != null) {
+                    return r.replace(reducer.apply(r.value, s.value));
+                }
+                else {
+                    return r;
+                }
+            },
+            r -> Optional.ofNullable(r.value)
+        );
     }
 
-    Reduction<T> replace(T newValue) {
-      this.value = newValue;
-      return this;
+    static <T> Collector<T, ?, T> reduce(T identity, BinaryOperator<T> reducer) {
+
+        return Collector.of(() -> new Reduction<>(identity),
+            (r, t) -> r.value = reducer.apply(r.value, t),
+            (r, s) -> r.replace(reducer.apply(r.value, s.value)),
+            r -> r.value
+        );
     }
-  }
+
+    static <T, S> Collector<T, ?, S> reduce(S identity,
+                                            BiFunction<S, ? super T, S> accumulator,
+                                            BinaryOperator<S> combiner) {
+
+        return Collector.of(() -> new Reduction<>(identity),
+            (r, t) -> r.value = accumulator.apply(r.value, t),
+            (r, s) -> r.replace(combiner.apply(r.value, s.value)),
+            r -> r.value
+        );
+    }
+
+    private static class Reduction<T> {
+        private T value;
+
+        Reduction() {
+        }
+
+        Reduction(T value) {
+            this.value = value;
+        }
+
+        Reduction<T> replace(T newValue) {
+            this.value = newValue;
+            return this;
+        }
+    }
 
 }

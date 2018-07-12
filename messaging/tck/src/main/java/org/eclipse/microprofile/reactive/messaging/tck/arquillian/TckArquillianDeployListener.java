@@ -42,93 +42,93 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TckArquillianDeployListener {
 
-  private final TckContainer tckContainer;
+    private final TckContainer tckContainer;
 
-  private final Map<Class<?>, List<DeploymentDescription>> activeDeployments = new ConcurrentHashMap<>();
+    private final Map<Class<?>, List<DeploymentDescription>> activeDeployments = new ConcurrentHashMap<>();
 
-  private final Archive<?> frameworkClasses = ShrinkWrap.create(JavaArchive.class)
-      .addPackage(TckMessagingManager.class.getPackage().getName());
+    private final Archive<?> frameworkClasses = ShrinkWrap.create(JavaArchive.class)
+        .addPackage(TckMessagingManager.class.getPackage().getName());
 
-  private final Archive<?> frameworkArchive = ShrinkWrap.create(JavaArchive.class)
-      .addPackage(TckMessagingManager.class.getPackage().getName())
-      .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    private final Archive<?> frameworkArchive = ShrinkWrap.create(JavaArchive.class)
+        .addPackage(TckMessagingManager.class.getPackage().getName())
+        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
 
-  public TckArquillianDeployListener() {
-    Iterator<TckContainer> containers = ServiceLoader.load(TckContainer.class).iterator();
+    public TckArquillianDeployListener() {
+        Iterator<TckContainer> containers = ServiceLoader.load(TckContainer.class).iterator();
 
-    if (containers.hasNext()) {
-      this.tckContainer = containers.next();
-    }
-    else {
-      throw new RuntimeException("No " + TckContainer.class.getName() +
-          " found. To run this TCK, you must provide an implementation of " +
-          TckContainer.class + " via the JDK service loader mechanism.");
-    }
-  }
-
-  public void onBeforeDeploy(@Observes BeforeDeploy beforeDeploy, TestClass testClass) throws DeploymentException {
-
-    String[] topicNames = getTopicsUsedByTestClass(testClass);
-
-    DeployableContainer<?> container = beforeDeploy.getDeployableContainer();
-    DeploymentDescription description = beforeDeploy.getDeployment();
-
-    List<DeploymentDescription> deployed = new ArrayList<>();
-    activeDeployments.put(testClass.getJavaClass(), deployed);
-
-    List<DeploymentDescription> deployments = tckContainer.createDeployments(topicNames);
-    for (DeploymentDescription deployable: deployments) {
-      if (!tckContainer.mergeArchives() || deployable.isDescriptorDeployment() || description.isDescriptorDeployment()) {
-        deployed.add(deployable);
-        container.deploy(deployable.getDescriptor());
-      }
-      else {
-        description.getArchive().merge(deployable.getArchive());
-      }
+        if (containers.hasNext()) {
+            this.tckContainer = containers.next();
+        }
+        else {
+            throw new RuntimeException("No " + TckContainer.class.getName() +
+                " found. To run this TCK, you must provide an implementation of " +
+                TckContainer.class + " via the JDK service loader mechanism.");
+        }
     }
 
-    if (description.isArchiveDeployment()) {
-      description.getArchive().merge(frameworkClasses);
-    }
-    else {
-      deployed.add(new DeploymentDescription("reactive-messaging-tck-framework.jar", frameworkArchive));
-      container.deploy(frameworkArchive);
-    }
-  }
+    public void onBeforeDeploy(@Observes BeforeDeploy beforeDeploy, TestClass testClass) throws DeploymentException {
 
-  public void onAfterUnDeploy(@Observes AfterUnDeploy afterUnDeploy, TestClass testClass) throws DeploymentException {
+        String[] topicNames = getTopicsUsedByTestClass(testClass);
 
-    String[] topicNames = getTopicsUsedByTestClass(testClass);
+        DeployableContainer<?> container = beforeDeploy.getDeployableContainer();
+        DeploymentDescription description = beforeDeploy.getDeployment();
 
-    DeployableContainer<?> container = afterUnDeploy.getDeployableContainer();
+        List<DeploymentDescription> deployed = new ArrayList<>();
+        activeDeployments.put(testClass.getJavaClass(), deployed);
 
-    List<DeploymentDescription> deployments = activeDeployments.remove(testClass.getJavaClass());
-    if (deployments == null) {
-      throw new IllegalStateException("After undeploy on test class that wasn't deployed?");
+        List<DeploymentDescription> deployments = tckContainer.createDeployments(topicNames);
+        for (DeploymentDescription deployable : deployments) {
+            if (!tckContainer.mergeArchives() || deployable.isDescriptorDeployment() || description.isDescriptorDeployment()) {
+                deployed.add(deployable);
+                container.deploy(deployable.getDescriptor());
+            }
+            else {
+                description.getArchive().merge(deployable.getArchive());
+            }
+        }
+
+        if (description.isArchiveDeployment()) {
+            description.getArchive().merge(frameworkClasses);
+        }
+        else {
+            deployed.add(new DeploymentDescription("reactive-messaging-tck-framework.jar", frameworkArchive));
+            container.deploy(frameworkArchive);
+        }
     }
-    for (DeploymentDescription deployable: deployments) {
-      if (deployable.isDescriptorDeployment()) {
-        container.undeploy(deployable.getDescriptor());
-      }
-      else {
-        container.undeploy(deployable.getArchive());
-      }
+
+    public void onAfterUnDeploy(@Observes AfterUnDeploy afterUnDeploy, TestClass testClass) throws DeploymentException {
+
+        String[] topicNames = getTopicsUsedByTestClass(testClass);
+
+        DeployableContainer<?> container = afterUnDeploy.getDeployableContainer();
+
+        List<DeploymentDescription> deployments = activeDeployments.remove(testClass.getJavaClass());
+        if (deployments == null) {
+            throw new IllegalStateException("After undeploy on test class that wasn't deployed?");
+        }
+        for (DeploymentDescription deployable : deployments) {
+            if (deployable.isDescriptorDeployment()) {
+                container.undeploy(deployable.getDescriptor());
+            }
+            else {
+                container.undeploy(deployable.getArchive());
+            }
+        }
+
+        tckContainer.teardownTopics(topicNames);
     }
 
-    tckContainer.teardownTopics(topicNames);
-  }
-
-  private String[] getTopicsUsedByTestClass(TestClass testClass) {
-    Topics topics = testClass.getAnnotation(Topics.class);
-    String[] topicNames;
-    if (topics != null) {
-      topicNames = topics.value();
+    private String[] getTopicsUsedByTestClass(TestClass testClass) {
+        Topics topics = testClass.getAnnotation(Topics.class);
+        String[] topicNames;
+        if (topics != null) {
+            topicNames = topics.value();
+        }
+        else {
+            topicNames = new String[0];
+        }
+        return topicNames;
     }
-    else {
-      topicNames = new String[0];
-    }
-    return topicNames;
-  }
 
 }

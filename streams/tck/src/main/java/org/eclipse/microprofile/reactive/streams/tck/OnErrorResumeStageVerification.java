@@ -30,7 +30,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Test cases for OnErrorResume.
+ * Test cases for OnErrorResume stages. This includes the
+ * {@link org.eclipse.microprofile.reactive.streams.spi.Stage.OnErrorResume} and
+ * {@link org.eclipse.microprofile.reactive.streams.spi.Stage.OnErrorResumeWith} stages.
  */
 public class OnErrorResumeStageVerification extends AbstractStageVerification {
 
@@ -39,7 +41,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   }
 
   @Test
-  public void onErrorShouldCatchErrorFromSource() {
+  public void onErrorResumeShouldCatchErrorFromSource() {
     AtomicReference<Throwable> exception = new AtomicReference<>();
     assertEquals(await(ReactiveStreams.failed(new Exception("failed"))
         .onErrorResume(err -> {
@@ -52,7 +54,33 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   }
 
   @Test
-  public void onErrorShouldCatchErrorFromStage() {
+  public void onErrorResumeWithShouldCatchErrorFromSource() {
+    AtomicReference<Throwable> exception = new AtomicReference<>();
+    assertEquals(await(ReactiveStreams.failed(new Exception("failed"))
+      .onErrorResumeWith(err -> {
+        exception.set(err);
+        return ReactiveStreams.of("foo", "bar");
+      })
+      .toList()
+      .run(getEngine())), Arrays.asList("foo", "bar"));
+    assertEquals(exception.get().getMessage(), "failed");
+  }
+
+  @Test
+  public void onErrorResumeWithPublisherShouldCatchErrorFromSource() {
+    AtomicReference<Throwable> exception = new AtomicReference<>();
+    assertEquals(await(ReactiveStreams.failed(new Exception("failed"))
+      .onErrorResumeWithPublisher(err -> {
+        exception.set(err);
+        return ReactiveStreams.of("foo", "bar").buildRs();
+      })
+      .toList()
+      .run(getEngine())), Arrays.asList("foo", "bar"));
+    assertEquals(exception.get().getMessage(), "failed");
+  }
+
+  @Test
+  public void onErrorResumeShouldCatchErrorFromStage() {
     AtomicReference<Throwable> exception = new AtomicReference<>();
     assertEquals(await(ReactiveStreams.of("a", "b", "c")
       .map(word -> {
@@ -70,6 +98,44 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
     assertEquals(exception.get().getMessage(), "failed");
   }
 
+  @Test
+  public void onErrorResumeWithShouldCatchErrorFromStage() {
+    AtomicReference<Throwable> exception = new AtomicReference<>();
+    assertEquals(await(ReactiveStreams.of("a", "b", "c")
+      .map(word -> {
+        if (word.equals("b")) {
+          throw new RuntimeException("failed");
+        }
+        return word.toUpperCase();
+      })
+      .onErrorResumeWith(err -> {
+        exception.set(err);
+        return ReactiveStreams.of("foo", "bar");
+      })
+      .toList()
+      .run(getEngine())), Arrays.asList("A", "foo", "bar"));
+    assertEquals(exception.get().getMessage(), "failed");
+  }
+
+  @Test
+  public void onErrorResumeWithPublisherShouldCatchErrorFromStage() {
+    AtomicReference<Throwable> exception = new AtomicReference<>();
+    assertEquals(await(ReactiveStreams.of("a", "b", "c")
+      .map(word -> {
+        if (word.equals("b")) {
+          throw new RuntimeException("failed");
+        }
+        return word.toUpperCase();
+      })
+      .onErrorResumeWithPublisher(err -> {
+        exception.set(err);
+        return ReactiveStreams.of("foo", "bar").buildRs();
+      })
+      .toList()
+      .run(getEngine())), Arrays.asList("A", "foo", "bar"));
+    assertEquals(exception.get().getMessage(), "failed");
+  }
+
 
   @Test(expectedExceptions = RuntimeException.class)
   public void onErrorResumeStageShouldPropagateRuntimeExceptions() {
@@ -81,6 +147,41 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
         .run(getEngine()));
   }
 
+  @Test(expectedExceptions = RuntimeException.class)
+  public void onErrorResumeWithStageShouldPropagateRuntimeExceptions() {
+    await(ReactiveStreams.failed(new Exception("source-failure"))
+      .onErrorResumeWith(t -> {
+        throw new RuntimeException("failed");
+      })
+      .toList()
+      .run(getEngine()));
+  }
+
+  @Test(expectedExceptions = RuntimeException.class)
+  public void onErrorResumeWithPublisherStageShouldPropagateRuntimeExceptions() {
+    await(ReactiveStreams.failed(new Exception("source-failure"))
+      .onErrorResumeWithPublisher(t -> {
+        throw new RuntimeException("failed");
+      })
+      .toList()
+      .run(getEngine()));
+  }
+
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+  public void onErrorResumeWithShouldBeAbleToInjectAFailure() {
+    await(ReactiveStreams.failed(new Exception("failed"))
+      .onErrorResumeWith(err -> ReactiveStreams.failed(new Exception("boom")))
+      .toList()
+      .run(getEngine()));
+  }
+
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+  public void onErrorResumeWithPublisherShouldBeAbleToInjectAFailure() {
+    await(ReactiveStreams.failed(new Exception("failed"))
+      .onErrorResumeWithPublisher(err -> ReactiveStreams.failed(new Exception("boom")).buildRs())
+      .toList()
+      .run(getEngine()));
+  }
 
   @Override
   List<Object> reactiveStreamsTckVerifiers() {

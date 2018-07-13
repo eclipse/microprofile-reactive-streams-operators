@@ -114,6 +114,9 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
       allTests.addAll(stageVerification.reactiveStreamsTckVerifiers());
     }
 
+    // Add tests that aren't dependent on the dependencies.
+    allTests.add(new GraphAccessorVerification());
+
     return allTests.stream().filter(this::isEnabled).toArray();
   }
 

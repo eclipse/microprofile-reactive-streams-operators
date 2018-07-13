@@ -33,49 +33,49 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * Test for the GraphAccessor class.
- *
+ * <p>
  * This does not need an implementation of the engine to verify it.
  */
 public class GraphAccessorVerification {
 
-  @Test
-  public void buildGraphForPublisherShouldProduceTheCorrectGraph() {
-    Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.of(1).map(i -> i * 2));
-    assertEquals(2, graph.getStages().size());
-    List<Stage> stages = new ArrayList<>(graph.getStages());
-    assertInstanceOf(stages.get(0), Stage.Of.class);
-    assertInstanceOf(stages.get(1), Stage.Map.class);
-  }
+    @Test
+    public void buildGraphForPublisherShouldProduceTheCorrectGraph() {
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.of(1).map(i -> i * 2));
+        assertEquals(2, graph.getStages().size());
+        List<Stage> stages = new ArrayList<>(graph.getStages());
+        assertInstanceOf(stages.get(0), Stage.Of.class);
+        assertInstanceOf(stages.get(1), Stage.Map.class);
+    }
 
-  @Test
-  public void buildGraphForProcessorShouldProduceTheCorrectGraph() {
-    Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.<Integer>builder().filter(i -> i > 10).takeWhile(i -> i < 20));
-    assertEquals(2, graph.getStages().size());
-    List<Stage> stages = new ArrayList<>(graph.getStages());
-    assertInstanceOf(stages.get(0), Stage.Filter.class);
-    assertInstanceOf(stages.get(1), Stage.TakeWhile.class);
-  }
+    @Test
+    public void buildGraphForProcessorShouldProduceTheCorrectGraph() {
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.<Integer>builder().filter(i -> i > 10).takeWhile(i -> i < 20));
+        assertEquals(2, graph.getStages().size());
+        List<Stage> stages = new ArrayList<>(graph.getStages());
+        assertInstanceOf(stages.get(0), Stage.Filter.class);
+        assertInstanceOf(stages.get(1), Stage.TakeWhile.class);
+    }
 
-  @Test
-  public void buildGraphForSubscriberShouldProduceTheCorrectGraph() {
-    Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.<Integer>builder().limit(10).toList());
-    assertEquals(2, graph.getStages().size());
-    List<Stage> stages = new ArrayList<>(graph.getStages());
-    assertInstanceOf(stages.get(0), Stage.Limit.class);
-    assertInstanceOf(stages.get(1), Stage.Collect.class);
-  }
+    @Test
+    public void buildGraphForSubscriberShouldProduceTheCorrectGraph() {
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.<Integer>builder().limit(10).toList());
+        assertEquals(2, graph.getStages().size());
+        List<Stage> stages = new ArrayList<>(graph.getStages());
+        assertInstanceOf(stages.get(0), Stage.Limit.class);
+        assertInstanceOf(stages.get(1), Stage.Collect.class);
+    }
 
-  @Test
-  public void buildGraphForCompletionRunnerShouldProduceTheCorrectGraph() {
-    Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.failed(new Exception()).distinct().cancel());
-    assertEquals(3, graph.getStages().size());
-    List<Stage> stages = new ArrayList<>(graph.getStages());
-    assertInstanceOf(stages.get(0), Stage.Failed.class);
-    assertInstanceOf(stages.get(1), Stage.Distinct.class);
-    assertEquals(Stage.Cancel.INSTANCE, stages.get(2));
-  }
+    @Test
+    public void buildGraphForCompletionRunnerShouldProduceTheCorrectGraph() {
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.failed(new Exception()).distinct().cancel());
+        assertEquals(3, graph.getStages().size());
+        List<Stage> stages = new ArrayList<>(graph.getStages());
+        assertInstanceOf(stages.get(0), Stage.Failed.class);
+        assertInstanceOf(stages.get(1), Stage.Distinct.class);
+        assertEquals(Stage.Cancel.INSTANCE, stages.get(2));
+    }
 
-  private static void assertInstanceOf(Object obj, Class<?> clazz) {
-    assertTrue(clazz.isInstance(obj), obj + " is not a an instance of " + clazz);
-  }
+    private static void assertInstanceOf(Object obj, Class<?> clazz) {
+        assertTrue(clazz.isInstance(obj), obj + " is not a an instance of " + clazz);
+    }
 }

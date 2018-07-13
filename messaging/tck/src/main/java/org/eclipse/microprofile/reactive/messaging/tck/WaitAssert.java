@@ -23,23 +23,23 @@ import java.time.Duration;
 
 public class WaitAssert {
 
-  private WaitAssert() {
-  }
-
-  public static void waitUntil(Duration timeout, Runnable block) {
-    long deadline = System.currentTimeMillis() + timeout.toMillis();
-    while (true) {
-      try {
-        block.run();
-        break;
-      }
-      catch (Throwable t) {
-        if (System.currentTimeMillis() >= deadline) {
-          throw new AssertionError("Action was not completed in " + timeout.toMillis() + "ms", t);
-        }
-      }
-
+    private WaitAssert() {
     }
-  }
+
+    public static void waitUntil(Duration timeout, Runnable block) {
+        long deadline = System.currentTimeMillis() + timeout.toMillis();
+        while (true) {
+            try {
+                block.run();
+                break;
+            }
+            catch (Throwable t) {
+                if (System.currentTimeMillis() >= deadline) {
+                    throw new AssertionError("Action was not completed in " + timeout.toMillis() + "ms", t);
+                }
+            }
+
+        }
+    }
 
 }

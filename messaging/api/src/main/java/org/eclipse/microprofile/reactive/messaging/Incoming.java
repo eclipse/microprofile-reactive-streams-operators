@@ -30,13 +30,13 @@ import java.lang.annotation.Target;
  * Methods annotated with this annotation must have one of the following shapes:
  * <p>
  * <ul>
- *   <li>Take zero parameters, and return a {@link org.eclipse.microprofile.reactive.streams.SubscriberBuilder}.</li>
- *   <li>Take zero parameters, and return a {@link org.reactivestreams.Subscriber}.</li>
- *   <li>Take zero parameters, and return a {@link org.eclipse.microprofile.reactive.streams.ProcessorBuilder}.</li>
- *   <li>Take zero parameters, and return a {@link org.reactivestreams.Processor}.</li>
- *   <li>Accept a single parameter, and return a {@link java.util.concurrent.CompletionStage}.</li>
- *   <li>Accept a single parameter, and return void.</li>
- *   <li>Accept a single parameter, and return any type.</li>
+ * <li>Take zero parameters, and return a {@link org.eclipse.microprofile.reactive.streams.SubscriberBuilder}.</li>
+ * <li>Take zero parameters, and return a {@link org.reactivestreams.Subscriber}.</li>
+ * <li>Take zero parameters, and return a {@link org.eclipse.microprofile.reactive.streams.ProcessorBuilder}.</li>
+ * <li>Take zero parameters, and return a {@link org.reactivestreams.Processor}.</li>
+ * <li>Accept a single parameter, and return a {@link java.util.concurrent.CompletionStage}.</li>
+ * <li>Accept a single parameter, and return void.</li>
+ * <li>Accept a single parameter, and return any type.</li>
  * </ul>
  * <p>
  * In addition, implementations of this specification may allow returning additional types, such as implementation
@@ -80,28 +80,28 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Incoming {
 
-  /**
-   * The topic to subscribe to.
-   * <p>
-   * If not set, it is assumed some other messaging provider specific mechanism will be used to identify which
-   * messages this subscriber will receive.
-   */
-  String topic() default "";
+    /**
+     * The topic to subscribe to.
+     * <p>
+     * If not set, it is assumed some other messaging provider specific mechanism will be used to identify which
+     * messages this subscriber will receive.
+     */
+    String topic() default "";
 
-  /**
-   * The messaging provider.
-   * <p>
-   * If not set, then the container may provide a container specific mechanism for selecting a default messaging
-   * provider.
-   * <p>
-   * Note that not all messaging providers are compatible with all containers, it is up to each container to
-   * decide which messaging providers it will accept, to define the messaging provider classes to pass here, and
-   * to potentially offer a container specific extension point for plugging in new containers.
-   * <p>
-   * If the container does not support the selected messaging provider, it must raise a deployment exception before
-   * the container is initialized.
-   * <p>
-   * The use of this property is inherently non portable.
-   */
-  Class<? extends MessagingProvider> provider() default MessagingProvider.class;
+    /**
+     * The messaging provider.
+     * <p>
+     * If not set, then the container may provide a container specific mechanism for selecting a default messaging
+     * provider.
+     * <p>
+     * Note that not all messaging providers are compatible with all containers, it is up to each container to
+     * decide which messaging providers it will accept, to define the messaging provider classes to pass here, and
+     * to potentially offer a container specific extension point for plugging in new containers.
+     * <p>
+     * If the container does not support the selected messaging provider, it must raise a deployment exception before
+     * the container is initialized.
+     * <p>
+     * The use of this property is inherently non portable.
+     */
+    Class<? extends MessagingProvider> provider() default MessagingProvider.class;
 }

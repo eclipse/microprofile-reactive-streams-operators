@@ -24,11 +24,11 @@ package org.eclipse.microprofile.reactive.messaging.tck.framework;
  */
 public class ReceiveTimeoutException extends RuntimeException {
 
-  public ReceiveTimeoutException(String message) {
-    super(message);
-  }
+    public ReceiveTimeoutException(String message) {
+        super(message);
+    }
 
-  public ReceiveTimeoutException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public ReceiveTimeoutException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

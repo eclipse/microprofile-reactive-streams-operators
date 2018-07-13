@@ -26,7 +26,7 @@ package org.eclipse.microprofile.reactive.streams.spi;
  * for example if in a future version a new stage is added that is not recognised by an existing implementation.
  */
 public class UnsupportedStageException extends RuntimeException {
-  public UnsupportedStageException(Stage stage) {
-    super("The " + stage.getClass().getSimpleName() + " stage is not supported by this Reactive Streams engine.");
-  }
+    public UnsupportedStageException(Stage stage) {
+        super("The " + stage.getClass().getSimpleName() + " stage is not supported by this Reactive Streams engine.");
+    }
 }

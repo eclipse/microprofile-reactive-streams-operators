@@ -33,46 +33,46 @@ import java.util.function.Supplier;
  */
 public interface Message<T> {
 
-  /**
-   * The payload for this message.
-   */
-  T getPayload();
+    /**
+     * Create a message with the given payload.
+     *
+     * @param payload The payload.
+     * @return A message with the given payload, and a no-op ack function.
+     */
+    static <T> Message<T> of(T payload) {
+        return () -> payload;
+    }
 
-  /**
-   * Acknowledge this message.
-   */
-  default CompletionStage<Void> ack() {
-    return CompletableFuture.completedFuture(null);
-  }
+    /**
+     * Create a message with the given payload and ack function.
+     *
+     * @param payload The payload.
+     * @param ack     The ack function, this will be invoked when the returned messages {@link #ack()} method is invoked.
+     * @return A message with the given payload and ack function.
+     */
+    static <T> Message<T> of(T payload, Supplier<CompletionStage<Void>> ack) {
+        return new Message<T>() {
+            @Override
+            public T getPayload() {
+                return payload;
+            }
 
-  /**
-   * Create a message with the given payload.
-   *
-   * @param payload The payload.
-   * @return A message with the given payload, and a no-op ack function.
-   */
-  static <T> Message<T> of(T payload) {
-    return () -> payload;
-  }
+            @Override
+            public CompletionStage<Void> ack() {
+                return ack.get();
+            }
+        };
+    }
 
-  /**
-   * Create a message with the given payload and ack function.
-   *
-   * @param payload The payload.
-   * @param ack The ack function, this will be invoked when the returned messages {@link #ack()} method is invoked.
-   * @return A message with the given payload and ack function.
-   */
-  static <T> Message<T> of(T payload, Supplier<CompletionStage<Void>> ack) {
-    return new Message<T>() {
-      @Override
-      public T getPayload() {
-        return payload;
-      }
+    /**
+     * The payload for this message.
+     */
+    T getPayload();
 
-      @Override
-      public CompletionStage<Void> ack() {
-        return ack.get();
-      }
-    };
-  }
+    /**
+     * Acknowledge this message.
+     */
+    default CompletionStage<Void> ack() {
+        return CompletableFuture.completedFuture(null);
+    }
 }

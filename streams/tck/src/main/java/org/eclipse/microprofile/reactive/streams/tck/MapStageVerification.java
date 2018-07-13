@@ -33,51 +33,51 @@ import static org.testng.Assert.assertEquals;
 
 public class MapStageVerification extends AbstractStageVerification {
 
-  MapStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    MapStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void mapStageShouldMapElements() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .map(Object::toString)
-        .toList()
-        .run(getEngine())), Arrays.asList("1", "2", "3"));
-  }
+    @Test
+    public void mapStageShouldMapElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .map(Object::toString)
+            .toList()
+            .run(getEngine())), Arrays.asList("1", "2", "3"));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void mapStageShouldPropagateRuntimeExceptions() {
-    await(ReactiveStreams.of("foo")
-        .map(foo -> {
-          throw new RuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(
-        new ProcessorVerification()
-    );
-  }
-
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void mapStageShouldPropagateRuntimeExceptions() {
+        await(ReactiveStreams.of("foo")
+            .map(foo -> {
+                throw new RuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine()));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .map(Function.identity()).buildRs(getEngine());
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(
+            new ProcessorVerification()
+        );
     }
 
-    @Override
-    public Integer createElement(int element) {
-      return element;
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .map(Function.identity()).buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
     }
-  }
 }

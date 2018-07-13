@@ -26,10 +26,10 @@ import org.testng.annotations.Factory;
  */
 public class TckTest {
 
-  @Factory
-  public Object[] independentTests() {
-    return new Object[] {
-        new GraphAccessorVerification()
-    };
-  }
+    @Factory
+    public Object[] independentTests() {
+        return new Object[]{
+            new GraphAccessorVerification()
+        };
+    }
 }

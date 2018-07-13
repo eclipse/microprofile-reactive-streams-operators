@@ -69,12 +69,11 @@ public class FlatMapPublisherStageVerification extends AbstractStageVerification
         // that it is the only publisher that is subscribed to at any one time.
         class ScheduledPublisher implements Publisher<Integer> {
             private final int id;
+            private AtomicBoolean published = new AtomicBoolean(false);
 
             private ScheduledPublisher(int id) {
                 this.id = id;
             }
-
-            private AtomicBoolean published = new AtomicBoolean(false);
 
             @Override
             public void subscribe(Subscriber<? super Integer> subscriber) {

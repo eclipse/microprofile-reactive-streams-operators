@@ -29,46 +29,46 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionStage;
 
 public class SubscriberStageVerification extends AbstractStageVerification {
-  SubscriberStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    SubscriberStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void subscriberStageShouldRedeemCompletionStageWhenCompleted() {
-    CompletionStage<Void> result = ReactiveStreams.of().to(
-        ReactiveStreams.builder().ignore().build(getEngine())
-    ).run(getEngine());
-    await(result);
-  }
+    @Test
+    public void subscriberStageShouldRedeemCompletionStageWhenCompleted() {
+        CompletionStage<Void> result = ReactiveStreams.of().to(
+            ReactiveStreams.builder().ignore().build(getEngine())
+        ).run(getEngine());
+        await(result);
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void subscriberStageShouldRedeemCompletionStageWhenFailed() {
-    CompletionStage<Void> result = ReactiveStreams.failed(new RuntimeException("failed")).to(
-        ReactiveStreams.builder().ignore().build(getEngine())
-    ).run(getEngine());
-    await(result);
-  }
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void subscriberStageShouldRedeemCompletionStageWhenFailed() {
+        CompletionStage<Void> result = ReactiveStreams.failed(new RuntimeException("failed")).to(
+            ReactiveStreams.builder().ignore().build(getEngine())
+        ).run(getEngine());
+        await(result);
+    }
 
-  @Test(expectedExceptions = CancellationException.class)
-  public void subscriberStageShouldRedeemCompletionStageWithCancellationExceptionWhenCancelled() {
-    CompletionStage<Void> result = ReactiveStreams.fromPublisher(subscriber -> {
-      subscriber.onSubscribe(new Subscription() {
-        @Override
-        public void request(long n) {
-        }
+    @Test(expectedExceptions = CancellationException.class)
+    public void subscriberStageShouldRedeemCompletionStageWithCancellationExceptionWhenCancelled() {
+        CompletionStage<Void> result = ReactiveStreams.fromPublisher(subscriber -> {
+            subscriber.onSubscribe(new Subscription() {
+                @Override
+                public void request(long n) {
+                }
 
-        @Override
-        public void cancel() {
-        }
-      });
-    }).to(
-        ReactiveStreams.builder().cancel().build(getEngine())
-    ).run(getEngine());
-    await(result);
-  }
+                @Override
+                public void cancel() {
+                }
+            });
+        }).to(
+            ReactiveStreams.builder().cancel().build(getEngine())
+        ).run(getEngine());
+        await(result);
+    }
 
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.emptyList();
-  }
+    @Override
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.emptyList();
+    }
 }

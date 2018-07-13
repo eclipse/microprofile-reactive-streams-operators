@@ -43,95 +43,94 @@ import java.util.function.Function;
  */
 public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
 
-  private final TestEnvironment testEnvironment;
+    private final TestEnvironment testEnvironment;
+    private E engine;
+    private ScheduledExecutorService executorService;
 
-  public ReactiveStreamsTck(TestEnvironment testEnvironment) {
-    this.testEnvironment = testEnvironment;
-  }
-
-  /**
-   * Override to provide the reactive streams engine.
-   */
-  protected abstract E createEngine();
-
-  /**
-   * Override to implement custom shutdown logic for the Reactive Streams engine.
-   */
-  protected void shutdownEngine(E engine) {
-    // By default, do nothing.
-  }
-
-  /**
-   * Override this to disable/enable tests, useful for debugging one test at a time.
-   */
-  protected boolean isEnabled(Object test) {
-    return true;
-  }
-
-  private E engine;
-  private ScheduledExecutorService executorService;
-
-  @AfterSuite(alwaysRun = true)
-  public void shutdownEngine() {
-    if (engine != null) {
-      shutdownEngine(engine);
-    }
-  }
-
-  @Factory
-  public Object[] allTests() {
-    engine = createEngine();
-    executorService = Executors.newScheduledThreadPool(4);
-
-    List<Function<VerificationDeps, AbstractStageVerification>> stageVerifications = Arrays.asList(
-        OfStageVerification::new,
-        MapStageVerification::new,
-        FlatMapStageVerification::new,
-        FilterStageVerification::new,
-        FindFirstStageVerification::new,
-        CollectStageVerification::new,
-        TakeWhileStageVerification::new,
-        FlatMapPublisherStageVerification::new,
-        FlatMapCompletionStageVerification::new,
-        FlatMapIterableStageVerification::new,
-        ConcatStageVerification::new,
-        EmptyProcessorVerification::new,
-        CancelStageVerification::new,
-        SubscriberStageVerification::new,
-        PeekStageVerification::new,
-        DistinctStageVerification::new,
-        OnStagesVerification::new,
-        LimitStageVerification::new,
-        SkipStageVerification::new,
-        DropWhileStageVerification::new
-    );
-
-    List<Object> allTests = new ArrayList<>();
-    VerificationDeps deps = new VerificationDeps();
-    for (Function<VerificationDeps, AbstractStageVerification> creator : stageVerifications) {
-      AbstractStageVerification stageVerification = creator.apply(deps);
-      allTests.add(stageVerification);
-      allTests.addAll(stageVerification.reactiveStreamsTckVerifiers());
+    public ReactiveStreamsTck(TestEnvironment testEnvironment) {
+        this.testEnvironment = testEnvironment;
     }
 
-    // Add tests that aren't dependent on the dependencies.
-    allTests.add(new GraphAccessorVerification());
+    /**
+     * Override to provide the reactive streams engine.
+     */
+    protected abstract E createEngine();
 
-    return allTests.stream().filter(this::isEnabled).toArray();
-  }
-
-  class VerificationDeps {
-    ReactiveStreamsEngine engine() {
-      return engine;
+    /**
+     * Override to implement custom shutdown logic for the Reactive Streams engine.
+     */
+    protected void shutdownEngine(E engine) {
+        // By default, do nothing.
     }
 
-    TestEnvironment testEnvironment() {
-      return testEnvironment;
+    /**
+     * Override this to disable/enable tests, useful for debugging one test at a time.
+     */
+    protected boolean isEnabled(Object test) {
+        return true;
     }
 
-    ScheduledExecutorService executorService() {
-      return executorService;
+    @AfterSuite(alwaysRun = true)
+    public void shutdownEngine() {
+        if (engine != null) {
+            shutdownEngine(engine);
+        }
     }
-  }
+
+    @Factory
+    public Object[] allTests() {
+        engine = createEngine();
+        executorService = Executors.newScheduledThreadPool(4);
+
+        List<Function<VerificationDeps, AbstractStageVerification>> stageVerifications = Arrays.asList(
+            OfStageVerification::new,
+            MapStageVerification::new,
+            FlatMapStageVerification::new,
+            FilterStageVerification::new,
+            FindFirstStageVerification::new,
+            CollectStageVerification::new,
+            TakeWhileStageVerification::new,
+            FlatMapPublisherStageVerification::new,
+            FlatMapCompletionStageVerification::new,
+            FlatMapIterableStageVerification::new,
+            ConcatStageVerification::new,
+            EmptyProcessorVerification::new,
+            CancelStageVerification::new,
+            SubscriberStageVerification::new,
+            PeekStageVerification::new,
+            DistinctStageVerification::new,
+            OnStagesVerification::new,
+            LimitStageVerification::new,
+            SkipStageVerification::new,
+            DropWhileStageVerification::new
+        );
+
+        List<Object> allTests = new ArrayList<>();
+        VerificationDeps deps = new VerificationDeps();
+        for (Function<VerificationDeps, AbstractStageVerification> creator : stageVerifications) {
+            AbstractStageVerification stageVerification = creator.apply(deps);
+            allTests.add(stageVerification);
+            allTests.addAll(stageVerification.reactiveStreamsTckVerifiers());
+        }
+
+        // Add tests that aren't dependent on the dependencies.
+        allTests.add(new GraphAccessorVerification());
+
+        return allTests.stream().filter(this::isEnabled).toArray();
+    }
+
+    class VerificationDeps {
+        ReactiveStreamsEngine engine() {
+            return engine;
+        }
+
+        TestEnvironment testEnvironment() {
+            return testEnvironment;
+        }
+
+        ScheduledExecutorService executorService() {
+            return executorService;
+        }
+    }
 
 }

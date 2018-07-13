@@ -39,6 +39,22 @@
  * <p>
  * A TCK is also provided that validates that an implementation is both correct according to this specification, and
  * the Reactive Streams specification.
+ * <p>
+ * The Reactive Streams utils SPI.
+ * <p>
+ * Implementors are expected to implement the {@code ReactiveStreamsEngine} interface, and use this SPI to inspect
+ * the graph of stages.
+ * <p>
+ * A TCK is also provided that validates that an implementation is both correct according to this specification, and
+ * the Reactive Streams specification.
+ * <p>
+ * The Reactive Streams utils SPI.
+ * <p>
+ * Implementors are expected to implement the {@code ReactiveStreamsEngine} interface, and use this SPI to inspect
+ * the graph of stages.
+ * <p>
+ * A TCK is also provided that validates that an implementation is both correct according to this specification, and
+ * the Reactive Streams specification.
  */
 
 /**

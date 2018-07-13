@@ -33,92 +33,92 @@ import static org.testng.Assert.assertEquals;
 
 public class CollectStageVerification extends AbstractStageVerification {
 
-  CollectStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    CollectStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void toListStageShouldReturnAList() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .toList().run(getEngine())), Arrays.asList(1, 2, 3));
-  }
+    @Test
+    public void toListStageShouldReturnAList() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .toList().run(getEngine())), Arrays.asList(1, 2, 3));
+    }
 
-  @Test
-  public void toListStageShouldReturnEmpty() {
-    assertEquals(await(ReactiveStreams.of()
-        .toList().run(getEngine())), Collections.emptyList());
-  }
+    @Test
+    public void toListStageShouldReturnEmpty() {
+        assertEquals(await(ReactiveStreams.of()
+            .toList().run(getEngine())), Collections.emptyList());
+    }
 
-  @Test
-  public void collectShouldAccumulateResult() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3)
-      .collect(
-        () -> new AtomicInteger(0),
-        AtomicInteger::addAndGet
-      ).run(getEngine())).get(), 6);
-  }
+    @Test
+    public void collectShouldAccumulateResult() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .collect(
+                () -> new AtomicInteger(0),
+                AtomicInteger::addAndGet
+            ).run(getEngine())).get(), 6);
+    }
 
-  @Test
-  public void collectShouldSupportEmptyStreams() {
-    assertEquals(await(ReactiveStreams.<Integer>empty()
-      .collect(
-        () -> new AtomicInteger(42),
-        AtomicInteger::addAndGet
-      ).run(getEngine())).get(), 42);
-  }
+    @Test
+    public void collectShouldSupportEmptyStreams() {
+        assertEquals(await(ReactiveStreams.<Integer>empty()
+            .collect(
+                () -> new AtomicInteger(42),
+                AtomicInteger::addAndGet
+            ).run(getEngine())).get(), 42);
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void collectShouldPropagateErrors() {
-    await(ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-      .collect(
-        () -> new AtomicInteger(0),
-        AtomicInteger::addAndGet
-      ).run(getEngine()));
-  }
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void collectShouldPropagateErrors() {
+        await(ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            .collect(
+                () -> new AtomicInteger(0),
+                AtomicInteger::addAndGet
+            ).run(getEngine()));
+    }
 
 
-  @Test
-  public void finisherFunctionShouldBeInvoked() {
-    assertEquals(await(ReactiveStreams.of("1", "2", "3")
-        .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
-  }
+    @Test
+    public void finisherFunctionShouldBeInvoked() {
+        assertEquals(await(ReactiveStreams.of("1", "2", "3")
+            .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void toListStageShouldPropagateErrors() {
-    await(ReactiveStreams.failed(new RuntimeException("failed"))
-        .toList().run(getEngine()));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Arrays.asList(new ToListSubscriberVerification(), new CollectSubscriberVerification());
-  }
-
-  class ToListSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
-    @Override
-    public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder().toList().build(getEngine());
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void toListStageShouldPropagateErrors() {
+        await(ReactiveStreams.failed(new RuntimeException("failed"))
+            .toList().run(getEngine()));
     }
 
     @Override
-    public Integer createElement(int element) {
-      return element;
-    }
-  }
-
-  class CollectSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
-    @Override
-    public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder()
-        .collect(
-          () -> new AtomicInteger(0),
-          AtomicInteger::addAndGet)
-        .build(getEngine());
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Arrays.asList(new ToListSubscriberVerification(), new CollectSubscriberVerification());
     }
 
-    @Override
-    public Integer createElement(int element) {
-      return element;
+    class ToListSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
+        @Override
+        public Subscriber<Integer> createSubscriber() {
+            return ReactiveStreams.<Integer>builder().toList().build(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
     }
-  }
+
+    class CollectSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
+        @Override
+        public Subscriber<Integer> createSubscriber() {
+            return ReactiveStreams.<Integer>builder()
+                .collect(
+                    () -> new AtomicInteger(0),
+                    AtomicInteger::addAndGet)
+                .build(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+    }
 }

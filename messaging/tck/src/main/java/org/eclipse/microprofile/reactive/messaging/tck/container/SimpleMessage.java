@@ -17,36 +17,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.messaging.tck.container;
+
+import org.eclipse.microprofile.reactive.messaging.Message;
 
 import java.util.Objects;
 
-public class MockPayload {
-    private String field1;
-    private int field2;
+public class SimpleMessage<T> implements Message<T> {
+    private final T payload;
 
-    public MockPayload(String field1, int field2) {
-        this.field1 = field1;
-        this.field2 = field2;
+    public SimpleMessage(T payload) {
+        this.payload = payload;
     }
 
-    public MockPayload() {
-    }
-
-    public String getField1() {
-        return field1;
-    }
-
-    public void setField1(String field1) {
-        this.field1 = field1;
-    }
-
-    public int getField2() {
-        return field2;
-    }
-
-    public void setField2(int field2) {
-        this.field2 = field2;
+    @Override
+    public T getPayload() {
+        return payload;
     }
 
     @Override
@@ -57,22 +43,24 @@ public class MockPayload {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        MockPayload that = (MockPayload) o;
-        return field2 == that.field2 &&
-            Objects.equals(field1, that.field1);
+        SimpleMessage<?> that = (SimpleMessage<?>) o;
+        return Objects.equals(payload, that.payload);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(field1, field2);
+        return Objects.hash(payload);
     }
 
     @Override
     public String toString() {
-        return "MockPayload{" +
-            "field1='" + field1 + '\'' +
-            ", field2=" + field2 +
+        return "SimpleMessage{" +
+            "payload=" + payload +
             '}';
+    }
+
+    public static <T> SimpleMessage<T> wrap(T payload) {
+        return new SimpleMessage<>(payload);
     }
 }

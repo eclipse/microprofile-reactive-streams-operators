@@ -17,18 +17,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.messaging.tck.client.event;
 
-/**
- * Exception thrown when a message isn't received in the given timeout.
- */
-public class ReceiveTimeoutException extends RuntimeException {
+import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
 
-    public ReceiveTimeoutException(String message) {
-        super(message);
+import java.util.List;
+
+public class DeployTopics extends TopicEvent {
+    private final List<String> topics;
+
+    public DeployTopics(DeployableContainer<?> deployableContainer, List<String> topics) {
+        super(deployableContainer);
+        this.topics = topics;
     }
 
-    public ReceiveTimeoutException(String message, Throwable cause) {
-        super(message, cause);
+    public List<String> getTopics() {
+        return topics;
     }
 }

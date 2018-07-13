@@ -17,10 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.messaging.tck.container;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
@@ -45,7 +44,7 @@ public class MockedReceiver<T> {
     private final BlockingDeque<Message<T>> queue = new LinkedBlockingDeque<>();
     private final List<Subscription> subscriptions = new CopyOnWriteArrayList<>();
 
-    MockedReceiver(TestEnvironment testEnvironment, String topic) {
+    public MockedReceiver(TestEnvironment testEnvironment, String topic) {
         this.testEnvironment = testEnvironment;
         this.topic = topic;
     }

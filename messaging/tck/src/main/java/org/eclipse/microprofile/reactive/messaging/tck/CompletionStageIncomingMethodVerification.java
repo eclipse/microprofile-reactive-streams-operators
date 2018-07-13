@@ -21,17 +21,16 @@ package org.eclipse.microprofile.reactive.messaging.tck;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.tck.arquillian.Topics;
-import org.eclipse.microprofile.reactive.messaging.tck.framework.ContainerController;
-import org.eclipse.microprofile.reactive.messaging.tck.framework.MockedReceiver;
-import org.eclipse.microprofile.reactive.messaging.tck.framework.MockPayload;
-import org.eclipse.microprofile.reactive.messaging.tck.framework.QuietRuntimeException;
-import org.eclipse.microprofile.reactive.messaging.tck.framework.TckMessagingManager;
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment;
+import org.eclipse.microprofile.reactive.messaging.tck.container.TckDeploymentUtils;
+import org.eclipse.microprofile.reactive.messaging.tck.container.Topics;
+import org.eclipse.microprofile.reactive.messaging.tck.container.ContainerPuppet;
+import org.eclipse.microprofile.reactive.messaging.tck.container.MockedReceiver;
+import org.eclipse.microprofile.reactive.messaging.tck.container.MockPayload;
+import org.eclipse.microprofile.reactive.messaging.tck.container.QuietRuntimeException;
+import org.eclipse.microprofile.reactive.messaging.tck.container.TestEnvironment;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.testng.Arquillian;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.testng.annotations.Test;
 
@@ -44,7 +43,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.eclipse.microprofile.reactive.messaging.tck.WaitAssert.waitUntil;
+import static org.eclipse.microprofile.reactive.messaging.tck.container.WaitAssert.waitUntil;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -68,7 +67,24 @@ import static org.testng.Assert.assertTrue;
     CompletionStageIncomingMethodVerification.OUTGOING_WRAPPED,
     CompletionStageIncomingMethodVerification.INCOMING_OUTGOING_WRAPPED
 })
+@Test(groups = {"all", "incoming"})
 public class CompletionStageIncomingMethodVerification extends Arquillian {
+
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return TckDeploymentUtils.createDeployment(Bean.class);
+    }
+
+    @ArquillianResource
+    private ContainerPuppet controller;
+    @ArquillianResource
+    private TestEnvironment environment;
+
+    @Inject
+    private TckMessagingManager manager;
+
+    @Inject
+    private Bean bean;
 
     static final String VOID_METHOD = "void-method";
     static final String NON_PARALLEL = "non-parallel";
@@ -78,20 +94,149 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
     static final String WRAPPED_MESSAGE = "wrapped-message";
     static final String OUTGOING_WRAPPED = "outgoing-wrapped";
     static final String INCOMING_OUTGOING_WRAPPED = "incoming-outgoing-wrapped";
-    @Inject
-    private TckMessagingManager manager;
-    @Inject
-    private ContainerController controller;
-    @Inject
-    private TestEnvironment environment;
-    @Inject
-    private Bean bean;
 
-    @Deployment
-    public static JavaArchive createDeployment() {
-        return ShrinkWrap.create(JavaArchive.class)
-            .addClass(Bean.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    @ApplicationScoped
+    public static class Bean {
+
+        @Inject
+        private TckMessagingManager manager;
+
+        @Incoming(topic = VOID_METHOD)
+        public CompletionStage<Void> handleVoidMethod(MockPayload payload) {
+            manager.getReceiver(VOID_METHOD).receiveMessage(payload);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        private final Deque<CompletableFuture<Void>> futures = new ArrayDeque<>();
+
+        public Deque<CompletableFuture<Void>> getFutures() {
+            return futures;
+        }
+
+        @Incoming(topic = NON_PARALLEL)
+        public CompletionStage<Void> handleNonParallel(MockPayload payload) {
+            manager.getReceiver(NON_PARALLEL).receiveMessage(payload);
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            futures.add(future);
+            return future;
+        }
+
+        @Incoming(topic = NON_VOID_METHOD)
+        public CompletionStage<String> handleNonVoidMethod(MockPayload payload) {
+            manager.getReceiver(NON_VOID_METHOD).receiveMessage(payload);
+            return CompletableFuture.completedFuture("hello");
+        }
+
+        private final AtomicBoolean syncFailed = new AtomicBoolean();
+
+        public AtomicBoolean getSyncFailed() {
+            return syncFailed;
+        }
+
+        @Incoming(topic = SYNC_FAILING)
+        public CompletionStage<Void> handleSyncFailing(MockPayload payload) {
+            if (payload.getField1().equals("fail") && !syncFailed.getAndSet(true)) {
+                manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
+
+        private final AtomicBoolean asyncFailed = new AtomicBoolean();
+
+        public AtomicBoolean getAsyncFailed() {
+            return asyncFailed;
+        }
+
+        @Incoming(topic = ASYNC_FAILING)
+        public CompletionStage<Void> handleAsyncFailing(MockPayload payload) {
+            if (payload.getField1().equals("fail") && !asyncFailed.getAndSet(true)) {
+                manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
+                CompletableFuture<Void> future = new CompletableFuture<>();
+                future.completeExceptionally(new QuietRuntimeException("failed"));
+                return future;
+            }
+            else {
+                manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
+
+        private final AtomicBoolean wrappedFailed = new AtomicBoolean();
+
+        public AtomicBoolean getWrappedFailed() {
+            return wrappedFailed;
+        }
+
+        @Incoming(topic = WRAPPED_MESSAGE)
+        public CompletionStage<Void> handleWrapped(Message<MockPayload> msg) {
+            if (msg.getPayload().getField1().equals("acknowledged") || wrappedFailed.get()) {
+                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
+                return msg.ack();
+            }
+            else if (msg.getPayload().getField1().equals("fail")) {
+                wrappedFailed.set(true);
+                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
+
+        private final AtomicInteger acked = new AtomicInteger();
+        private final AtomicBoolean outgoingWrappedFailed = new AtomicBoolean();
+
+        public AtomicInteger getAcked() {
+            return acked;
+        }
+
+        public AtomicBoolean getOutgoingWrappedFailed() {
+            return outgoingWrappedFailed;
+        }
+
+        @Incoming(topic = OUTGOING_WRAPPED)
+        public CompletionStage<Message<Void>> handleOutgoingWrapped(MockPayload msg) {
+            if (msg.getField1().equals("fail") && !outgoingWrappedFailed.getAndSet(true)) {
+                manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
+                return CompletableFuture.completedFuture(Message.of(null, () -> {
+                    acked.incrementAndGet();
+                    return CompletableFuture.completedFuture(null);
+                }));
+            }
+        }
+
+        private final AtomicBoolean incomingOutgoingWrappedFailed = new AtomicBoolean();
+
+        public AtomicBoolean getIncomingOutgoingWrappedFailed() {
+            return incomingOutgoingWrappedFailed;
+        }
+
+        @Incoming(topic = INCOMING_OUTGOING_WRAPPED)
+        public CompletionStage<Message<Void>> handleIncomingOutgoingWrapped(Message<MockPayload> msg) {
+            if (msg.getPayload().getField1().equals("acknowledged") || incomingOutgoingWrappedFailed.get()) {
+                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
+                return CompletableFuture.completedFuture(Message.of(null, msg::ack));
+            }
+            else if (msg.getPayload().getField1().equals("fail")) {
+                incomingOutgoingWrappedFailed.set(true);
+                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
+                // Note - not transferring the ack.
+                return CompletableFuture.completedFuture(Message.of(null));
+            }
+        }
     }
 
     @Test
@@ -143,7 +288,7 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
         receiver.expectNoMessages("Didn't expect a message because didn't send one.");
     }
 
-    @Test
+    @Test(groups = {"ack"})
     public void completionStageMethodShouldRetryMessagesThatFailSynchronously() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(SYNC_FAILING);
         MockPayload msg1 = new MockPayload("success", 1);
@@ -160,7 +305,7 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
         receiver.expectNextMessageWithPayload(msg3);
     }
 
-    @Test
+    @Test(groups = {"ack"})
     public void completionStageMethodShouldRetryMessagesThatFailAsynchronously() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(ASYNC_FAILING);
         MockPayload msg1 = new MockPayload("success", 1);
@@ -177,7 +322,7 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
         receiver.expectNextMessageWithPayload(msg3);
     }
 
-    @Test
+    @Test(groups = {"ack"})
     public void completionStageMethodShouldNotAutomaticallyAcknowledgeWrappedMessages() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(WRAPPED_MESSAGE);
         MockPayload msg1 = new MockPayload("acknowledged", 1);
@@ -197,7 +342,7 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
         receiver.expectNextMessageWithPayload(msg4);
     }
 
-    @Test
+    @Test(groups = {"ack"})
     public void completionStageWithOutgoingWrappedMessageShouldGetAcknowledged() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(OUTGOING_WRAPPED);
         MockPayload msg1 = new MockPayload("success", 1);
@@ -216,7 +361,7 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
         waitUntil(environment.receiveTimeout(), () -> assertEquals(bean.getAcked().get(), 3));
     }
 
-    @Test
+    @Test(groups = {"ack"})
     public void completionStageMethodShouldAcknowldegePassedThroughAckFunctions() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(INCOMING_OUTGOING_WRAPPED);
         MockPayload msg1 = new MockPayload("acknowledged", 1);
@@ -232,143 +377,5 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
         receiver.expectNextMessageWithPayload(msg2);
         receiver.expectNextMessageWithPayload(msg3);
         receiver.expectNextMessageWithPayload(msg4);
-    }
-
-    @ApplicationScoped
-    public static class Bean {
-
-        private final Deque<CompletableFuture<Void>> futures = new ArrayDeque<>();
-        private final AtomicBoolean syncFailed = new AtomicBoolean();
-        private final AtomicBoolean asyncFailed = new AtomicBoolean();
-        private final AtomicBoolean wrappedFailed = new AtomicBoolean();
-        private final AtomicInteger acked = new AtomicInteger();
-        private final AtomicBoolean outgoingWrappedFailed = new AtomicBoolean();
-        private final AtomicBoolean incomingOutgoingWrappedFailed = new AtomicBoolean();
-        @Inject
-        private TckMessagingManager manager;
-
-        @Incoming(topic = VOID_METHOD)
-        public CompletionStage<Void> handleVoidMethod(MockPayload payload) {
-            manager.getReceiver(VOID_METHOD).receiveMessage(payload);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        public Deque<CompletableFuture<Void>> getFutures() {
-            return futures;
-        }
-
-        @Incoming(topic = NON_PARALLEL)
-        public CompletionStage<Void> handleNonParallel(MockPayload payload) {
-            manager.getReceiver(NON_PARALLEL).receiveMessage(payload);
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            futures.add(future);
-            return future;
-        }
-
-        @Incoming(topic = NON_VOID_METHOD)
-        public CompletionStage<String> handleNonVoidMethod(MockPayload payload) {
-            manager.getReceiver(NON_VOID_METHOD).receiveMessage(payload);
-            return CompletableFuture.completedFuture("hello");
-        }
-
-        public AtomicBoolean getSyncFailed() {
-            return syncFailed;
-        }
-
-        @Incoming(topic = SYNC_FAILING)
-        public CompletionStage<Void> handleSyncFailing(MockPayload payload) {
-            if (payload.getField1().equals("fail") && !syncFailed.getAndSet(true)) {
-                manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
-                throw new QuietRuntimeException("failed");
-            }
-            else {
-                manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
-                return CompletableFuture.completedFuture(null);
-            }
-        }
-
-        public AtomicBoolean getAsyncFailed() {
-            return asyncFailed;
-        }
-
-        @Incoming(topic = ASYNC_FAILING)
-        public CompletionStage<Void> handleAsyncFailing(MockPayload payload) {
-            if (payload.getField1().equals("fail") && !asyncFailed.getAndSet(true)) {
-                manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
-                CompletableFuture<Void> future = new CompletableFuture<>();
-                future.completeExceptionally(new QuietRuntimeException("failed"));
-                return future;
-            }
-            else {
-                manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
-                return CompletableFuture.completedFuture(null);
-            }
-        }
-
-        public AtomicBoolean getWrappedFailed() {
-            return wrappedFailed;
-        }
-
-        @Incoming(topic = WRAPPED_MESSAGE)
-        public CompletionStage<Void> handleWrapped(Message<MockPayload> msg) {
-            if (msg.getPayload().getField1().equals("acknowledged") || wrappedFailed.get()) {
-                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
-                return msg.ack();
-            }
-            else if (msg.getPayload().getField1().equals("fail")) {
-                wrappedFailed.set(true);
-                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
-                throw new QuietRuntimeException("failed");
-            }
-            else {
-                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
-                return CompletableFuture.completedFuture(null);
-            }
-        }
-
-        public AtomicInteger getAcked() {
-            return acked;
-        }
-
-        public AtomicBoolean getOutgoingWrappedFailed() {
-            return outgoingWrappedFailed;
-        }
-
-        @Incoming(topic = OUTGOING_WRAPPED)
-        public CompletionStage<Message<Void>> handleOutgoingWrapped(MockPayload msg) {
-            if (msg.getField1().equals("fail") && !outgoingWrappedFailed.getAndSet(true)) {
-                manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
-                throw new QuietRuntimeException("failed");
-            }
-            else {
-                manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
-                return CompletableFuture.completedFuture(Message.of(null, () -> {
-                    acked.incrementAndGet();
-                    return CompletableFuture.completedFuture(null);
-                }));
-            }
-        }
-
-        public AtomicBoolean getIncomingOutgoingWrappedFailed() {
-            return incomingOutgoingWrappedFailed;
-        }
-
-        @Incoming(topic = INCOMING_OUTGOING_WRAPPED)
-        public CompletionStage<Message<Void>> handleIncomingOutgoingWrapped(Message<MockPayload> msg) {
-            if (msg.getPayload().getField1().equals("acknowledged") || incomingOutgoingWrappedFailed.get()) {
-                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-                return CompletableFuture.completedFuture(Message.of(null, msg::ack));
-            }
-            else if (msg.getPayload().getField1().equals("fail")) {
-                incomingOutgoingWrappedFailed.set(true);
-                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-                throw new QuietRuntimeException("failed");
-            }
-            else {
-                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-                // Note - not transferring the ack.
-                return CompletableFuture.completedFuture(Message.of(null));
-            }
-        }
     }
 }

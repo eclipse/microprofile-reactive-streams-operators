@@ -17,29 +17,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck;
+package org.eclipse.microprofile.reactive.messaging.tck.container;
 
-import java.time.Duration;
-
-public class WaitAssert {
-
-    private WaitAssert() {
+/**
+ * RuntimeException with no stack trace for expected failures, to make logging not so noisy.
+ */
+public class QuietRuntimeException extends RuntimeException {
+    public QuietRuntimeException() {
+        this(null, null);
     }
 
-    public static void waitUntil(Duration timeout, Runnable block) {
-        long deadline = System.currentTimeMillis() + timeout.toMillis();
-        while (true) {
-            try {
-                block.run();
-                break;
-            }
-            catch (Throwable t) {
-                if (System.currentTimeMillis() >= deadline) {
-                    throw new AssertionError("Action was not completed in " + timeout.toMillis() + "ms", t);
-                }
-            }
-
-        }
+    public QuietRuntimeException(String message) {
+        this(message, null);
     }
 
+    public QuietRuntimeException(String message, Throwable cause) {
+        super(message, cause, true, false);
+    }
+
+    public QuietRuntimeException(Throwable cause) {
+        this(null, cause);
+    }
 }

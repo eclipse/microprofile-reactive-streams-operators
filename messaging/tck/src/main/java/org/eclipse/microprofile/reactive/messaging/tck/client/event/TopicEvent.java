@@ -17,13 +17,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.arquillian;
+package org.eclipse.microprofile.reactive.messaging.tck.client.event;
 
-import org.jboss.arquillian.core.spi.LoadableExtension;
+import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
+import org.jboss.arquillian.container.spi.event.container.ContainerEvent;
 
-public class TckArquillianExtension implements LoadableExtension {
-    @Override
-    public void register(ExtensionBuilder builder) {
-        builder.observer(TckArquillianDeployListener.class);
+public abstract class TopicEvent extends ContainerEvent {
+    protected TopicEvent(DeployableContainer<?> deployableContainer) {
+        super(deployableContainer);
     }
 }

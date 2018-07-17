@@ -42,9 +42,7 @@ public class PeekStageVerification extends AbstractStageVerification {
     public void peekStageShouldNotModifyElements() {
         AtomicInteger count = new AtomicInteger();
         assertEquals(await(ReactiveStreams.of(1, 2, 3)
-            .peek(i -> {
-                count.incrementAndGet();
-            })
+            .peek(i -> count.incrementAndGet())
             .toList()
             .run(getEngine())), Arrays.asList(1, 2, 3));
         assertEquals(count.get(), 3);

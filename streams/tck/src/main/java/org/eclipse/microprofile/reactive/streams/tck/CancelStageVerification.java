@@ -38,18 +38,16 @@ public class CancelStageVerification extends AbstractStageVerification {
     @Test
     public void cancelStageShouldCancelTheStage() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> {
-            s.onSubscribe(new Subscription() {
-                @Override
-                public void request(long n) {
-                }
+        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> s.onSubscribe(new Subscription() {
+            @Override
+            public void request(long n) {
+            }
 
-                @Override
-                public void cancel() {
-                    cancelled.complete(null);
-                }
-            });
-        }).cancel().run(getEngine());
+            @Override
+            public void cancel() {
+                cancelled.complete(null);
+            }
+        })).cancel().run(getEngine());
         await(cancelled);
         await(result);
     }

@@ -25,64 +25,62 @@ import org.reactivestreams.Subscription;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public class CancelStageVerification extends AbstractStageVerification {
-  CancelStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    CancelStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void cancelStageShouldCancelTheStage() {
-    CompletableFuture<Void> cancelled = new CompletableFuture<>();
-    CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> {
-      s.onSubscribe(new Subscription() {
+    @Test
+    public void cancelStageShouldCancelTheStage() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> s.onSubscribe(new Subscription() {
+            @Override
+            public void request(long n) {
+            }
+
+            @Override
+            public void cancel() {
+                cancelled.complete(null);
+            }
+        })).cancel().run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Override
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new SubscriberVerification());
+    }
+
+    public class SubscriberVerification extends StageSubscriberBlackboxVerification {
         @Override
-        public void request(long n) {
+        public Subscriber createSubscriber() {
+            return ReactiveStreams.builder().cancel().build(getEngine());
         }
 
         @Override
-        public void cancel() {
-          cancelled.complete(null);
+        public Object createElement(int element) {
+            return element;
         }
-      });
-    }).cancel().run(getEngine());
-    await(cancelled);
-    await(result);
-  }
 
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Arrays.asList(new SubscriberVerification());
-  }
+        @Override
+        public void required_spec201_blackbox_mustSignalDemandViaSubscriptionRequest() throws Throwable {
+            throw new SkipException("Cancel subscriber does not need to signal demand.");
+        }
 
-  public class SubscriberVerification extends StageSubscriberBlackboxVerification {
-    @Override
-    public Subscriber createSubscriber() {
-      return ReactiveStreams.builder().cancel().build(getEngine());
+        @Override
+        public void required_spec209_blackbox_mustBePreparedToReceiveAnOnCompleteSignalWithPrecedingRequestCall() throws Throwable {
+            throw new SkipException("Cancel subscriber does not need to signal demand.");
+        }
+
+        @Override
+        public void required_spec210_blackbox_mustBePreparedToReceiveAnOnErrorSignalWithPrecedingRequestCall() throws Throwable {
+            throw new SkipException("Cancel subscriber does not need to signal demand.");
+        }
     }
-
-    @Override
-    public Object createElement(int element) {
-      return element;
-    }
-
-    @Override
-    public void required_spec201_blackbox_mustSignalDemandViaSubscriptionRequest() throws Throwable {
-      throw new SkipException("Cancel subscriber does not need to signal demand.");
-    }
-
-    @Override
-    public void required_spec209_blackbox_mustBePreparedToReceiveAnOnCompleteSignalWithPrecedingRequestCall() throws Throwable {
-      throw new SkipException("Cancel subscriber does not need to signal demand.");
-    }
-
-    @Override
-    public void required_spec210_blackbox_mustBePreparedToReceiveAnOnErrorSignalWithPrecedingRequestCall() throws Throwable {
-      throw new SkipException("Cancel subscriber does not need to signal demand.");
-    }
-  }
 }

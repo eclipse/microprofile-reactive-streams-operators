@@ -32,50 +32,50 @@ import static org.testng.Assert.assertEquals;
 
 public class OfStageVerification extends AbstractStageVerification {
 
-  OfStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
-
-  @Test
-  public void iterableStageShouldEmitManyElements() {
-    assertEquals(await(
-        ReactiveStreams.of("a", "b", "c")
-            .toList()
-            .run(getEngine())
-    ), Arrays.asList("a", "b", "c"));
-  }
-
-  @Test
-  public void emptyIterableStageShouldEmitNoElements() {
-    assertEquals(await(
-        ReactiveStreams.empty()
-            .toList()
-            .run(getEngine())
-    ), Collections.emptyList());
-  }
-
-  @Test
-  public void singleIterableStageShouldEmitOneElement() {
-    assertEquals(await(
-        ReactiveStreams.of("a")
-            .toList()
-            .run(getEngine())
-    ), Collections.singletonList("a"));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new PublisherVerification());
-  }
-
-  public class PublisherVerification extends StagePublisherVerification<Long> {
-    @Override
-    public Publisher<Long> createPublisher(long elements) {
-      return ReactiveStreams.fromIterable(
-          () -> LongStream.rangeClosed(1, elements).boxed().iterator()
-      ).buildRs(getEngine());
+    OfStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
     }
-  }
+
+    @Test
+    public void iterableStageShouldEmitManyElements() {
+        assertEquals(await(
+            ReactiveStreams.of("a", "b", "c")
+                .toList()
+                .run(getEngine())
+        ), Arrays.asList("a", "b", "c"));
+    }
+
+    @Test
+    public void emptyIterableStageShouldEmitNoElements() {
+        assertEquals(await(
+            ReactiveStreams.empty()
+                .toList()
+                .run(getEngine())
+        ), Collections.emptyList());
+    }
+
+    @Test
+    public void singleIterableStageShouldEmitOneElement() {
+        assertEquals(await(
+            ReactiveStreams.of("a")
+                .toList()
+                .run(getEngine())
+        ), Collections.singletonList("a"));
+    }
+
+    @Override
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new PublisherVerification());
+    }
+
+    public class PublisherVerification extends StagePublisherVerification<Long> {
+        @Override
+        public Publisher<Long> createPublisher(long elements) {
+            return ReactiveStreams.fromIterable(
+                () -> LongStream.rangeClosed(1, elements).boxed().iterator()
+            ).buildRs(getEngine());
+        }
+    }
 
 
 }

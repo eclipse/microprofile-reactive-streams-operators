@@ -32,53 +32,53 @@ import static org.testng.Assert.assertEquals;
 
 public class SkipStageVerification extends AbstractStageVerification {
 
-  SkipStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    SkipStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void skipStageShouldSkipElements() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
-        .skip(2)
-        .toList()
-        .run(getEngine())), Arrays.asList(3, 4));
-  }
+    @Test
+    public void skipStageShouldSkipElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+            .skip(2)
+            .toList()
+            .run(getEngine())), Arrays.asList(3, 4));
+    }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void skipOnPublisherShouldRefuseToSkipNegativeElements() {
-    ReactiveStreams.of(1)
-        .skip(-1);
-  }
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void skipOnPublisherShouldRefuseToSkipNegativeElements() {
+        ReactiveStreams.of(1)
+            .skip(-1);
+    }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void skipOnProcessorShouldRefuseToSkipNegativeElements() {
-    ReactiveStreams.builder()
-        .skip(-1);
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(
-        new ProcessorVerification()
-    );
-  }
-
-  class ProcessorVerification extends StageProcessorVerification<Integer> {
-
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().skip(0).buildRs(getEngine());
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void skipOnProcessorShouldRefuseToSkipNegativeElements() {
+        ReactiveStreams.builder()
+            .skip(-1);
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .skip(1).buildRs(getEngine());
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(
+            new ProcessorVerification()
+        );
     }
 
-    @Override
-    public Integer createElement(int element) {
-      return element;
+    class ProcessorVerification extends StageProcessorVerification<Integer> {
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder().skip(0).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .skip(1).buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
     }
-  }
 }

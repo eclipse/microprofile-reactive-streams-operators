@@ -24,43 +24,43 @@ import org.eclipse.microprofile.reactive.messaging.Message;
 import java.util.Objects;
 
 public class SimpleMessage<T> implements Message<T> {
-  private final T payload;
+    private final T payload;
 
-  public SimpleMessage(T payload) {
-    this.payload = payload;
-  }
-
-  @Override
-  public T getPayload() {
-    return payload;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public SimpleMessage(T payload) {
+        this.payload = payload;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public static <T> SimpleMessage<T> wrap(T payload) {
+        return new SimpleMessage<>(payload);
     }
-    SimpleMessage<?> that = (SimpleMessage<?>) o;
-    return Objects.equals(payload, that.payload);
-  }
 
-  @Override
-  public int hashCode() {
+    @Override
+    public T getPayload() {
+        return payload;
+    }
 
-    return Objects.hash(payload);
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SimpleMessage<?> that = (SimpleMessage<?>) o;
+        return Objects.equals(payload, that.payload);
+    }
 
-  @Override
-  public String toString() {
-    return "SimpleMessage{" +
-        "payload=" + payload +
-        '}';
-  }
+    @Override
+    public int hashCode() {
 
-  public static <T> SimpleMessage<T> wrap(T payload) {
-    return new SimpleMessage<>(payload);
-  }
+        return Objects.hash(payload);
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleMessage{" +
+            "payload=" + payload +
+            '}';
+    }
 }

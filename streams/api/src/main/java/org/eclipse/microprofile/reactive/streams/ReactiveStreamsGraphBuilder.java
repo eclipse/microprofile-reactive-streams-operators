@@ -32,73 +32,73 @@ import java.util.*;
  */
 final class ReactiveStreamsGraphBuilder {
 
-  private final Stage stage;
-  private final ReactiveStreamsGraphBuilder previous;
+    private final Stage stage;
+    private final ReactiveStreamsGraphBuilder previous;
 
-  private ReactiveStreamsGraphBuilder(Stage stage, ReactiveStreamsGraphBuilder previous) {
-    this.stage = stage;
-    this.previous = previous;
-  }
-
-  ReactiveStreamsGraphBuilder(Stage stage) {
-    this(stage, null);
-  }
-
-  ReactiveStreamsGraphBuilder addStage(Stage stage) {
-    return new ReactiveStreamsGraphBuilder(stage, this);
-  }
-
-  static ReactiveStreamsEngine defaultEngine() {
-    Iterator<ReactiveStreamsEngine> engines = ServiceLoader.load(ReactiveStreamsEngine.class).iterator();
-
-    if (engines.hasNext()) {
-      return engines.next();
-    }
-    else {
-      throw new IllegalStateException("No implementation of ReactiveStreamsEngine service could be found.");
-    }
-  }
-
-  Graph build(boolean expectInlet, boolean expectOutlet) {
-    ArrayDeque<Stage> deque = new ArrayDeque<>();
-    flatten(deque);
-    Graph graph = new Graph(Collections.unmodifiableCollection(deque));
-
-    if (expectInlet) {
-      if (!graph.hasInlet()) {
-        throw new IllegalStateException("Expected to build a graph with an inlet, but no inlet was found: " + graph);
-      }
-    }
-    else if (graph.hasInlet()) {
-      throw new IllegalStateException("Expected to build a graph with no inlet, but an inlet was found: " + graph);
+    private ReactiveStreamsGraphBuilder(Stage stage, ReactiveStreamsGraphBuilder previous) {
+        this.stage = stage;
+        this.previous = previous;
     }
 
-    if (expectOutlet) {
-      if (!graph.hasOutlet()) {
-        throw new IllegalStateException("Expected to build a graph with an outlet, but no outlet was found: " + graph);
-      }
-    }
-    else if (graph.hasOutlet()) {
-      throw new IllegalStateException("Expected to build a graph with no outlet, but an outlet was found: " + graph);
+    ReactiveStreamsGraphBuilder(Stage stage) {
+        this(stage, null);
     }
 
-    return graph;
-  }
+    static ReactiveStreamsEngine defaultEngine() {
+        Iterator<ReactiveStreamsEngine> engines = ServiceLoader.load(ReactiveStreamsEngine.class).iterator();
 
-  private void flatten(Deque<Stage> stages) {
-    ReactiveStreamsGraphBuilder thisStage = this;
-    while (thisStage != null) {
-      if (thisStage.stage == InternalStages.Identity.INSTANCE) {
-        // Ignore, no need to add an identity stage
-      }
-      else if (thisStage.stage instanceof InternalStages.Nested) {
-        ((InternalStages.Nested) thisStage.stage).getBuilder().flatten(stages);
-      }
-      else {
-        stages.addFirst(thisStage.stage);
-      }
-      thisStage = thisStage.previous;
+        if (engines.hasNext()) {
+            return engines.next();
+        }
+        else {
+            throw new IllegalStateException("No implementation of ReactiveStreamsEngine service could be found.");
+        }
     }
-  }
+
+    ReactiveStreamsGraphBuilder addStage(Stage stage) {
+        return new ReactiveStreamsGraphBuilder(stage, this);
+    }
+
+    Graph build(boolean expectInlet, boolean expectOutlet) {
+        ArrayDeque<Stage> deque = new ArrayDeque<>();
+        flatten(deque);
+        Graph graph = new Graph(Collections.unmodifiableCollection(deque));
+
+        if (expectInlet) {
+            if (!graph.hasInlet()) {
+                throw new IllegalStateException("Expected to build a graph with an inlet, but no inlet was found: " + graph);
+            }
+        }
+        else if (graph.hasInlet()) {
+            throw new IllegalStateException("Expected to build a graph with no inlet, but an inlet was found: " + graph);
+        }
+
+        if (expectOutlet) {
+            if (!graph.hasOutlet()) {
+                throw new IllegalStateException("Expected to build a graph with an outlet, but no outlet was found: " + graph);
+            }
+        }
+        else if (graph.hasOutlet()) {
+            throw new IllegalStateException("Expected to build a graph with no outlet, but an outlet was found: " + graph);
+        }
+
+        return graph;
+    }
+
+    private void flatten(Deque<Stage> stages) {
+        ReactiveStreamsGraphBuilder thisStage = this;
+        while (thisStage != null) {
+            if (thisStage.stage == InternalStages.Identity.INSTANCE) {
+                // Ignore, no need to add an identity stage
+            }
+            else if (thisStage.stage instanceof InternalStages.Nested) {
+                ((InternalStages.Nested) thisStage.stage).getBuilder().flatten(stages);
+            }
+            else {
+                stages.addFirst(thisStage.stage);
+            }
+            thisStage = thisStage.previous;
+        }
+    }
 
 }

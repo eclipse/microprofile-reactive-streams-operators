@@ -70,313 +70,305 @@ import static org.testng.Assert.assertTrue;
 })
 public class CompletionStageIncomingMethodVerification extends Arquillian {
 
-  @Deployment
-  public static JavaArchive createDeployment() {
-    return ShrinkWrap.create(JavaArchive.class)
-        .addClass(Bean.class)
-        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-  }
-
-  @Inject
-  private TckMessagingManager manager;
-  @Inject
-  private ContainerController controller;
-  @Inject
-  private TestEnvironment environment;
-
-  @Inject
-  private Bean bean;
-
-  static final String VOID_METHOD = "void-method";
-  static final String NON_PARALLEL = "non-parallel";
-  static final String NON_VOID_METHOD = "non-void-method";
-  static final String SYNC_FAILING = "sync-failing";
-  static final String ASYNC_FAILING = "async-failing";
-  static final String WRAPPED_MESSAGE = "wrapped-message";
-  static final String OUTGOING_WRAPPED = "outgoing-wrapped";
-  static final String INCOMING_OUTGOING_WRAPPED = "incoming-outgoing-wrapped";
-
-  @ApplicationScoped
-  public static class Bean {
-
+    static final String VOID_METHOD = "void-method";
+    static final String NON_PARALLEL = "non-parallel";
+    static final String NON_VOID_METHOD = "non-void-method";
+    static final String SYNC_FAILING = "sync-failing";
+    static final String ASYNC_FAILING = "async-failing";
+    static final String WRAPPED_MESSAGE = "wrapped-message";
+    static final String OUTGOING_WRAPPED = "outgoing-wrapped";
+    static final String INCOMING_OUTGOING_WRAPPED = "incoming-outgoing-wrapped";
     @Inject
     private TckMessagingManager manager;
+    @Inject
+    private ContainerController controller;
+    @Inject
+    private TestEnvironment environment;
+    @Inject
+    private Bean bean;
 
-    @Incoming(topic = VOID_METHOD)
-    public CompletionStage<Void> handleVoidMethod(MockPayload payload) {
-      manager.getReceiver(VOID_METHOD).receiveMessage(payload);
-      return CompletableFuture.completedFuture(null);
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return ShrinkWrap.create(JavaArchive.class)
+            .addClass(Bean.class)
+            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
-    private final Deque<CompletableFuture<Void>> futures = new ArrayDeque<>();
+    @Test
+    public void simpleCompletionStageVoidMethodShouldProcessMessages() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(VOID_METHOD);
+        MockPayload msg1 = new MockPayload("mock", 1);
+        MockPayload msg2 = new MockPayload("mock", 2);
+        MockPayload msg3 = new MockPayload("mock", 3);
 
-    public Deque<CompletableFuture<Void>> getFutures() {
-      return futures;
+        controller.sendPayloads(VOID_METHOD, msg1, msg2);
+
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNoMessages("Didn't expect a message because didn't send one.");
+        controller.sendPayloads(VOID_METHOD, msg3);
+        receiver.expectNextMessageWithPayload(msg3);
     }
 
-    @Incoming(topic = NON_PARALLEL)
-    public CompletionStage<Void> handleNonParallel(MockPayload payload) {
-      manager.getReceiver(NON_PARALLEL).receiveMessage(payload);
-      CompletableFuture<Void> future = new CompletableFuture<>();
-      futures.add(future);
-      return future;
+    @Test
+    public void completionStageMethodShouldNotProcessMessagesInParallel() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(NON_PARALLEL);
+        MockPayload msg1 = new MockPayload("mock", 1);
+        MockPayload msg2 = new MockPayload("mock", 2);
+        MockPayload msg3 = new MockPayload("mock", 3);
+
+        controller.sendPayloads(NON_PARALLEL, msg1, msg2);
+
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNoMessages("Did not redeem future from previous message yet.");
+        bean.getFutures().removeFirst().complete(null);
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNoMessages("Did not redeem future from previous message yet.");
+        bean.getFutures().removeFirst().complete(null);
+        controller.sendPayloads(NON_PARALLEL, msg3);
+        receiver.expectNextMessageWithPayload(msg3);
+        bean.getFutures().removeFirst().complete(null);
     }
 
-    @Incoming(topic = NON_VOID_METHOD)
-    public CompletionStage<String> handleNonVoidMethod(MockPayload payload) {
-      manager.getReceiver(NON_VOID_METHOD).receiveMessage(payload);
-      return CompletableFuture.completedFuture("hello");
+    @Test
+    public void completionStageNonVoidMethodShouldIgnoreReturnValue() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(NON_VOID_METHOD);
+        MockPayload msg1 = new MockPayload("mock", 1);
+        MockPayload msg2 = new MockPayload("mock", 2);
+
+        controller.sendPayloads(NON_VOID_METHOD, msg1, msg2);
+
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNoMessages("Didn't expect a message because didn't send one.");
     }
 
-    private final AtomicBoolean syncFailed = new AtomicBoolean();
+    @Test
+    public void completionStageMethodShouldRetryMessagesThatFailSynchronously() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(SYNC_FAILING);
+        MockPayload msg1 = new MockPayload("success", 1);
+        MockPayload msg2 = new MockPayload("fail", 2);
+        MockPayload msg3 = new MockPayload("success", 3);
 
-    public AtomicBoolean getSyncFailed() {
-      return syncFailed;
+        controller.sendPayloads(SYNC_FAILING, msg1, msg2, msg3);
+        // We should receive the fail message once, then failed should be true, then we should receive it again,
+        // followed by the next message.
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNextMessageWithPayload(msg2);
+        assertTrue(bean.getSyncFailed().get(), "Sync was not failed");
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
     }
 
-    @Incoming(topic = SYNC_FAILING)
-    public CompletionStage<Void> handleSyncFailing(MockPayload payload) {
-      if (payload.getField1().equals("fail") && !syncFailed.getAndSet(true)) {
-        manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
-        throw new QuietRuntimeException("failed");
-      }
-      else {
-        manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
-        return CompletableFuture.completedFuture(null);
-      }
+    @Test
+    public void completionStageMethodShouldRetryMessagesThatFailAsynchronously() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(ASYNC_FAILING);
+        MockPayload msg1 = new MockPayload("success", 1);
+        MockPayload msg2 = new MockPayload("fail", 2);
+        MockPayload msg3 = new MockPayload("success", 3);
+
+        controller.sendPayloads(ASYNC_FAILING, msg1, msg2, msg3);
+        // We should receive the fail message once, then failed should be true, then we should receive it again,
+        // followed by the next message.
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNextMessageWithPayload(msg2);
+        assertTrue(bean.getAsyncFailed().get(), "Async was not failed");
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
     }
 
-    private final AtomicBoolean asyncFailed = new AtomicBoolean();
+    @Test
+    public void completionStageMethodShouldNotAutomaticallyAcknowledgeWrappedMessages() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(WRAPPED_MESSAGE);
+        MockPayload msg1 = new MockPayload("acknowledged", 1);
+        MockPayload msg2 = new MockPayload("unacknowledged", 2);
+        MockPayload msg3 = new MockPayload("fail", 3);
+        MockPayload msg4 = new MockPayload("success", 4);
 
-    public AtomicBoolean getAsyncFailed() {
-      return asyncFailed;
+        controller.sendPayloads(WRAPPED_MESSAGE, msg1, msg2, msg3, msg4);
+        // First one should be acknwoldeged. The second one gets processed successfully, but first time, doesn't ack.
+        // Third one fails on the first attempt, on the second acks. Fourth one always acks.
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
+        assertTrue(bean.getWrappedFailed().get(), "Wrapped was not failed");
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
+        receiver.expectNextMessageWithPayload(msg4);
     }
 
-    @Incoming(topic = ASYNC_FAILING)
-    public CompletionStage<Void> handleAsyncFailing(MockPayload payload) {
-      if (payload.getField1().equals("fail") && !asyncFailed.getAndSet(true)) {
-        manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        future.completeExceptionally(new QuietRuntimeException("failed"));
-        return future;
-      }
-      else {
-        manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
-        return CompletableFuture.completedFuture(null);
-      }
+    @Test
+    public void completionStageWithOutgoingWrappedMessageShouldGetAcknowledged() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(OUTGOING_WRAPPED);
+        MockPayload msg1 = new MockPayload("success", 1);
+        MockPayload msg2 = new MockPayload("fail", 2);
+        MockPayload msg3 = new MockPayload("success", 3);
+
+        controller.sendPayloads(OUTGOING_WRAPPED, msg1, msg2, msg3);
+        receiver.expectNextMessageWithPayload(msg1);
+        waitUntil(environment.receiveTimeout(), () -> assertTrue(bean.getAcked().get() > 1));
+        receiver.expectNextMessageWithPayload(msg2);
+        assertTrue(bean.getOutgoingWrappedFailed().get(), "Outgoing wrapped was not failed");
+
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
+        waitUntil(environment.receiveTimeout(), () -> assertTrue(bean.getAcked().get() > 2));
+        waitUntil(environment.receiveTimeout(), () -> assertEquals(bean.getAcked().get(), 3));
     }
 
-    private final AtomicBoolean wrappedFailed = new AtomicBoolean();
+    @Test
+    public void completionStageMethodShouldAcknowldegePassedThroughAckFunctions() {
+        MockedReceiver<MockPayload> receiver = manager.getReceiver(INCOMING_OUTGOING_WRAPPED);
+        MockPayload msg1 = new MockPayload("acknowledged", 1);
+        MockPayload msg2 = new MockPayload("unacknowledged", 2);
+        MockPayload msg3 = new MockPayload("fail", 3);
+        MockPayload msg4 = new MockPayload("success", 4);
 
-    public AtomicBoolean getWrappedFailed() {
-      return wrappedFailed;
+        controller.sendPayloads(INCOMING_OUTGOING_WRAPPED, msg1, msg2, msg3, msg4);
+        receiver.expectNextMessageWithPayload(msg1);
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
+        assertTrue(bean.getIncomingOutgoingWrappedFailed().get(), "Wrapped was not failed");
+        receiver.expectNextMessageWithPayload(msg2);
+        receiver.expectNextMessageWithPayload(msg3);
+        receiver.expectNextMessageWithPayload(msg4);
     }
 
-    @Incoming(topic = WRAPPED_MESSAGE)
-    public CompletionStage<Void> handleWrapped(Message<MockPayload> msg) {
-      if (msg.getPayload().getField1().equals("acknowledged") || wrappedFailed.get()) {
-        manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
-        return msg.ack();
-      }
-      else if (msg.getPayload().getField1().equals("fail")) {
-        wrappedFailed.set(true);
-        manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
-        throw new QuietRuntimeException("failed");
-      }
-      else {
-        manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
-        return CompletableFuture.completedFuture(null);
-      }
+    @ApplicationScoped
+    public static class Bean {
+
+        private final Deque<CompletableFuture<Void>> futures = new ArrayDeque<>();
+        private final AtomicBoolean syncFailed = new AtomicBoolean();
+        private final AtomicBoolean asyncFailed = new AtomicBoolean();
+        private final AtomicBoolean wrappedFailed = new AtomicBoolean();
+        private final AtomicInteger acked = new AtomicInteger();
+        private final AtomicBoolean outgoingWrappedFailed = new AtomicBoolean();
+        private final AtomicBoolean incomingOutgoingWrappedFailed = new AtomicBoolean();
+        @Inject
+        private TckMessagingManager manager;
+
+        @Incoming(topic = VOID_METHOD)
+        public CompletionStage<Void> handleVoidMethod(MockPayload payload) {
+            manager.getReceiver(VOID_METHOD).receiveMessage(payload);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        public Deque<CompletableFuture<Void>> getFutures() {
+            return futures;
+        }
+
+        @Incoming(topic = NON_PARALLEL)
+        public CompletionStage<Void> handleNonParallel(MockPayload payload) {
+            manager.getReceiver(NON_PARALLEL).receiveMessage(payload);
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            futures.add(future);
+            return future;
+        }
+
+        @Incoming(topic = NON_VOID_METHOD)
+        public CompletionStage<String> handleNonVoidMethod(MockPayload payload) {
+            manager.getReceiver(NON_VOID_METHOD).receiveMessage(payload);
+            return CompletableFuture.completedFuture("hello");
+        }
+
+        public AtomicBoolean getSyncFailed() {
+            return syncFailed;
+        }
+
+        @Incoming(topic = SYNC_FAILING)
+        public CompletionStage<Void> handleSyncFailing(MockPayload payload) {
+            if (payload.getField1().equals("fail") && !syncFailed.getAndSet(true)) {
+                manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.getReceiver(SYNC_FAILING).receiveMessage(payload);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
+
+        public AtomicBoolean getAsyncFailed() {
+            return asyncFailed;
+        }
+
+        @Incoming(topic = ASYNC_FAILING)
+        public CompletionStage<Void> handleAsyncFailing(MockPayload payload) {
+            if (payload.getField1().equals("fail") && !asyncFailed.getAndSet(true)) {
+                manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
+                CompletableFuture<Void> future = new CompletableFuture<>();
+                future.completeExceptionally(new QuietRuntimeException("failed"));
+                return future;
+            }
+            else {
+                manager.getReceiver(ASYNC_FAILING).receiveMessage(payload);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
+
+        public AtomicBoolean getWrappedFailed() {
+            return wrappedFailed;
+        }
+
+        @Incoming(topic = WRAPPED_MESSAGE)
+        public CompletionStage<Void> handleWrapped(Message<MockPayload> msg) {
+            if (msg.getPayload().getField1().equals("acknowledged") || wrappedFailed.get()) {
+                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
+                return msg.ack();
+            }
+            else if (msg.getPayload().getField1().equals("fail")) {
+                wrappedFailed.set(true);
+                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.<MockPayload>getReceiver(WRAPPED_MESSAGE).receiveWrappedMessage(msg);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
+
+        public AtomicInteger getAcked() {
+            return acked;
+        }
+
+        public AtomicBoolean getOutgoingWrappedFailed() {
+            return outgoingWrappedFailed;
+        }
+
+        @Incoming(topic = OUTGOING_WRAPPED)
+        public CompletionStage<Message<Void>> handleOutgoingWrapped(MockPayload msg) {
+            if (msg.getField1().equals("fail") && !outgoingWrappedFailed.getAndSet(true)) {
+                manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
+                return CompletableFuture.completedFuture(Message.of(null, () -> {
+                    acked.incrementAndGet();
+                    return CompletableFuture.completedFuture(null);
+                }));
+            }
+        }
+
+        public AtomicBoolean getIncomingOutgoingWrappedFailed() {
+            return incomingOutgoingWrappedFailed;
+        }
+
+        @Incoming(topic = INCOMING_OUTGOING_WRAPPED)
+        public CompletionStage<Message<Void>> handleIncomingOutgoingWrapped(Message<MockPayload> msg) {
+            if (msg.getPayload().getField1().equals("acknowledged") || incomingOutgoingWrappedFailed.get()) {
+                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
+                return CompletableFuture.completedFuture(Message.of(null, msg::ack));
+            }
+            else if (msg.getPayload().getField1().equals("fail")) {
+                incomingOutgoingWrappedFailed.set(true);
+                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
+                throw new QuietRuntimeException("failed");
+            }
+            else {
+                manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
+                // Note - not transferring the ack.
+                return CompletableFuture.completedFuture(Message.of(null));
+            }
+        }
     }
-
-    private final AtomicInteger acked = new AtomicInteger();
-    private final AtomicBoolean outgoingWrappedFailed = new AtomicBoolean();
-
-    public AtomicInteger getAcked() {
-      return acked;
-    }
-
-    public AtomicBoolean getOutgoingWrappedFailed() {
-      return outgoingWrappedFailed;
-    }
-
-    @Incoming(topic = OUTGOING_WRAPPED)
-    public CompletionStage<Message<Void>> handleOutgoingWrapped(MockPayload msg) {
-      if (msg.getField1().equals("fail") && !outgoingWrappedFailed.getAndSet(true)) {
-        manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
-        throw new QuietRuntimeException("failed");
-      }
-      else {
-        manager.getReceiver(OUTGOING_WRAPPED).receiveMessage(msg);
-        return CompletableFuture.completedFuture(Message.of(null, () -> {
-          acked.incrementAndGet();
-          return CompletableFuture.completedFuture(null);
-        }));
-      }
-    }
-
-    private final AtomicBoolean incomingOutgoingWrappedFailed = new AtomicBoolean();
-
-    public AtomicBoolean getIncomingOutgoingWrappedFailed() {
-      return incomingOutgoingWrappedFailed;
-    }
-
-    @Incoming(topic = INCOMING_OUTGOING_WRAPPED)
-    public CompletionStage<Message<Void>> handleIncomingOutgoingWrapped(Message<MockPayload> msg) {
-      if (msg.getPayload().getField1().equals("acknowledged") || incomingOutgoingWrappedFailed.get()) {
-        manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-        return CompletableFuture.completedFuture(Message.of(null, msg::ack));
-      }
-      else if (msg.getPayload().getField1().equals("fail")) {
-        incomingOutgoingWrappedFailed.set(true);
-        manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-        throw new QuietRuntimeException("failed");
-      }
-      else {
-        manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-        // Note - not transferring the ack.
-        return CompletableFuture.completedFuture(Message.of(null));
-      }
-    }
-  }
-
-  @Test
-  public void simpleCompletionStageVoidMethodShouldProcessMessages() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(VOID_METHOD);
-    MockPayload msg1 = new MockPayload("mock", 1);
-    MockPayload msg2 = new MockPayload("mock", 2);
-    MockPayload msg3 = new MockPayload("mock", 3);
-
-    controller.sendPayloads(VOID_METHOD, msg1, msg2);
-
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNoMessages("Didn't expect a message because didn't send one.");
-    controller.sendPayloads(VOID_METHOD, msg3);
-    receiver.expectNextMessageWithPayload(msg3);
-  }
-
-  @Test
-  public void completionStageMethodShouldNotProcessMessagesInParallel() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(NON_PARALLEL);
-    MockPayload msg1 = new MockPayload("mock", 1);
-    MockPayload msg2 = new MockPayload("mock", 2);
-    MockPayload msg3 = new MockPayload("mock", 3);
-
-    controller.sendPayloads(NON_PARALLEL, msg1, msg2);
-
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNoMessages("Did not redeem future from previous message yet.");
-    bean.getFutures().removeFirst().complete(null);
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNoMessages("Did not redeem future from previous message yet.");
-    bean.getFutures().removeFirst().complete(null);
-    controller.sendPayloads(NON_PARALLEL, msg3);
-    receiver.expectNextMessageWithPayload(msg3);
-    bean.getFutures().removeFirst().complete(null);
-  }
-
-  @Test
-  public void completionStageNonVoidMethodShouldIgnoreReturnValue() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(NON_VOID_METHOD);
-    MockPayload msg1 = new MockPayload("mock", 1);
-    MockPayload msg2 = new MockPayload("mock", 2);
-
-    controller.sendPayloads(NON_VOID_METHOD, msg1, msg2);
-
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNoMessages("Didn't expect a message because didn't send one.");
-  }
-
-  @Test
-  public void completionStageMethodShouldRetryMessagesThatFailSynchronously() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(SYNC_FAILING);
-    MockPayload msg1 = new MockPayload("success", 1);
-    MockPayload msg2 = new MockPayload("fail", 2);
-    MockPayload msg3 = new MockPayload("success", 3);
-
-    controller.sendPayloads(SYNC_FAILING, msg1, msg2, msg3);
-    // We should receive the fail message once, then failed should be true, then we should receive it again,
-    // followed by the next message.
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNextMessageWithPayload(msg2);
-    assertTrue(bean.getSyncFailed().get(), "Sync was not failed");
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-  }
-
-  @Test
-  public void completionStageMethodShouldRetryMessagesThatFailAsynchronously() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(ASYNC_FAILING);
-    MockPayload msg1 = new MockPayload("success", 1);
-    MockPayload msg2 = new MockPayload("fail", 2);
-    MockPayload msg3 = new MockPayload("success", 3);
-
-    controller.sendPayloads(ASYNC_FAILING, msg1, msg2, msg3);
-    // We should receive the fail message once, then failed should be true, then we should receive it again,
-    // followed by the next message.
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNextMessageWithPayload(msg2);
-    assertTrue(bean.getAsyncFailed().get(), "Async was not failed");
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-  }
-
-  @Test
-  public void completionStageMethodShouldNotAutomaticallyAcknowledgeWrappedMessages() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(WRAPPED_MESSAGE);
-    MockPayload msg1 = new MockPayload("acknowledged", 1);
-    MockPayload msg2 = new MockPayload("unacknowledged", 2);
-    MockPayload msg3 = new MockPayload("fail", 3);
-    MockPayload msg4 = new MockPayload("success", 4);
-
-    controller.sendPayloads(WRAPPED_MESSAGE, msg1, msg2, msg3, msg4);
-    // First one should be acknwoldeged. The second one gets processed successfully, but first time, doesn't ack.
-    // Third one fails on the first attempt, on the second acks. Fourth one always acks.
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-    assertTrue(bean.getWrappedFailed().get(), "Wrapped was not failed");
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-    receiver.expectNextMessageWithPayload(msg4);
-  }
-
-  @Test
-  public void completionStageWithOutgoingWrappedMessageShouldGetAcknowledged() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(OUTGOING_WRAPPED);
-    MockPayload msg1 = new MockPayload("success", 1);
-    MockPayload msg2 = new MockPayload("fail", 2);
-    MockPayload msg3 = new MockPayload("success", 3);
-
-    controller.sendPayloads(OUTGOING_WRAPPED, msg1, msg2, msg3);
-    receiver.expectNextMessageWithPayload(msg1);
-    waitUntil(environment.receiveTimeout(), () -> assertTrue(bean.getAcked().get() > 1));
-    receiver.expectNextMessageWithPayload(msg2);
-    assertTrue(bean.getOutgoingWrappedFailed().get(), "Outgoing wrapped was not failed");
-
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-    waitUntil(environment.receiveTimeout(), () -> assertTrue(bean.getAcked().get() > 2));
-    waitUntil(environment.receiveTimeout(), () -> assertEquals(bean.getAcked().get(), 3));
-  }
-
-  @Test
-  public void completionStageMethodShouldAcknowldegePassedThroughAckFunctions() {
-    MockedReceiver<MockPayload> receiver = manager.getReceiver(INCOMING_OUTGOING_WRAPPED);
-    MockPayload msg1 = new MockPayload("acknowledged", 1);
-    MockPayload msg2 = new MockPayload("unacknowledged", 2);
-    MockPayload msg3 = new MockPayload("fail", 3);
-    MockPayload msg4 = new MockPayload("success", 4);
-
-    controller.sendPayloads(INCOMING_OUTGOING_WRAPPED, msg1, msg2, msg3, msg4);
-    receiver.expectNextMessageWithPayload(msg1);
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-    assertTrue(bean.getIncomingOutgoingWrappedFailed().get(), "Wrapped was not failed");
-    receiver.expectNextMessageWithPayload(msg2);
-    receiver.expectNextMessageWithPayload(msg3);
-    receiver.expectNextMessageWithPayload(msg4);
-  }
 }

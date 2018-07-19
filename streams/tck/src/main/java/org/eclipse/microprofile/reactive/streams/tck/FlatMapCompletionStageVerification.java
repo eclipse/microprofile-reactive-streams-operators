@@ -34,95 +34,95 @@ import java.util.function.Function;
 import static org.testng.Assert.assertEquals;
 
 public class FlatMapCompletionStageVerification extends AbstractStageVerification {
-  FlatMapCompletionStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    FlatMapCompletionStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void flatMapCsStageShouldMapFutures() throws Exception {
-    CompletableFuture<Integer> one = new CompletableFuture<>();
-    CompletableFuture<Integer> two = new CompletableFuture<>();
-    CompletableFuture<Integer> three = new CompletableFuture<>();
+    @Test
+    public void flatMapCsStageShouldMapFutures() throws Exception {
+        CompletableFuture<Integer> one = new CompletableFuture<>();
+        CompletableFuture<Integer> two = new CompletableFuture<>();
+        CompletableFuture<Integer> three = new CompletableFuture<>();
 
-    CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
-        .flatMapCompletionStage(Function.identity())
-        .toList()
-        .run(getEngine());
+        CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
+            .flatMapCompletionStage(Function.identity())
+            .toList()
+            .run(getEngine());
 
-    Thread.sleep(100);
+        Thread.sleep(100);
 
-    one.complete(1);
-    two.complete(2);
-    three.complete(3);
+        one.complete(1);
+        two.complete(2);
+        three.complete(3);
 
-    assertEquals(await(result), Arrays.asList(1, 2, 3));
-  }
+        assertEquals(await(result), Arrays.asList(1, 2, 3));
+    }
 
-  @Test
-  public void flatMapCsStageShouldMaintainOrderOfFutures() throws Exception {
-    CompletableFuture<Integer> one = new CompletableFuture<>();
-    CompletableFuture<Integer> two = new CompletableFuture<>();
-    CompletableFuture<Integer> three = new CompletableFuture<>();
+    @Test
+    public void flatMapCsStageShouldMaintainOrderOfFutures() throws Exception {
+        CompletableFuture<Integer> one = new CompletableFuture<>();
+        CompletableFuture<Integer> two = new CompletableFuture<>();
+        CompletableFuture<Integer> three = new CompletableFuture<>();
 
-    CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
-        .flatMapCompletionStage(Function.identity())
-        .toList()
-        .run(getEngine());
+        CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
+            .flatMapCompletionStage(Function.identity())
+            .toList()
+            .run(getEngine());
 
-    three.complete(3);
-    Thread.sleep(100);
-    two.complete(2);
-    Thread.sleep(100);
-    one.complete(1);
+        three.complete(3);
+        Thread.sleep(100);
+        two.complete(2);
+        Thread.sleep(100);
+        one.complete(1);
 
-    assertEquals(await(result), Arrays.asList(1, 2, 3));
-  }
+        assertEquals(await(result), Arrays.asList(1, 2, 3));
+    }
 
-  @Test
-  public void flatMapCsStageShouldOnlyMapOneElementAtATime() throws Exception {
-    CompletableFuture<Integer> one = new CompletableFuture<>();
-    CompletableFuture<Integer> two = new CompletableFuture<>();
-    CompletableFuture<Integer> three = new CompletableFuture<>();
+    @Test
+    public void flatMapCsStageShouldOnlyMapOneElementAtATime() throws Exception {
+        CompletableFuture<Integer> one = new CompletableFuture<>();
+        CompletableFuture<Integer> two = new CompletableFuture<>();
+        CompletableFuture<Integer> three = new CompletableFuture<>();
 
-    AtomicInteger concurrentMaps = new AtomicInteger(0);
+        AtomicInteger concurrentMaps = new AtomicInteger(0);
 
-    CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
-        .flatMapCompletionStage(i -> {
-          assertEquals(1, concurrentMaps.incrementAndGet());
-          return i;
-        })
-        .toList()
-        .run(getEngine());
+        CompletionStage<List<Integer>> result = ReactiveStreams.of(one, two, three)
+            .flatMapCompletionStage(i -> {
+                assertEquals(1, concurrentMaps.incrementAndGet());
+                return i;
+            })
+            .toList()
+            .run(getEngine());
 
-    Thread.sleep(100);
-    concurrentMaps.decrementAndGet();
-    one.complete(1);
-    Thread.sleep(100);
-    concurrentMaps.decrementAndGet();
-    two.complete(2);
-    Thread.sleep(100);
-    concurrentMaps.decrementAndGet();
-    three.complete(3);
+        Thread.sleep(100);
+        concurrentMaps.decrementAndGet();
+        one.complete(1);
+        Thread.sleep(100);
+        concurrentMaps.decrementAndGet();
+        two.complete(2);
+        Thread.sleep(100);
+        concurrentMaps.decrementAndGet();
+        three.complete(3);
 
-    assertEquals(await(result), Arrays.asList(1, 2, 3));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new ProcessorVerification());
-  }
-
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder()
-          .flatMapCompletionStage(CompletableFuture::completedFuture)
-          .buildRs(getEngine());
+        assertEquals(await(result), Arrays.asList(1, 2, 3));
     }
 
     @Override
-    public Integer createElement(int element) {
-      return element;
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new ProcessorVerification());
     }
-  }
+
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder()
+                .flatMapCompletionStage(CompletableFuture::completedFuture)
+                .buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+    }
 }

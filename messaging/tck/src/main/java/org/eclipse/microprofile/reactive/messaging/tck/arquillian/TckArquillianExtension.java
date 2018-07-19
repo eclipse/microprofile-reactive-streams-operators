@@ -22,8 +22,8 @@ package org.eclipse.microprofile.reactive.messaging.tck.arquillian;
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
 public class TckArquillianExtension implements LoadableExtension {
-  @Override
-  public void register(ExtensionBuilder builder) {
-    builder.observer(TckArquillianDeployListener.class);
-  }
+    @Override
+    public void register(ExtensionBuilder builder) {
+        builder.observer(TckArquillianDeployListener.class);
+    }
 }

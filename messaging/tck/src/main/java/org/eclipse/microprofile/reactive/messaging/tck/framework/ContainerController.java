@@ -36,30 +36,29 @@ import java.io.ByteArrayOutputStream;
 @ApplicationScoped
 public class ContainerController {
 
-  @Inject
-  private TckMessagingPuppet container;
+    private final Jsonb jsonb = JsonbBuilder.create();
+    @Inject
+    private TckMessagingPuppet container;
 
-  private final Jsonb jsonb = JsonbBuilder.create();
-
-  public void sendMessages(String topic, Message<?>... messages) {
-    for (Message<?> message: messages) {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      jsonb.toJson(message.getPayload(), baos);
-      container.sendMessage(topic, Message.of(baos.toByteArray()));
+    public void sendMessages(String topic, Message<?>... messages) {
+        for (Message<?> message : messages) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            jsonb.toJson(message.getPayload(), baos);
+            container.sendMessage(topic, Message.of(baos.toByteArray()));
+        }
     }
-  }
 
-  public void sendPayloads(String topic, Object... payloads) {
-    for (Object payload: payloads) {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      jsonb.toJson(payload, baos);
-      container.sendMessage(topic, Message.of(baos.toByteArray()));
+    public void sendPayloads(String topic, Object... payloads) {
+        for (Object payload : payloads) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            jsonb.toJson(payload, baos);
+            container.sendMessage(topic, Message.of(baos.toByteArray()));
+        }
     }
-  }
 
-  @Produces
-  public TestEnvironment produceTestEnvironment() {
-    return container.testEnvironment();
-  }
+    @Produces
+    public TestEnvironment produceTestEnvironment() {
+        return container.testEnvironment();
+    }
 
 }

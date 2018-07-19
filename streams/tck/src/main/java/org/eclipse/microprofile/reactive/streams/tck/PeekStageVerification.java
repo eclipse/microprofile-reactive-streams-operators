@@ -34,57 +34,56 @@ import static org.testng.Assert.assertEquals;
 
 public class PeekStageVerification extends AbstractStageVerification {
 
-  PeekStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    PeekStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void peekStageShouldNotModifyElements() {
-    AtomicInteger count = new AtomicInteger();  
-    assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .peek(i -> {
-            count.incrementAndGet();
-        })
-        .toList()
-        .run(getEngine())), Arrays.asList(1, 2, 3));
-    assertEquals(count.get(), 3);    
-  }
+    @Test
+    public void peekStageShouldNotModifyElements() {
+        AtomicInteger count = new AtomicInteger();
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .peek(i -> count.incrementAndGet())
+            .toList()
+            .run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(count.get(), 3);
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void peekStageShouldPropagateRuntimeExceptions() {
-    await(ReactiveStreams.of("foo")
-        .peek(x -> {
-          throw new RuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(
-        new ProcessorVerification()
-    );
-  }
-
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-
-    private Consumer<Integer> noop = x -> {};
-
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder().peek(noop).buildRs(getEngine());
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void peekStageShouldPropagateRuntimeExceptions() {
+        await(ReactiveStreams.of("foo")
+            .peek(x -> {
+                throw new RuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine()));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .peek(noop).buildRs(getEngine());
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(
+            new ProcessorVerification()
+        );
     }
 
-    @Override
-    public Integer createElement(int element) {
-      return element;
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+
+        private Consumer<Integer> noop = x -> {
+        };
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder().peek(noop).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .peek(noop).buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
     }
-  }
 }

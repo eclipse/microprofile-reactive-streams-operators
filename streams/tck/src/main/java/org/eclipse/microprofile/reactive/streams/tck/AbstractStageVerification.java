@@ -38,89 +38,89 @@ import java.util.concurrent.TimeoutException;
 
 abstract class AbstractStageVerification {
 
-  private final ReactiveStreamsEngine engine;
-  private final TestEnvironment environment;
-  private final ScheduledExecutorService executorService;
+    private final ReactiveStreamsEngine engine;
+    private final TestEnvironment environment;
+    private final ScheduledExecutorService executorService;
 
-  AbstractStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    this.engine = deps.engine();
-    this.environment = deps.testEnvironment();
-    this.executorService = deps.executorService();
-  }
-
-  ReactiveStreamsEngine getEngine() {
-    return engine;
-  }
-
-  ScheduledExecutorService getExecutorService() {
-    return executorService;
-  }
-
-  abstract List<Object> reactiveStreamsTckVerifiers();
-
-  <T> T await(CompletionStage<T> future) {
-    try {
-      return future.toCompletableFuture().get(environment.defaultTimeoutMillis(), TimeUnit.MILLISECONDS);
-    }
-    catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-    catch (ExecutionException e) {
-      if (e.getCause() instanceof RuntimeException) {
-        throw (RuntimeException) e.getCause();
-      }
-      else {
-        throw new RuntimeException(e.getCause());
-      }
-    }
-    catch (TimeoutException e) {
-      throw new RuntimeException("Future timed out after " + environment.defaultTimeoutMillis() + "ms", e);
-    }
-  }
-
-
-  abstract class StagePublisherVerification<T> extends PublisherVerification<T> {
-
-    StagePublisherVerification() {
-      super(AbstractStageVerification.this.environment);
+    AbstractStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        this.engine = deps.engine();
+        this.environment = deps.testEnvironment();
+        this.executorService = deps.executorService();
     }
 
-    @Override
-    public Publisher<T> createFailedPublisher() {
-      return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
-    }
-  }
-
-  abstract class StageProcessorVerification<T> extends IdentityProcessorVerification<T> {
-    StageProcessorVerification() {
-      super(AbstractStageVerification.this.environment);
+    ReactiveStreamsEngine getEngine() {
+        return engine;
     }
 
-    @Override
-    public ExecutorService publisherExecutorService() {
-      return executorService;
+    ScheduledExecutorService getExecutorService() {
+        return executorService;
     }
 
-    @Override
-    public Publisher<T> createFailedPublisher() {
-      return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
+    abstract List<Object> reactiveStreamsTckVerifiers();
+
+    <T> T await(CompletionStage<T> future) {
+        try {
+            return future.toCompletableFuture().get(environment.defaultTimeoutMillis(), TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        catch (ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            else {
+                throw new RuntimeException(e.getCause());
+            }
+        }
+        catch (TimeoutException e) {
+            throw new RuntimeException("Future timed out after " + environment.defaultTimeoutMillis() + "ms", e);
+        }
     }
 
-    @Override
-    public long maxSupportedSubscribers() {
-      return 1;
-    }
-  }
 
-  abstract class StageSubscriberWhiteboxVerification<T> extends SubscriberWhiteboxVerification<T> {
-    StageSubscriberWhiteboxVerification() {
-      super(AbstractStageVerification.this.environment);
-    }
-  }
+    abstract class StagePublisherVerification<T> extends PublisherVerification<T> {
 
-  abstract class StageSubscriberBlackboxVerification<T> extends SubscriberBlackboxVerification<T> {
-    StageSubscriberBlackboxVerification() {
-      super(AbstractStageVerification.this.environment);
+        StagePublisherVerification() {
+            super(AbstractStageVerification.this.environment);
+        }
+
+        @Override
+        public Publisher<T> createFailedPublisher() {
+            return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
+        }
     }
-  }
+
+    abstract class StageProcessorVerification<T> extends IdentityProcessorVerification<T> {
+        StageProcessorVerification() {
+            super(AbstractStageVerification.this.environment);
+        }
+
+        @Override
+        public ExecutorService publisherExecutorService() {
+            return executorService;
+        }
+
+        @Override
+        public Publisher<T> createFailedPublisher() {
+            return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
+        }
+
+        @Override
+        public long maxSupportedSubscribers() {
+            return 1;
+        }
+    }
+
+    abstract class StageSubscriberWhiteboxVerification<T> extends SubscriberWhiteboxVerification<T> {
+        StageSubscriberWhiteboxVerification() {
+            super(AbstractStageVerification.this.environment);
+        }
+    }
+
+    abstract class StageSubscriberBlackboxVerification<T> extends SubscriberBlackboxVerification<T> {
+        StageSubscriberBlackboxVerification() {
+            super(AbstractStageVerification.this.environment);
+        }
+    }
 }

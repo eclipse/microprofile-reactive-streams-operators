@@ -23,16 +23,16 @@ import org.testng.annotations.Factory;
 
 /**
  * The TCK.
- *
+ * <p>
  * Run this class to run all TCK tests.
  */
 public class ReactiveMessagingTck {
 
-  @Factory
-  public Object[] getAllTests() {
-    return new Object[] {
-        new CompletionStageIncomingMethodVerification()
-    };
-  }
+    @Factory
+    public Object[] getAllTests() {
+        return new Object[]{
+            new CompletionStageIncomingMethodVerification()
+        };
+    }
 
 }

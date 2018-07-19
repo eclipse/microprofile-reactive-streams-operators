@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 
 import java.util.concurrent.CompletionStage;
@@ -35,29 +36,33 @@ import java.util.concurrent.CompletionStage;
  */
 public final class CompletionRunner<T> {
 
-  private final ReactiveStreamsGraphBuilder graphBuilder;
+    private final ReactiveStreamsGraphBuilder graphBuilder;
 
-  CompletionRunner(ReactiveStreamsGraphBuilder graphBuilder) {
-    this.graphBuilder = graphBuilder;
-  }
+    CompletionRunner(ReactiveStreamsGraphBuilder graphBuilder) {
+        this.graphBuilder = graphBuilder;
+    }
 
 
-  /**
-   * Run this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
-   *
-   * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
-   */
-  public CompletionStage<T> run() {
-    return run(ReactiveStreamsGraphBuilder.defaultEngine());
-  }
+    /**
+     * Run this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
+     *
+     * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
+     */
+    public CompletionStage<T> run() {
+        return run(ReactiveStreamsGraphBuilder.defaultEngine());
+    }
 
-  /**
-   * Run this stream, using the supplied {@link ReactiveStreamsEngine}.
-   *
-   * @param engine The engine to run the stream with.
-   * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
-   */
-  public CompletionStage<T> run(ReactiveStreamsEngine engine) {
-    return engine.buildCompletion(graphBuilder.build(false, false));
-  }
+    /**
+     * Run this stream, using the supplied {@link ReactiveStreamsEngine}.
+     *
+     * @param engine The engine to run the stream with.
+     * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
+     */
+    public CompletionStage<T> run(ReactiveStreamsEngine engine) {
+        return engine.buildCompletion(toGraph());
+    }
+
+    Graph toGraph() {
+        return graphBuilder.build(false, false);
+    }
 }

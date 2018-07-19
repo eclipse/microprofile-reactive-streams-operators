@@ -31,17 +31,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @ApplicationScoped
 public class TckMessagingManager {
-  private final Map<String, MockedReceiver<?>> receivers = new ConcurrentHashMap<>();
-  private final Map<String, MockedSender<?>> senders = new ConcurrentHashMap<>();
+    private final Map<String, MockedReceiver<?>> receivers = new ConcurrentHashMap<>();
+    private final Map<String, MockedSender<?>> senders = new ConcurrentHashMap<>();
 
-  @Inject
-  private TckMessagingPuppet tckLocalContainerController;
+    @Inject
+    private TckMessagingPuppet tckLocalContainerController;
 
-  public <T> MockedReceiver<T> getReceiver(String topic) {
-    return (MockedReceiver<T>) receivers.computeIfAbsent(topic, t -> new MockedReceiver<T>(tckLocalContainerController.testEnvironment(), topic));
-  }
+    public <T> MockedReceiver<T> getReceiver(String topic) {
+        return (MockedReceiver<T>) receivers.computeIfAbsent(topic, t -> new MockedReceiver<T>(tckLocalContainerController.testEnvironment(), topic));
+    }
 
-  public <T> MockedSender<T> getSender(String topic) {
-    return (MockedSender<T>) senders.computeIfAbsent(topic, t -> new MockedSender<T>());
-  }
+    public <T> MockedSender<T> getSender(String topic) {
+        return (MockedSender<T>) senders.computeIfAbsent(topic, t -> new MockedSender<T>());
+    }
 }

@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 
@@ -36,36 +37,40 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
  */
 public final class SubscriberBuilder<T, R> {
 
-  private final ReactiveStreamsGraphBuilder graphBuilder;
+    private final ReactiveStreamsGraphBuilder graphBuilder;
 
-  SubscriberBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
-    this.graphBuilder = graphBuilder;
-  }
+    SubscriberBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
+        this.graphBuilder = graphBuilder;
+    }
 
-  SubscriberBuilder(Stage stage) {
-    this.graphBuilder = new ReactiveStreamsGraphBuilder(stage);
-  }
+    SubscriberBuilder(Stage stage) {
+        this.graphBuilder = new ReactiveStreamsGraphBuilder(stage);
+    }
 
-  /**
-   * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
-   *
-   * @return A {@link CompletionSubscriber} that will run this stream.
-   */
-  public CompletionSubscriber<T, R> build() {
-    return build(ReactiveStreamsGraphBuilder.defaultEngine());
-  }
+    /**
+     * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
+     *
+     * @return A {@link CompletionSubscriber} that will run this stream.
+     */
+    public CompletionSubscriber<T, R> build() {
+        return build(ReactiveStreamsGraphBuilder.defaultEngine());
+    }
 
-  /**
-   * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
-   *
-   * @param engine The engine to run the stream with.
-   * @return A {@link CompletionSubscriber} that will run this stream.
-   */
-  public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
-    return engine.buildSubscriber(graphBuilder.build(true, false));
-  }
+    /**
+     * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
+     *
+     * @param engine The engine to run the stream with.
+     * @return A {@link CompletionSubscriber} that will run this stream.
+     */
+    public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
+        return engine.buildSubscriber(toGraph());
+    }
 
-  ReactiveStreamsGraphBuilder getGraphBuilder() {
-    return graphBuilder;
-  }
+    ReactiveStreamsGraphBuilder getGraphBuilder() {
+        return graphBuilder;
+    }
+
+    Graph toGraph() {
+        return graphBuilder.build(true, false);
+    }
 }

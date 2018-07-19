@@ -26,21 +26,20 @@ import java.time.Duration;
  */
 public class TestEnvironment {
 
-  private final Duration receiveTimeout;
-  private final Duration noMessageTimeout;
+    public static final TestEnvironment DEFAULT = new TestEnvironment(Duration.ofSeconds(10), Duration.ofSeconds(1));
+    private final Duration receiveTimeout;
+    private final Duration noMessageTimeout;
 
-  public TestEnvironment(Duration receiveTimeout, Duration noMessageTimeout) {
-    this.receiveTimeout = receiveTimeout;
-    this.noMessageTimeout = noMessageTimeout;
-  }
+    public TestEnvironment(Duration receiveTimeout, Duration noMessageTimeout) {
+        this.receiveTimeout = receiveTimeout;
+        this.noMessageTimeout = noMessageTimeout;
+    }
 
-  public Duration receiveTimeout() {
-    return receiveTimeout;
-  }
+    public Duration receiveTimeout() {
+        return receiveTimeout;
+    }
 
-  public Duration noMessageTimeout() {
-    return noMessageTimeout;
-  }
-
-  public static final TestEnvironment DEFAULT = new TestEnvironment(Duration.ofSeconds(10), Duration.ofSeconds(1));
+    public Duration noMessageTimeout() {
+        return noMessageTimeout;
+    }
 }

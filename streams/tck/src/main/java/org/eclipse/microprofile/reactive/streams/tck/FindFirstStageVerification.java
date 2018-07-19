@@ -31,42 +31,42 @@ import static org.testng.Assert.assertEquals;
 
 public class FindFirstStageVerification extends AbstractStageVerification {
 
-  FindFirstStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    FindFirstStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void findFirstStageShouldFindTheFirstElement() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3)
-        .findFirst().run(getEngine())), Optional.of(1));
-  }
+    @Test
+    public void findFirstStageShouldFindTheFirstElement() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .findFirst().run(getEngine())), Optional.of(1));
+    }
 
-  @Test
-  public void findFirstStageShouldReturnEmpty() {
-    assertEquals(await(ReactiveStreams.of()
-        .findFirst().run(getEngine())), Optional.empty());
-  }
+    @Test
+    public void findFirstStageShouldReturnEmpty() {
+        assertEquals(await(ReactiveStreams.of()
+            .findFirst().run(getEngine())), Optional.empty());
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-  public void findFirstStageShouldPropagateErrors() {
-    await(ReactiveStreams.failed(new RuntimeException("failed"))
-        .findFirst().run(getEngine()));
-  }
-
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new SubscriberVerification());
-  }
-
-  class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
-    @Override
-    public Subscriber<Integer> createSubscriber() {
-      return ReactiveStreams.<Integer>builder().findFirst().build(getEngine());
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void findFirstStageShouldPropagateErrors() {
+        await(ReactiveStreams.failed(new RuntimeException("failed"))
+            .findFirst().run(getEngine()));
     }
 
     @Override
-    public Integer createElement(int element) {
-      return element;
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new SubscriberVerification());
     }
-  }
+
+    class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
+        @Override
+        public Subscriber<Integer> createSubscriber() {
+            return ReactiveStreams.<Integer>builder().findFirst().build(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+    }
 }

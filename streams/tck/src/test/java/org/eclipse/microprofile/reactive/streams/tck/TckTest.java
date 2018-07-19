@@ -17,18 +17,19 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.streams.tck;
+
+import org.testng.annotations.Factory;
 
 /**
- * Exception thrown when a message isn't received in the given timeout.
+ * This runs any tests that don't require an implementation to run.
  */
-public class ReceiveTimeoutException extends RuntimeException {
+public class TckTest {
 
-    public ReceiveTimeoutException(String message) {
-        super(message);
-    }
-
-    public ReceiveTimeoutException(String message, Throwable cause) {
-        super(message, cause);
+    @Factory
+    public Object[] independentTests() {
+        return new Object[]{
+            new GraphAccessorVerification()
+        };
     }
 }

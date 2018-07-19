@@ -34,105 +34,105 @@ import static org.testng.Assert.assertEquals;
 
 public class LimitStageVerification extends AbstractStageVerification {
 
-  LimitStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
-    super(deps);
-  }
+    LimitStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void limitStageShouldLimitTheOutputElements() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5)
-        .limit(3)
-        .toList()
-        .run(getEngine())), Arrays.asList(1, 2, 3));
-  }
-
-  @Test
-  public void limitStageShouldAllowLimitingToZero() {
-    assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
-        .limit(0)
-        .toList()
-        .run(getEngine())), Collections.emptyList());
-  }
-
-  @Test
-  public void limitStageToZeroShouldCompleteStreamEvenWhenNoElementsAreReceived() {
-    assertEquals(await(ReactiveStreams.fromPublisher(subscriber ->
-        subscriber.onSubscribe(new Subscription() {
-          @Override
-          public void request(long n) {
-          }
-
-          @Override
-          public void cancel() {
-          }
-        })
-    ).limit(0)
-        .toList()
-        .run(getEngine())), Collections.emptyList());
-  }
-
-  @Test
-  public void limitShouldCancelUpStreamWhenDone() {
-    CompletableFuture<Void> cancelled = new CompletableFuture<>();
-    ReactiveStreams.<Integer>fromPublisher(subscriber ->
-        subscriber.onSubscribe(new Subscription() {
-          @Override
-          public void request(long n) {
-            subscriber.onNext(1);
-          }
-
-          @Override
-          public void cancel() {
-            cancelled.complete(null);
-          }
-        })
-    ).limit(1)
-        .toList()
-        .run(getEngine());
-    await(cancelled);
-  }
-
-  @Test
-  public void limitShouldIgnoreSubsequentErrorsWhenDone() {
-    assertEquals(await(
-        ReactiveStreams.of(1, 2, 3, 4)
-            .flatMap(i -> {
-              if (i == 4) {
-                return ReactiveStreams.failed(new RuntimeException("failed"));
-              }
-              else {
-                return ReactiveStreams.of(i);
-              }
-            })
+    @Test
+    public void limitStageShouldLimitTheOutputElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5)
             .limit(3)
             .toList()
-            .run(getEngine())
-    ), Arrays.asList(1, 2, 3));
-  }
+            .run(getEngine())), Arrays.asList(1, 2, 3));
+    }
 
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.singletonList(new ProcessorVerification());
-  }
+    @Test
+    public void limitStageShouldAllowLimitingToZero() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
+            .limit(0)
+            .toList()
+            .run(getEngine())), Collections.emptyList());
+    }
 
-  public class ProcessorVerification extends StageProcessorVerification<Integer> {
-    @Override
-    public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-      return ReactiveStreams.<Integer>builder()
-          .limit(Long.MAX_VALUE)
-          .buildRs(getEngine());
+    @Test
+    public void limitStageToZeroShouldCompleteStreamEvenWhenNoElementsAreReceived() {
+        assertEquals(await(ReactiveStreams.fromPublisher(subscriber ->
+            subscriber.onSubscribe(new Subscription() {
+                @Override
+                public void request(long n) {
+                }
+
+                @Override
+                public void cancel() {
+                }
+            })
+        ).limit(0)
+            .toList()
+            .run(getEngine())), Collections.emptyList());
+    }
+
+    @Test
+    public void limitShouldCancelUpStreamWhenDone() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        ReactiveStreams.<Integer>fromPublisher(subscriber ->
+            subscriber.onSubscribe(new Subscription() {
+                @Override
+                public void request(long n) {
+                    subscriber.onNext(1);
+                }
+
+                @Override
+                public void cancel() {
+                    cancelled.complete(null);
+                }
+            })
+        ).limit(1)
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+    }
+
+    @Test
+    public void limitShouldIgnoreSubsequentErrorsWhenDone() {
+        assertEquals(await(
+            ReactiveStreams.of(1, 2, 3, 4)
+                .flatMap(i -> {
+                    if (i == 4) {
+                        return ReactiveStreams.failed(new RuntimeException("failed"));
+                    }
+                    else {
+                        return ReactiveStreams.of(i);
+                    }
+                })
+                .limit(3)
+                .toList()
+                .run(getEngine())
+        ), Arrays.asList(1, 2, 3));
     }
 
     @Override
-    public Integer createElement(int element) {
-      return element;
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Collections.singletonList(new ProcessorVerification());
     }
 
-    @Override
-    public Publisher<Integer> createFailedPublisher() {
-      return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-          .limit(Long.MAX_VALUE)
-          .buildRs(getEngine());
+    public class ProcessorVerification extends StageProcessorVerification<Integer> {
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder()
+                .limit(Long.MAX_VALUE)
+                .buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .limit(Long.MAX_VALUE)
+                .buildRs(getEngine());
+        }
     }
-  }
 }

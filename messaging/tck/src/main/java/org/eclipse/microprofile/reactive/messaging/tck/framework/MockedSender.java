@@ -41,137 +41,137 @@ import java.util.stream.Collectors;
  */
 public class MockedSender<T> {
 
-  private final Deque<Message<T>> queue = new ArrayDeque<>();
-  private final List<MessageProcessor> publishers = new CopyOnWriteArrayList<>();
+    private final Deque<Message<T>> queue = new ArrayDeque<>();
+    private final List<MessageProcessor> publishers = new CopyOnWriteArrayList<>();
 
-  public int numPublishers() {
-    return publishers.size();
-  }
-
-  public ProcessorBuilder<Void, Message<T>> createWrappedProcessor() {
-    return ReactiveStreams.fromProcessor(new MessageProcessor());
-  }
-
-  public ProcessorBuilder<Void, T> createProcessor() {
-    return createWrappedProcessor().map(Message::getPayload);
-  }
-
-  public PublisherBuilder<Message<T>> createWrappedPublisher() {
-    return ReactiveStreams.fromPublisher(new MessageProcessor());
-  }
-
-  public PublisherBuilder<T> createPublisher() {
-    return createWrappedPublisher().map(Message::getPayload);
-  }
-
-  public void send(T... message) {
-    queue.addAll(Arrays.asList(message).stream().map(SimpleMessage::new).collect(Collectors.toList()));
-    trySend();
-  }
-
-  public void send(Message<T>... message) {
-    queue.addAll(Arrays.asList(message));
-    trySend();
-  }
-
-  private void trySend() {
-    for (MessageProcessor publisher : publishers) {
-      publisher.maybeSend(0);
-      if (queue.isEmpty()) {
-        break;
-      }
-    }
-  }
-
-  public void completeAll() {
-    List<MessageProcessor> all = new ArrayList<>(publishers);
-    all.clear();
-    for (MessageProcessor publisher : all) {
-      publisher.onComplete();
-    }
-  }
-
-  public void failAll(Throwable error) {
-    List<MessageProcessor> all = new ArrayList<>(publishers);
-    all.clear();
-    for (MessageProcessor publisher : all) {
-      publisher.onError(error);
-    }
-  }
-
-  private class MessageProcessor implements Processor<Void, Message<T>>, Subscription {
-
-    private final AtomicReference<Subscriber<? super Message<T>>> subscriber = new AtomicReference<>();
-    private long demand = 0;
-    private boolean sending = false;
-
-    @Override
-    public void subscribe(Subscriber<? super Message<T>> subscriber) {
-      if (!this.subscriber.compareAndSet(null, subscriber)) {
-        subscriber.onSubscribe(new Subscription() {
-          @Override
-          public void request(long l) {
-          }
-
-          @Override
-          public void cancel() {
-          }
-        });
-        subscriber.onError(new RuntimeException("I only support one subscriber"));
-      }
-      else {
-        publishers.add(this);
-        subscriber.onSubscribe(this);
-      }
+    public int numPublishers() {
+        return publishers.size();
     }
 
-    private synchronized void maybeSend(long increaseDemand) {
-      demand += increaseDemand;
-      if (demand < 0) {
-        demand = Long.MAX_VALUE;
-      }
-      if (!sending) {
-        sending = true;
-        while (demand > 0) {
-          Message<T> toSend = queue.poll();
-          if (toSend != null) {
-            this.subscriber.get().onNext(toSend);
-            if (demand != Long.MAX_VALUE) {
-              demand--;
+    public ProcessorBuilder<Void, Message<T>> createWrappedProcessor() {
+        return ReactiveStreams.fromProcessor(new MessageProcessor());
+    }
+
+    public ProcessorBuilder<Void, T> createProcessor() {
+        return createWrappedProcessor().map(Message::getPayload);
+    }
+
+    public PublisherBuilder<Message<T>> createWrappedPublisher() {
+        return ReactiveStreams.fromPublisher(new MessageProcessor());
+    }
+
+    public PublisherBuilder<T> createPublisher() {
+        return createWrappedPublisher().map(Message::getPayload);
+    }
+
+    public void send(T... message) {
+        queue.addAll(Arrays.stream(message).map(SimpleMessage::new).collect(Collectors.toList()));
+        trySend();
+    }
+
+    public void send(Message<T>... message) {
+        queue.addAll(Arrays.asList(message));
+        trySend();
+    }
+
+    private void trySend() {
+        for (MessageProcessor publisher : publishers) {
+            publisher.maybeSend(0);
+            if (queue.isEmpty()) {
+                break;
             }
-          }
-          else {
-            break;
-          }
         }
-        sending = false;
-      }
     }
 
-    @Override
-    public void request(long l) {
-      maybeSend(l);
+    public void completeAll() {
+        List<MessageProcessor> all = new ArrayList<>(publishers);
+        all.clear();
+        for (MessageProcessor publisher : all) {
+            publisher.onComplete();
+        }
     }
 
-    @Override
-    public void cancel() {
-      publishers.remove(this);
+    public void failAll(Throwable error) {
+        List<MessageProcessor> all = new ArrayList<>(publishers);
+        all.clear();
+        for (MessageProcessor publisher : all) {
+            publisher.onError(error);
+        }
     }
 
-    @Override
-    public void onSubscribe(Subscription subscription) {
-    }
+    private class MessageProcessor implements Processor<Void, Message<T>>, Subscription {
 
-    @Override
-    public void onNext(Void aVoid) {
-    }
+        private final AtomicReference<Subscriber<? super Message<T>>> subscriber = new AtomicReference<>();
+        private long demand = 0;
+        private boolean sending = false;
 
-    @Override
-    public void onError(Throwable throwable) {
-    }
+        @Override
+        public void subscribe(Subscriber<? super Message<T>> subscriber) {
+            if (!this.subscriber.compareAndSet(null, subscriber)) {
+                subscriber.onSubscribe(new Subscription() {
+                    @Override
+                    public void request(long l) {
+                    }
 
-    @Override
-    public void onComplete() {
+                    @Override
+                    public void cancel() {
+                    }
+                });
+                subscriber.onError(new RuntimeException("I only support one subscriber"));
+            }
+            else {
+                publishers.add(this);
+                subscriber.onSubscribe(this);
+            }
+        }
+
+        private synchronized void maybeSend(long increaseDemand) {
+            demand += increaseDemand;
+            if (demand < 0) {
+                demand = Long.MAX_VALUE;
+            }
+            if (!sending) {
+                sending = true;
+                while (demand > 0) {
+                    Message<T> toSend = queue.poll();
+                    if (toSend != null) {
+                        this.subscriber.get().onNext(toSend);
+                        if (demand != Long.MAX_VALUE) {
+                            demand--;
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                }
+                sending = false;
+            }
+        }
+
+        @Override
+        public void request(long l) {
+            maybeSend(l);
+        }
+
+        @Override
+        public void cancel() {
+            publishers.remove(this);
+        }
+
+        @Override
+        public void onSubscribe(Subscription subscription) {
+        }
+
+        @Override
+        public void onNext(Void aVoid) {
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+        }
+
+        @Override
+        public void onComplete() {
+        }
     }
-  }
 }

@@ -26,29 +26,29 @@ import java.util.Optional;
 
 /**
  * A puppet for sending and receiving messages.
- *
+ * <p>
  * An instance of this is intended to be provided by the implementation under test, to be able to interact the topics under test. It should be
  * provided in a deployment returned by {@link TckContainer#createDeployments(String...)}, to allow it to be dependency injected into the tests
  * running in the container, so they can control topics and query them for results.
  */
 public interface TckMessagingPuppet {
 
-  /**
-   * Send a message to the given incoming topic.
-   */
-  void sendMessage(String topic, Message<byte[]> message);
+    /**
+     * Send a message to the given incoming topic.
+     */
+    void sendMessage(String topic, Message<byte[]> message);
 
-  /**
-   * Receive a message from the given outgoing topic.
-   *
-   * If no message is received within the given timeout, empty should be returned.
-   */
-  Optional<Message<byte[]>> receiveMessage(String topic, Duration timeout);
+    /**
+     * Receive a message from the given outgoing topic.
+     * <p>
+     * If no message is received within the given timeout, empty should be returned.
+     */
+    Optional<Message<byte[]>> receiveMessage(String topic, Duration timeout);
 
-  /**
-   * The test environment.
-   */
-  default TestEnvironment testEnvironment() {
-    return TestEnvironment.DEFAULT;
-  }
+    /**
+     * The test environment.
+     */
+    default TestEnvironment testEnvironment() {
+        return TestEnvironment.DEFAULT;
+    }
 }

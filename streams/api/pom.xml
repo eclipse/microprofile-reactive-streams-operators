@@ -17,7 +17,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,7 +31,6 @@
     <properties>
         <bnd.baseline.include.distribution.management>false</bnd.baseline.include.distribution.management>
     </properties>
-    <groupId>org.eclipse.microprofile.reactive.streams</groupId>
     <artifactId>microprofile-reactive-streams-operators</artifactId>
     <name>MicroProfile Reactive Streams Operators</name>
     <description>MicroProfile Reactive Streams Operators :: API</description>

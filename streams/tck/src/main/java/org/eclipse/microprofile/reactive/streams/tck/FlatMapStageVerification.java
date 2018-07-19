@@ -63,11 +63,6 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     public void flatMapStageShouldOnlySubscribeToOnePublisherAtATime() throws Exception {
         AtomicInteger activePublishers = new AtomicInteger();
 
-        // A publisher that publishes one element 100ms after being requested,
-        // and then completes 100ms later. It also uses activePublishers to ensure
-        // that it is the only publisher that is subscribed to at any one time.
-
-
         CompletionStage<List<Integer>> result = ReactiveStreams.of(1, 2, 3, 4, 5)
             .flatMap(id -> ReactiveStreams.fromPublisher(new ScheduledPublisher(id, activePublishers, () -> getExecutorService())))
             .toList()

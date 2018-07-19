@@ -64,43 +64,9 @@ public class FlatMapPublisherStageVerification extends AbstractStageVerification
     public void flatMapStageShouldOnlySubscribeToOnePublisherAtATime() throws Exception {
         AtomicInteger activePublishers = new AtomicInteger();
 
-        // A publisher that publishes one element 100ms after being requested,
-        // and then completes 100ms later. It also uses activePublishers to ensure
-        // that it is the only publisher that is subscribed to at any one time.
-        class ScheduledPublisher implements Publisher<Integer> {
-            private final int id;
-            private AtomicBoolean published = new AtomicBoolean(false);
-
-            private ScheduledPublisher(int id) {
-                this.id = id;
-            }
-
-            @Override
-            public void subscribe(Subscriber<? super Integer> subscriber) {
-                assertEquals(activePublishers.incrementAndGet(), 1);
-                subscriber.onSubscribe(new Subscription() {
-                    @Override
-                    public void request(long n) {
-                        if (published.compareAndSet(false, true)) {
-                            getExecutorService().schedule(() -> {
-                                subscriber.onNext(id);
-                                getExecutorService().schedule(() -> {
-                                    activePublishers.decrementAndGet();
-                                    subscriber.onComplete();
-                                }, 100, TimeUnit.MILLISECONDS);
-                            }, 100, TimeUnit.MILLISECONDS);
-                        }
-                    }
-
-                    @Override
-                    public void cancel() {
-                    }
-                });
-            }
-        }
 
         CompletionStage<List<Integer>> result = ReactiveStreams.of(1, 2, 3, 4, 5)
-            .flatMapPublisher(id -> new ScheduledPublisher(id))
+            .flatMapPublisher(id -> new ScheduledPublisher(id, activePublishers, () -> getExecutorService()))
             .toList()
             .run(getEngine());
 

@@ -20,12 +20,16 @@
 package org.eclipse.microprofile.reactive.streams.tck;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.LongStream;
 
 import static org.testng.Assert.assertEquals;
 
@@ -157,7 +161,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
       .run(getEngine()));
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*failed.*")
   public void onErrorResumeWithPublisherStageShouldPropagateRuntimeExceptions() {
     await(ReactiveStreams.failed(new Exception("source-failure"))
       .onErrorResumeWithPublisher(t -> {
@@ -183,10 +187,95 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
       .run(getEngine()));
   }
 
-  @Override
-  List<Object> reactiveStreamsTckVerifiers() {
-    return Collections.emptyList();
-  }
+    @Override
+    List<Object> reactiveStreamsTckVerifiers() {
+        return Arrays.asList(
+            new OnErrorResumeWithVerification(),
+            new OnErrorResumeVerification(),
+            new OnErrorResumeWithPublisherVerification()
+        );
+    }
+
+    public class OnErrorResumeWithVerification extends StageProcessorVerification<Integer> {
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder()
+                .onErrorResumeWith(ReactiveStreams::failed)
+                .map(Function.identity()).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .onErrorResumeWith(t -> {
+                    // Re-throw the exception.
+                    if (t instanceof RuntimeException) {
+                        throw (RuntimeException) t;
+                    }
+                    // Wrap if required.
+                    throw new RuntimeException(t);
+                })
+                .buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+
+        @Override
+        public void required_spec203_mustNotCallMethodsOnSubscriptionOrPublisherInOnError() {
+            // Ignore this test, as the subscription happen in the onError method to switch the control to the new stream.
+        }
+    }
+
+    public class OnErrorResumeVerification extends StageProcessorVerification<Integer> {
+
+        @Override
+        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
+            return ReactiveStreams.<Integer>builder()
+                .onErrorResume(t -> {
+                    if (t instanceof RuntimeException) {
+                        throw (RuntimeException) t;
+                    }
+                    throw new RuntimeException(t);
+                })
+                .map(Function.identity()).buildRs(getEngine());
+        }
+
+        @Override
+        public Publisher<Integer> createFailedPublisher() {
+            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+                .onErrorResume(t -> {
+                    // Re-throw the exception.
+                    if (t instanceof RuntimeException) {
+                        throw (RuntimeException) t;
+                    }
+                    // Wrap if required.
+                    throw new RuntimeException(t);
+                })
+                .buildRs(getEngine());
+        }
+
+        @Override
+        public Integer createElement(int element) {
+            return element;
+        }
+
+    }
+
+    public class OnErrorResumeWithPublisherVerification extends StagePublisherVerification<Long> {
+        @Override
+        public Publisher<Long> createPublisher(long elements) {
+            return
+                ReactiveStreams.<Long>failed(new Exception("BOOM"))
+                    .onErrorResumeWith(
+                        t -> ReactiveStreams.fromIterable(() -> LongStream.rangeClosed(1, elements).boxed().iterator())
+                    )
+                    .buildRs(getEngine());
+        }
+    }
 
 
 }

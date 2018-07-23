@@ -65,7 +65,7 @@ public class MockedSender<T> {
     }
 
     public void send(T... message) {
-        queue.addAll(Arrays.asList(message).stream().map(SimpleMessage::new).collect(Collectors.toList()));
+        queue.addAll(Arrays.stream(message).map(SimpleMessage::new).collect(Collectors.toList()));
         trySend();
     }
 

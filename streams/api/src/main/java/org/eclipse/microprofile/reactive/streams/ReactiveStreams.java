@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -59,7 +60,7 @@ public class ReactiveStreams {
      * @return A publisher builder that will emit the element.
      */
     public static <T> PublisherBuilder<T> of(T t) {
-        return new PublisherBuilder<>(new Stage.Of(Arrays.asList(t)));
+        return new PublisherBuilder<>(new Stage.Of(Collections.singletonList(t)));
     }
 
     /**

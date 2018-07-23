@@ -25,7 +25,7 @@ import org.reactivestreams.Subscription;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -38,25 +38,23 @@ public class CancelStageVerification extends AbstractStageVerification {
     @Test
     public void cancelStageShouldCancelTheStage() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> {
-            s.onSubscribe(new Subscription() {
-                @Override
-                public void request(long n) {
-                }
+        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> s.onSubscribe(new Subscription() {
+            @Override
+            public void request(long n) {
+            }
 
-                @Override
-                public void cancel() {
-                    cancelled.complete(null);
-                }
-            });
-        }).cancel().run(getEngine());
+            @Override
+            public void cancel() {
+                cancelled.complete(null);
+            }
+        })).cancel().run(getEngine());
         await(cancelled);
         await(result);
     }
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
-        return Arrays.asList(new SubscriberVerification());
+        return Collections.singletonList(new SubscriberVerification());
     }
 
     public class SubscriberVerification extends StageSubscriberBlackboxVerification {

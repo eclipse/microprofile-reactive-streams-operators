@@ -51,17 +51,15 @@ public class SubscriberStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = CancellationException.class)
     public void subscriberStageShouldRedeemCompletionStageWithCancellationExceptionWhenCancelled() {
-        CompletionStage<Void> result = ReactiveStreams.fromPublisher(subscriber -> {
-            subscriber.onSubscribe(new Subscription() {
-                @Override
-                public void request(long n) {
-                }
+        CompletionStage<Void> result = ReactiveStreams.fromPublisher(subscriber -> subscriber.onSubscribe(new Subscription() {
+            @Override
+            public void request(long n) {
+            }
 
-                @Override
-                public void cancel() {
-                }
-            });
-        }).to(
+            @Override
+            public void cancel() {
+            }
+        })).to(
             ReactiveStreams.builder().cancel().build(getEngine())
         ).run(getEngine());
         await(result);

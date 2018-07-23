@@ -223,11 +223,6 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
         public Integer createElement(int element) {
             return element;
         }
-
-        @Override
-        public void required_spec203_mustNotCallMethodsOnSubscriptionOrPublisherInOnError() {
-            // Ignore this test, as the subscription happen in the onError method to switch the control to the new stream.
-        }
     }
 
     public class OnErrorResumeVerification extends StageProcessorVerification<Integer> {

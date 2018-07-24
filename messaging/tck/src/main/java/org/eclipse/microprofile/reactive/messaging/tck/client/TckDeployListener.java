@@ -34,7 +34,11 @@ import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class TckDeployListener {
 
@@ -45,11 +49,11 @@ public class TckDeployListener {
     @Inject
     private Event<TopicEvent> topicEvent;
 
-    public void onGenerateDeployment(@Observes GenerateDeployment event) {
+    public void onGenerateDeployment(@Observes GenerateDeployment event) throws DeploymentException {
 
-        String[] topicNames = getTopicsUsedByTestClass(event.getTestClass());
+        List<String> topicNames = getTopicsUsedByTestClass(event.getTestClass());
 
-        TopicDeploymentScenario scenario = new TopicDeploymentScenario(Arrays.asList(topicNames));
+        TopicDeploymentScenario scenario = new TopicDeploymentScenario(topicNames);
 
         topicDeploymentScenario.set(scenario);
     }
@@ -79,14 +83,29 @@ public class TckDeployListener {
         }
     }
 
-    private String[] getTopicsUsedByTestClass(TestClass testClass) {
-        Topics topics = testClass.getAnnotation(Topics.class);
-        String[] topicNames;
-        if (topics != null) {
-            topicNames = topics.value();
-        }
-        else {
-            topicNames = new String[0];
+    private List<String> getTopicsUsedByTestClass(TestClass testClass) throws DeploymentException {
+        Method[] topicsMethods = testClass.getMethods(Topics.class);
+        List<String> topicNames = new ArrayList<>();
+        for (Method method : topicsMethods) {
+            Object topics;
+            try {
+                topics = method.invoke(null);
+            }
+            catch (Exception e) {
+                throw new DeploymentException("Error reading topics from " + testClass.getName(), e);
+            }
+            if (topics instanceof Collection) {
+                topicNames.addAll((Collection) topics);
+            }
+            else if (topics instanceof String[]) {
+                topicNames.addAll(Arrays.asList((String[]) topics));
+            }
+            else if (topics instanceof String) {
+                topicNames.add((String) topics);
+            }
+            else {
+                throw new DeploymentException("Object of invalid type returned from @Topic annotated " + method + ", object was " + topics);
+            }
         }
         return topicNames;
     }

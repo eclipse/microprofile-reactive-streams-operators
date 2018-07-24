@@ -49,6 +49,10 @@ public class MockPayload {
         this.field2 = field2;
     }
 
+    public MockPayload transform() {
+        return new MockPayload("transformed " + field1, 100 + field2);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

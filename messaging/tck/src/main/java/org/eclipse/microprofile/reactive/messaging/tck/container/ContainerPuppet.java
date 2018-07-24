@@ -25,7 +25,9 @@ import org.jboss.arquillian.core.api.annotation.Inject;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 /**
  * Convenience helper to send messages serialized using JSONB.
@@ -53,4 +55,30 @@ public class ContainerPuppet {
         }
     }
 
+    public <T> Message<T> expectNextMessageWithPayload(String topic, T payload) {
+        Optional<Message<byte[]>> message = puppet.get().receiveMessage(topic, puppet.get().testEnvironment().receiveTimeout());
+        if (message.isPresent()) {
+            T received = jsonb.fromJson(new ByteArrayInputStream(message.get().getPayload()), (Class<T>) payload.getClass());
+            if (received.equals(payload)) {
+                return Message.of(received);
+            }
+            else {
+                throw new AssertionError("Expected a message on topic " + topic + " with payload " + payload +
+                    " but got " + received);
+            }
+        }
+        else {
+            throw new AssertionError("Did not receive a message on " + topic + " within " +
+                puppet.get().testEnvironment().receiveTimeout().toMillis() + "ms");
+        }
+    }
+
+    public void expectNoMessages(String topic) {
+        Optional<Message<byte[]>> message = puppet.get().receiveMessage(topic,
+            puppet.get().testEnvironment().noMessageTimeout());
+        if (message.isPresent()) {
+            throw new AssertionError("Expected no messages on topic " + topic +
+                " but got message with payload " + new String(message.get().getPayload()));
+        }
+    }
 }

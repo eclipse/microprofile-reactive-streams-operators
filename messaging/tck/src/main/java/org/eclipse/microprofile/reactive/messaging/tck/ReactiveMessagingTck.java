@@ -31,7 +31,8 @@ public class ReactiveMessagingTck {
     @Factory
     public Object[] getAllTests() {
         return new Object[]{
-            new CompletionStageIncomingMethodVerification()
+            new IncomingCompletionStageMethodVerification(),
+            new IncomingOutgingCompletionStageMethodVerification()
         };
     }
 

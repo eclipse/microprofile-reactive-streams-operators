@@ -17,4 +17,4 @@
 # limitations under the License.
 ################################################################################
 
-org.eclipse.microprofile.reactive.messaging.tck.client.TckArquillianExtension
+org.eclipse.microprofile.reactive.messaging.tck.container.TckArquillianRemoteExtension

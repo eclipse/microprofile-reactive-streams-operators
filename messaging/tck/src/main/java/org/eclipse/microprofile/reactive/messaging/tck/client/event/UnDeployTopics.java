@@ -17,29 +17,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.spi;
+package org.eclipse.microprofile.reactive.messaging.tck.client.event;
 
-import java.time.Duration;
+import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
 
-/**
- * Configuration for the test environment.
- */
-public class TestEnvironment {
+import java.util.List;
 
-    public static final TestEnvironment DEFAULT = new TestEnvironment(Duration.ofSeconds(10), Duration.ofSeconds(1));
-    private final Duration receiveTimeout;
-    private final Duration noMessageTimeout;
+public class UnDeployTopics extends TopicEvent {
+    private final List<String> topics;
 
-    public TestEnvironment(Duration receiveTimeout, Duration noMessageTimeout) {
-        this.receiveTimeout = receiveTimeout;
-        this.noMessageTimeout = noMessageTimeout;
+    public UnDeployTopics(DeployableContainer<?> deployableContainer, List<String> topics) {
+        super(deployableContainer);
+        this.topics = topics;
     }
 
-    public Duration receiveTimeout() {
-        return receiveTimeout;
-    }
-
-    public Duration noMessageTimeout() {
-        return noMessageTimeout;
+    public List<String> getTopics() {
+        return topics;
     }
 }

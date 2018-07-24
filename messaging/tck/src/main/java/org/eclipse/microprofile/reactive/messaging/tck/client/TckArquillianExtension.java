@@ -17,25 +17,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.messaging.tck.client;
 
-/**
- * RuntimeException with no stack trace for expected failures, to make logging not so noisy.
- */
-public class QuietRuntimeException extends RuntimeException {
-    public QuietRuntimeException() {
-        this(null, null);
-    }
+import org.jboss.arquillian.container.test.spi.client.deployment.AuxiliaryArchiveAppender;
+import org.jboss.arquillian.core.spi.LoadableExtension;
 
-    public QuietRuntimeException(String message) {
-        this(message, null);
-    }
-
-    public QuietRuntimeException(String message, Throwable cause) {
-        super(message, cause, true, false);
-    }
-
-    public QuietRuntimeException(Throwable cause) {
-        this(null, cause);
+public class TckArquillianExtension implements LoadableExtension {
+    @Override
+    public void register(ExtensionBuilder builder) {
+        builder.observer(TckDeployListener.class);
+        builder.service(AuxiliaryArchiveAppender.class, TckArchiveAppender.class);
     }
 }

@@ -17,15 +17,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.messaging.tck.container;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TckMessagingPuppet;
-import org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment;
+import org.jboss.arquillian.core.api.Instance;
+import org.jboss.arquillian.core.api.annotation.Inject;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import java.io.ByteArrayOutputStream;
@@ -33,18 +30,18 @@ import java.io.ByteArrayOutputStream;
 /**
  * Convenience helper to send messages serialized using JSONB.
  */
-@ApplicationScoped
-public class ContainerController {
+public class ContainerPuppet {
+
+    @Inject
+    private Instance<TckMessagingPuppet> puppet;
 
     private final Jsonb jsonb = JsonbBuilder.create();
-    @Inject
-    private TckMessagingPuppet container;
 
     public void sendMessages(String topic, Message<?>... messages) {
         for (Message<?> message : messages) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             jsonb.toJson(message.getPayload(), baos);
-            container.sendMessage(topic, Message.of(baos.toByteArray()));
+            puppet.get().sendMessage(topic, Message.of(baos.toByteArray()));
         }
     }
 
@@ -52,13 +49,8 @@ public class ContainerController {
         for (Object payload : payloads) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             jsonb.toJson(payload, baos);
-            container.sendMessage(topic, Message.of(baos.toByteArray()));
+            puppet.get().sendMessage(topic, Message.of(baos.toByteArray()));
         }
-    }
-
-    @Produces
-    public TestEnvironment produceTestEnvironment() {
-        return container.testEnvironment();
     }
 
 }

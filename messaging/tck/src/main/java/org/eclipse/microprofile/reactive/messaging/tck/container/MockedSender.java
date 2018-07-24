@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.framework;
+package org.eclipse.microprofile.reactive.messaging.tck.container;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;

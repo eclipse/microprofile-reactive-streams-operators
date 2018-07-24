@@ -17,18 +17,36 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.messaging.tck.arquillian;
+package org.eclipse.microprofile.reactive.messaging.tck.container;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.eclipse.microprofile.reactive.messaging.Message;
+
+import java.time.Duration;
+import java.util.Optional;
 
 /**
- * Used to specify the topics that a TCK test works with.
+ * A puppet for sending and receiving messages.
+ * <p>
+ * An instance of this
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Topics {
-    String[] value();
+public interface TckMessagingPuppet {
+
+    /**
+     * Send a message to the given incoming topic.
+     */
+    void sendMessage(String topic, Message<byte[]> message);
+
+    /**
+     * Receive a message from the given outgoing topic.
+     * <p>
+     * If no message is received within the given timeout, empty should be returned.
+     */
+    Optional<Message<byte[]>> receiveMessage(String topic, Duration timeout);
+
+    /**
+     * The test environment.
+     */
+    default TestEnvironment testEnvironment() {
+        return TestEnvironment.DEFAULT;
+    }
 }

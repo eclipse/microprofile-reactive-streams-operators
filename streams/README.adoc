@@ -46,11 +46,11 @@ For additional API naming and scope, Akka Streams, RxJava and Reactor have been 
 
 MicroProfile Reactive Streams does not contain an implementation itself but only provides the specified API, a TCK and documentation.
 
-The following Implementations are available 
+The following Implementations are available:
 
 * https://github.com/lightbend/microprofile-reactive-streams/tree/master/akka[Akka Streams]
 * https://github.com/lightbend/microprofile-reactive-streams/tree/master/zerodep[Zero Dependency] - intended as a possible reference implementation for when this is proposed to the JDK, but not the reference implementation for MicroProfile as MicroProfile does not have reference implementations.
-* https://github.com/lightbend/microprofile-reactive-streams/tree/master/rxjava[RxJava]
+* https://github.com/smallrye/smallrye-reactive-streams-operators[SmallRye] - based on RxJava 2 and Eclipse Vert.x.
 
 == Design
 

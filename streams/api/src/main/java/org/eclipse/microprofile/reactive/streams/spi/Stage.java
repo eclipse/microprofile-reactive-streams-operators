@@ -560,6 +560,73 @@ public interface Stage {
     }
 
     /**
+     * A stage to handle error from upstream. It builds a stream containing all the elements from  upstream. Additionally,
+     * in the case of failure, rather than invoking {@link Subscriber#onError(Throwable)}, it invokes a given method and
+     * emits the result as final event of the stream.
+     *
+     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
+     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
+     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
+     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead emit the return value of
+     * the passed function. This operator prevents errors from propagating or to supply fallback data should errors be
+     * encountered.
+     *
+     * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
+     *
+     */
+    final class OnErrorResume implements Inlet, Outlet {
+        private final Function<Throwable, ?> function;
+
+
+        public OnErrorResume(Function<Throwable, ?>  function) {
+            this.function = function;
+        }
+
+        /**
+         * The error handler.
+         *
+         * @return  the error handler.
+         */
+        public Function<Throwable, ?> getFunction() {
+            return function;
+        }
+    }
+
+    /**
+     * A stage to handle error from upstream. It builds a stream containing all the elements from  upstream. Additionally,
+     * in the case of failure, rather than invoking {@link Subscriber#onError(Throwable)}, it invokes a given method and
+     * switch the control to the returned stream.
+     *
+     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
+     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
+     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
+     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
+     * {@link org.eclipse.microprofile.reactive.streams.PublisherBuilder} returned from given function, which invoke the
+     * subscriber's <code>onNext</code> method if it is able to do so. In such a case, because no publisher necessarily
+     * invokes <code>onError</code>, the subscriber may never know that an error happened.
+     *
+     * Any {@link RuntimeException} thrown by the function should be propagated down the stream as an error.
+     *
+     */
+    final class OnErrorResumeWith implements Inlet, Outlet {
+        private final Function<Throwable, Graph> function;
+
+
+        public OnErrorResumeWith(Function<Throwable, Graph>  function) {
+            this.function = function;
+        }
+
+        /**
+         * The error handler.
+         *
+         * @return  the error handler.
+         */
+        public Function<Throwable, Graph> getFunction() {
+            return function;
+        }
+    }
+
+    /**
      * A failed publisher.
      * <p>
      * When built, this should produce a publisher that immediately fails the stream with the passed in error.
@@ -616,7 +683,7 @@ public interface Stage {
     }
 
     final class Cancel implements Inlet {
-        public final static Cancel INSTANCE = new Cancel();
+        public static final Cancel INSTANCE = new Cancel();
 
         private Cancel() {
         }

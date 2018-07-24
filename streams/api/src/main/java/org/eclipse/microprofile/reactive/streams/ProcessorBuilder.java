@@ -408,6 +408,71 @@ public final class ProcessorBuilder<T, R> {
     }
 
     /**
+     * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
+     * invoking {@link #onError(Consumer)}, it invokes the given method and emits the result as final event of the stream.
+     *
+     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
+     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
+     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
+     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead emit the return value of
+     * the passed function. This operator prevents errors from propagating or to supply fallback data should errors be
+     * encountered.
+     *
+     * @param errorHandler the function returning the value that need to be emitting instead of the error.
+     *                     The function must not return {@code null}
+     * @return The new processor
+     */
+    public ProcessorBuilder<T, R> onErrorResume(Function<Throwable, R> errorHandler) {
+        return addStage(new Stage.OnErrorResume(errorHandler));
+    }
+
+    /**
+     * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
+     * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
+     * instead.
+     *
+     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
+     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
+     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
+     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
+     * {@link PublisherBuilder} returned from given function, which invoke the subscriber's <code>onNext</code> method if
+     * it is able to do so. In such a case, because no publisher necessarily invokes <code>onError</code>, the subscriber
+     * may never know that an error happened.
+     *
+     * @param errorHandler the function returning the stream that need to be emitting instead of the error.
+     *                     The function must not return {@code null}
+     * @return The new processor
+     */
+    public ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, PublisherBuilder<R>> errorHandler) {
+        return addStage(new Stage.OnErrorResumeWith(errorHandler.andThen(PublisherBuilder::toGraph)));
+    }
+
+    /**
+     * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
+     * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
+     * instead.
+     *
+     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
+     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
+     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
+     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
+     * {@link PublisherBuilder} returned from given function, which invoke the subscriber's <code>onNext</code> method if
+     * it is able to do so. In such a case, because no publisher necessarily invokes <code>onError</code>, the subscriber
+     * may never know that an error happened.
+     *
+     * @param errorHandler the function returning the stream that need to be emitting instead of the error.
+     *                     The function must not return {@code null}
+     * @return The new processor
+     */
+    public ProcessorBuilder<T, R> onErrorResumeWithPublisher(Function<Throwable, Publisher<R>> errorHandler) {
+        return addStage(new Stage.OnErrorResumeWith(
+            errorHandler
+                .andThen(ReactiveStreams::fromPublisher)
+                .andThen(PublisherBuilder::toGraph))
+        );
+    }
+
+    /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
      * stream completes or failed. The given action does not know if the stream failed or completed. If you need to
      * distinguish use {@link #onError(Consumer)} and {@link #onComplete(Runnable)}. In addition, the action is called if

@@ -88,6 +88,41 @@ public CompletionStage<OutgoingMessage> processMessage(IncomingMessage msg) {
 
 Simple methods are only supported for `@Incoming` annotated methods, if there is only an `@Outgoing` annotation on the method, this is a definition error. If the method is not `@Outgoing` annotated, then the returned value is ignored - however, note that for asynchronous methods, the returned `CompletionStage` is still important for determining when message processing has completed successfully, for the purposes of message acknowledgement. When there is no `@Outgoing` annotation, `void` may also be returned.
 
+===== Event metadata
+
+The `Event` interface is an abstraction of the raw `Message` type. The `Event` contains a set of attributes, providing enriched metadata about the actual event, including the optional payload.
+
+The following example show a few custom, domain specific _events_:
+
+[source, java]
+----
+public interface DoorEvent {}
+
+@Value
+public class DoorOpened implements DoorEvent {}
+
+@Value
+public class PersonEntered implements DoorEvent {
+  public final String personId;
+}
+----
+
+The generic `DoorEvent` and the more specific `DoorOpened` event type would be representation an `Event` implementation containing no payload, while the `PersonEntered` event type would have an actual payload.
+
+Now, these custom evens could be used by an application in combination with `@Incoming` and `@Outcoming` annotations on a method:
+
+[source, java]
+----
+@Incoming
+@Outgoing
+public Event<SomeAnalyticsEvent> processEventType(Event<PersonEntered> evt) {
+  return runAnalytics(evt);
+}
+----
+
+It is modeled after the link:https://github.com/cloudevents/spec[CloudEvents Specification]
+
+
 ===== Reactive streams
 
 For more power, developers may use Reactive Streams shapes. Reactive Streams shaped methods accept no parameters, and return one of the following:

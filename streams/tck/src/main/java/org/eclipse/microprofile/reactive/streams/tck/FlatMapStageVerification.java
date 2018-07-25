@@ -64,7 +64,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         AtomicInteger activePublishers = new AtomicInteger();
 
         CompletionStage<List<Integer>> result = ReactiveStreams.of(1, 2, 3, 4, 5)
-            .flatMap(id -> ReactiveStreams.fromPublisher(new ScheduledPublisher(id, activePublishers, () -> getExecutorService())))
+            .flatMap(id -> ReactiveStreams.fromPublisher(new ScheduledPublisher(id, activePublishers, this::getExecutorService)))
             .toList()
             .run(getEngine());
 

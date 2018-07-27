@@ -20,10 +20,9 @@
 package org.eclipse.microprofile.reactive.messaging.tck.container;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
-import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -42,22 +41,14 @@ import java.util.stream.Collectors;
 public class MockedSender<T> {
 
     private final Deque<Message<T>> queue = new ArrayDeque<>();
-    private final List<MessageProcessor> publishers = new CopyOnWriteArrayList<>();
+    private final List<MessagePublisher> publishers = new CopyOnWriteArrayList<>();
 
     public int numPublishers() {
         return publishers.size();
     }
 
-    public ProcessorBuilder<Void, Message<T>> createWrappedProcessor() {
-        return ReactiveStreams.fromProcessor(new MessageProcessor());
-    }
-
-    public ProcessorBuilder<Void, T> createProcessor() {
-        return createWrappedProcessor().map(Message::getPayload);
-    }
-
     public PublisherBuilder<Message<T>> createWrappedPublisher() {
-        return ReactiveStreams.fromPublisher(new MessageProcessor());
+        return ReactiveStreams.fromPublisher(new MessagePublisher());
     }
 
     public PublisherBuilder<T> createPublisher() {
@@ -75,7 +66,7 @@ public class MockedSender<T> {
     }
 
     private void trySend() {
-        for (MessageProcessor publisher : publishers) {
+        for (MessagePublisher publisher : publishers) {
             publisher.maybeSend(0);
             if (queue.isEmpty()) {
                 break;
@@ -84,22 +75,22 @@ public class MockedSender<T> {
     }
 
     public void completeAll() {
-        List<MessageProcessor> all = new ArrayList<>(publishers);
-        all.clear();
-        for (MessageProcessor publisher : all) {
-            publisher.onComplete();
+        List<MessagePublisher> all = new ArrayList<>(publishers);
+        publishers.clear();
+        for (MessagePublisher publisher : all) {
+            publisher.completeSubscriber();
         }
     }
 
     public void failAll(Throwable error) {
-        List<MessageProcessor> all = new ArrayList<>(publishers);
-        all.clear();
-        for (MessageProcessor publisher : all) {
-            publisher.onError(error);
+        List<MessagePublisher> all = new ArrayList<>(publishers);
+        publishers.clear();
+        for (MessagePublisher publisher : all) {
+            publisher.failSubscriber(error);
         }
     }
 
-    private class MessageProcessor implements Processor<Void, Message<T>>, Subscription {
+    private class MessagePublisher implements Publisher<Message<T>>, Subscription {
 
         private final AtomicReference<Subscriber<? super Message<T>>> subscriber = new AtomicReference<>();
         private long demand = 0;
@@ -148,6 +139,14 @@ public class MockedSender<T> {
             }
         }
 
+        private synchronized void failSubscriber(Throwable error) {
+            subscriber.get().onError(error);
+        }
+
+        private synchronized void completeSubscriber() {
+            subscriber.get().onComplete();
+        }
+
         @Override
         public void request(long l) {
             maybeSend(l);
@@ -156,22 +155,6 @@ public class MockedSender<T> {
         @Override
         public void cancel() {
             publishers.remove(this);
-        }
-
-        @Override
-        public void onSubscribe(Subscription subscription) {
-        }
-
-        @Override
-        public void onNext(Void aVoid) {
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-        }
-
-        @Override
-        public void onComplete() {
         }
     }
 }

@@ -21,9 +21,11 @@ package org.eclipse.microprofile.reactive.messaging.tck.container;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
+import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -53,24 +55,24 @@ public class MockedReceiver<T> {
         return subscriptions.size();
     }
 
-    public ProcessorBuilder<Message<T>, Void> createWrappedProcessor() {
-        return ReactiveStreams.fromProcessor(new MessageProcessor());
+    public <R> ProcessorBuilder<Message<T>, R> createWrappedProcessor(PublisherBuilder<R> publisher) {
+        return ReactiveStreams.fromProcessor(new MessageProcessor(publisher.buildRs()));
     }
 
-    public ProcessorBuilder<T, Void> createProcessor() {
+    public <R> ProcessorBuilder<T, R> createProcessor(PublisherBuilder<R> publisher) {
         return ReactiveStreams.<T>builder()
             .<Message<T>>map(SimpleMessage::new)
-            .via(new MessageProcessor());
+            .via(new MessageProcessor<>(publisher.buildRs()));
     }
 
     public SubscriberBuilder<Message<T>, Void> createWrappedSubscriber() {
-        return ReactiveStreams.fromSubscriber(new MessageProcessor());
+        return ReactiveStreams.fromSubscriber(new MessageProcessor(null));
     }
 
     public SubscriberBuilder<T, Void> createSubscriber() {
         return ReactiveStreams.<T>builder()
             .<Message<T>>map(SimpleMessage::new)
-            .to(new MessageProcessor());
+            .to(new MessageProcessor(null));
     }
 
     /**
@@ -98,7 +100,7 @@ public class MockedReceiver<T> {
      * <p>
      * Any messages not matching the payload will be acknowledged and ignored.
      */
-    public Message<T> expectEventualMessageWithPayload(T payload) throws InterruptedException {
+    public Message<T> expectEventualMessageWithPayload(T payload) {
         long start = System.currentTimeMillis();
         Message<T> msg = receiveMessageWithPayload(payload, testEnvironment.receiveTimeout().toMillis());
         List<String> ignored = new ArrayList<>();
@@ -156,20 +158,17 @@ public class MockedReceiver<T> {
         return msg;
     }
 
-    private class MessageProcessor implements Processor<Message<T>, Void> {
-        private volatile AtomicReference<Subscription> subscription;
+    private class MessageProcessor<R> implements Processor<Message<T>, R> {
+        private final Publisher<R> publisher;
+        private volatile AtomicReference<Subscription> subscription = new AtomicReference<>();
+
+        public MessageProcessor(Publisher<R> publisher) {
+            this.publisher = publisher;
+        }
 
         @Override
-        public void subscribe(Subscriber<? super Void> subscriber) {
-            subscriber.onSubscribe(new Subscription() {
-                @Override
-                public void request(long l) {
-                }
-
-                @Override
-                public void cancel() {
-                }
-            });
+        public void subscribe(Subscriber<? super R> subscriber) {
+            publisher.subscribe(subscriber);
         }
 
         @Override
@@ -179,14 +178,13 @@ public class MockedReceiver<T> {
             }
             else {
                 subscriptions.add(subscription);
-                subscription.request(1);
+                subscription.request(Long.MAX_VALUE);
             }
         }
 
         @Override
         public void onNext(Message<T> message) {
             receiveWrappedMessage(message);
-            subscription.get().request(1);
         }
 
         @Override

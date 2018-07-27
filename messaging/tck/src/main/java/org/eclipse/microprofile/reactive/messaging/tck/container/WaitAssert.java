@@ -20,6 +20,9 @@
 package org.eclipse.microprofile.reactive.messaging.tck.container;
 
 import java.time.Duration;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class WaitAssert {
 
@@ -42,4 +45,15 @@ public class WaitAssert {
         }
     }
 
+    public static <T> T await(CompletionStage<T> future, TestEnvironment environment) {
+        try {
+            return future.toCompletableFuture().get(environment.receiveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        }
+        catch (TimeoutException e) {
+            throw new AssertionError("Action was not completed in " + environment.receiveTimeout().toMillis() + "ms", e);
+        }
+        catch (Exception e) {
+            throw new AssertionError("Action failed", e);
+        }
+    }
 }

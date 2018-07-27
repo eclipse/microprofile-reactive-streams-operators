@@ -32,7 +32,8 @@ public class ReactiveMessagingTck {
     public Object[] getAllTests() {
         return new Object[]{
             new IncomingCompletionStageMethodVerification(),
-            new IncomingOutgingCompletionStageMethodVerification()
+            new IncomingOutgingCompletionStageMethodVerification(),
+            new IncomingProcessorMethodVerification()
         };
     }
 

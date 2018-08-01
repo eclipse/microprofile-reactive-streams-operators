@@ -27,10 +27,10 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -241,6 +241,7 @@ public final class PublisherBuilder<T> {
      * @return A new completion builder.
      */
     public CompletionRunner<Void> forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action, "Action must not be null");
         return collect(Collector.<T, Void, Void>of(
             () -> null,
             (n, t) -> action.accept(t),
@@ -299,24 +300,6 @@ public final class PublisherBuilder<T> {
      */
     public CompletionRunner<Optional<T>> reduce(BinaryOperator<T> accumulator) {
         return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
-    }
-
-    /**
-     * Perform a reduction on the elements of this stream, using the provided identity value, accumulation function and
-     * combiner function.
-     * <p>
-     * The result of the reduction is returned in the {@link CompletionStage}.
-     *
-     * @param identity    The identity value.
-     * @param accumulator The accumulator function.
-     * @param combiner    The combiner function.
-     * @return A new completion builder.
-     */
-    public <S> CompletionRunner<S> reduce(S identity,
-                                          BiFunction<S, ? super T, S> accumulator,
-                                          BinaryOperator<S> combiner) {
-
-        return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator, combiner)));
     }
 
     /**
@@ -390,6 +373,7 @@ public final class PublisherBuilder<T> {
      * @return A {@link CompletionRunner} that completes when the stream completes.
      */
     public <R> CompletionRunner<R> to(SubscriberBuilder<T, R> subscriber) {
+        Objects.requireNonNull(subscriber, "Subscriber must not be null");
         return addTerminalStage(new InternalStages.Nested(subscriber.getGraphBuilder()));
     }
 
@@ -536,6 +520,7 @@ public final class PublisherBuilder<T> {
      * @return A {@link Publisher} that will run this stream.
      */
     public Publisher<T> buildRs(ReactiveStreamsEngine engine) {
+        Objects.requireNonNull(engine, "Engine must not be null");
         return engine.buildPublisher(toGraph());
     }
 

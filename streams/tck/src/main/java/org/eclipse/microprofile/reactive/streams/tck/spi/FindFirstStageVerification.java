@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Subscriber;
@@ -26,12 +26,16 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.testng.Assert.assertEquals;
 
+/**
+ * Verification for find first stage.
+ */
 public class FindFirstStageVerification extends AbstractStageVerification {
 
-    FindFirstStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    FindFirstStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -42,15 +46,35 @@ public class FindFirstStageVerification extends AbstractStageVerification {
     }
 
     @Test
-    public void findFirstStageShouldReturnEmpty() {
+    public void findFirstStageShouldFindTheFirstElementInSingleElementStream() {
+        assertEquals(await(ReactiveStreams.of(1)
+            .findFirst().run(getEngine())), Optional.of(1));
+    }
+
+    @Test
+    public void findFirstStageShouldReturnEmptyForEmptyStream() {
         assertEquals(await(ReactiveStreams.of()
             .findFirst().run(getEngine())), Optional.empty());
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
+    public void findFirstStageShouldCancelUpstream() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        assertEquals(await(infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .findFirst().run(getEngine())), Optional.of(1));
+        await(cancelled);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void findFirstStageShouldPropagateErrors() {
-        await(ReactiveStreams.failed(new RuntimeException("failed"))
+        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
             .findFirst().run(getEngine()));
+    }
+
+    @Test
+    public void findFirstStageShouldBeReusable() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .findFirst().run(getEngine())), Optional.of(1));
     }
 
     @Override

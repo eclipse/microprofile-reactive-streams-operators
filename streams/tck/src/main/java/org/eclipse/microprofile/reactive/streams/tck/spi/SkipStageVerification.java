@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -32,7 +33,7 @@ import static org.testng.Assert.assertEquals;
 
 public class SkipStageVerification extends AbstractStageVerification {
 
-    SkipStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    SkipStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -44,16 +45,20 @@ public class SkipStageVerification extends AbstractStageVerification {
             .run(getEngine())), Arrays.asList(3, 4));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void skipOnPublisherShouldRefuseToSkipNegativeElements() {
-        ReactiveStreams.of(1)
-            .skip(-1);
+    @Test
+    public void skipStageShouldSupportSkippingNoElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+            .skip(0)
+            .toList()
+            .run(getEngine())), Arrays.asList(1, 2, 3, 4));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void skipOnProcessorShouldRefuseToSkipNegativeElements() {
-        ReactiveStreams.builder()
-            .skip(-1);
+    @Test
+    public void skipStageShouldBeReusable() {
+        ProcessorBuilder<Integer, Integer> skip = ReactiveStreams.<Integer>builder().skip(2);
+
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4).via(skip).toList().run(getEngine())), Arrays.asList(3, 4));
+        assertEquals(await(ReactiveStreams.of(5, 6, 7, 8).via(skip).toList().run(getEngine())), Arrays.asList(7, 8));
     }
 
     @Override

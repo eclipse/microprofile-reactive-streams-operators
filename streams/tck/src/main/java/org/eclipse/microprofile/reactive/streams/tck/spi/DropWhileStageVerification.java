@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -27,29 +28,59 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static org.testng.Assert.assertEquals;
 
+/**
+ * Verification for the drop while stage.
+ */
 public class DropWhileStageVerification extends AbstractStageVerification {
 
-    DropWhileStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    DropWhileStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
     @Test
     public void dropWhileStageShouldSupportDroppingElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 0)
             .dropWhile(i -> i < 3)
             .toList()
-            .run(getEngine())), Arrays.asList(3, 4));
+            .run(getEngine())), Arrays.asList(3, 4, 0));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void dropWhileStageShouldHandleErrors() {
-        await(ReactiveStreams.of(1, 2, 3, 4)
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Integer>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
             .dropWhile(i -> {
-                throw new RuntimeException("failed");
+                throw new QuietRuntimeException("failed");
             })
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void dropWhileStageShouldPropagateUpstreamErrorsWhileDropping() {
+        await(ReactiveStreams.<Integer>failed(new QuietRuntimeException("failed"))
+            .dropWhile(i -> i < 3)
+            .toList()
+            .run(getEngine()));
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void dropWhileStageShouldPropagateUpstreamErrorsAfterFinishedDropping() {
+        await(infiniteStream()
+            .peek(i -> {
+                if (i == 4) {
+                    throw new QuietRuntimeException("failed");
+                }
+            })
+            .dropWhile(i -> i < 3)
             .toList()
             .run(getEngine()));
     }
@@ -70,6 +101,38 @@ public class DropWhileStageVerification extends AbstractStageVerification {
             })
             .toList()
             .run(getEngine())), Arrays.asList(3, 4));
+    }
+
+    @Test
+    public void dropWhileStageShouldAllowCompletionWhileDropping() {
+        assertEquals(await(ReactiveStreams.of(1, 1, 1, 1)
+            .dropWhile(i -> i < 3)
+            .toList()
+            .run(getEngine())), Collections.emptyList());
+    }
+
+    @Test
+    public void dropWhileStageShouldPropagateCancel() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        await(infiniteStream().onTerminate(() -> cancelled.complete(null)).dropWhile(i -> i < 3).cancel().run(getEngine()));
+        await(cancelled);
+    }
+
+    @Test
+    public void dropWhileStageBuilderShouldBeReusable() {
+        ProcessorBuilder<Integer, Integer> dropWhile = ReactiveStreams.<Integer>builder()
+            .dropWhile(i -> i < 3);
+
+        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+            .via(dropWhile)
+            .toList()
+            .run(getEngine())), Arrays.asList(3, 4));
+
+        assertEquals(await(ReactiveStreams.of(0, 1, 6, 7)
+            .via(dropWhile)
+            .toList()
+            .run(getEngine())), Arrays.asList(6, 7));
+
     }
 
     @Override

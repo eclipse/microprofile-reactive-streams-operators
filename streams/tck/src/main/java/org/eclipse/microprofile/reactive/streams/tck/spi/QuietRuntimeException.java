@@ -17,18 +17,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
-
-import org.eclipse.microprofile.reactive.streams.tck.api.ReactiveStreamsApiVerification;
-import org.testng.annotations.Factory;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 /**
- * This runs any tests that don't require an implementation to run, that is, the API verification.
+ * RuntimeException with no stack trace for expected failures, to make logging not so noisy.
  */
-public class TckTest {
+public class QuietRuntimeException extends RuntimeException {
+    public QuietRuntimeException() {
+        this(null, null);
+    }
 
-    @Factory
-    public Object[] allTests() {
-        return new ReactiveStreamsApiVerification().allTests().toArray();
+    public QuietRuntimeException(String message) {
+        this(message, null);
+    }
+
+    public QuietRuntimeException(String message, Throwable cause) {
+        super(message, cause, true, false);
+    }
+
+    public QuietRuntimeException(Throwable cause) {
+        this(null, cause);
     }
 }

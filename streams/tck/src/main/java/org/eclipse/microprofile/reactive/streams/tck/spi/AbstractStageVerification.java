@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.reactivestreams.Publisher;
@@ -35,14 +36,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
+/**
+ * All stage verifications should inherit from this. This provides access to dependencies of the TCK, as well as some
+ * convenient helper functions.
+ */
 abstract class AbstractStageVerification {
 
     private final ReactiveStreamsEngine engine;
     private final TestEnvironment environment;
     private final ScheduledExecutorService executorService;
 
-    AbstractStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    AbstractStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         this.engine = deps.engine();
         this.environment = deps.testEnvironment();
         this.executorService = deps.executorService();
@@ -56,8 +63,14 @@ abstract class AbstractStageVerification {
         return executorService;
     }
 
+    /**
+     * A stage verification may return multiple tests here for doing Reactive Streams TCK verifications.
+     */
     abstract List<Object> reactiveStreamsTckVerifiers();
 
+    /**
+     * Wait for the given future to complete and return its value, using the configured timeout.
+     */
     <T> T await(CompletionStage<T> future) {
         try {
             return future.toCompletableFuture().get(environment.defaultTimeoutMillis(), TimeUnit.MILLISECONDS);
@@ -78,6 +91,15 @@ abstract class AbstractStageVerification {
         }
     }
 
+    /**
+     * An infinite stream of integers starting from one.
+     */
+    PublisherBuilder<Integer> infiniteStream() {
+        return ReactiveStreams.fromIterable(() -> {
+            AtomicInteger value = new AtomicInteger();
+            return IntStream.generate(value::incrementAndGet).boxed().iterator();
+        });
+    }
 
     abstract class StagePublisherVerification<T> extends PublisherVerification<T> {
 

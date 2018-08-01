@@ -23,6 +23,8 @@ import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 
+import java.util.Objects;
+
 /**
  * A builder for a {@link org.reactivestreams.Subscriber} and its result.
  * <p>
@@ -63,6 +65,7 @@ public final class SubscriberBuilder<T, R> {
      * @return A {@link CompletionSubscriber} that will run this stream.
      */
     public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
+        Objects.requireNonNull(engine, "Engine must not be null");
         return engine.buildSubscriber(toGraph());
     }
 

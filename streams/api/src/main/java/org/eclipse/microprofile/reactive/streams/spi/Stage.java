@@ -24,6 +24,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -91,7 +92,7 @@ public interface Stage {
         private final Function<?, ?> mapper;
 
         public Map(Function<?, ?> mapper) {
-            this.mapper = mapper;
+            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
         }
 
         /**
@@ -116,7 +117,7 @@ public interface Stage {
         private final Consumer<?> consumer;
 
         public Peek(Consumer<?> consumer) {
-            this.consumer = consumer;
+            this.consumer = Objects.requireNonNull(consumer, "Consumer must not be null");
         }
 
         /**
@@ -141,7 +142,7 @@ public interface Stage {
         private final Predicate<?> predicate;
 
         public Filter(Predicate<?> predicate) {
-            this.predicate = predicate;
+            this.predicate = Objects.requireNonNull(predicate, "Predicate must not be null");
         }
 
         /**
@@ -166,7 +167,7 @@ public interface Stage {
         private final Predicate<?> predicate;
 
         public DropWhile(Predicate<?> predicate) {
-            this.predicate = predicate;
+            this.predicate = Objects.requireNonNull(predicate, "Predicate must not be null");
         }
 
         /**
@@ -249,7 +250,7 @@ public interface Stage {
         private final Predicate<?> predicate;
 
         public TakeWhile(Predicate<?> predicate) {
-            this.predicate = predicate;
+            this.predicate = Objects.requireNonNull(predicate, "Predicate must not be null");
         }
 
         /**
@@ -272,7 +273,7 @@ public interface Stage {
         private final Publisher<?> publisher;
 
         public PublisherStage(Publisher<?> publisher) {
-            this.publisher = publisher;
+            this.publisher = Objects.requireNonNull(publisher, "Publisher must not be null");
         }
 
         /**
@@ -294,11 +295,15 @@ public interface Stage {
      * Any exceptions thrown by the iterator must be propagated downstream.
      */
     final class Of implements Outlet {
+        /**
+         * Instance used for an empty stream.
+         */
         public static final Of EMPTY = new Of(Collections.emptyList());
+
         private final Iterable<?> elements;
 
         public Of(Iterable<?> elements) {
-            this.elements = elements;
+            this.elements = Objects.requireNonNull(elements, "Iterable must not be null");
         }
 
         /**
@@ -320,7 +325,7 @@ public interface Stage {
         private final Processor<?, ?> processor;
 
         public ProcessorStage(Processor<?, ?> processor) {
-            this.processor = processor;
+            this.processor = Objects.requireNonNull(processor, "Processor must not be null");
         }
 
         /**
@@ -362,7 +367,7 @@ public interface Stage {
         private final Subscriber<?> subscriber;
 
         public SubscriberStage(Subscriber<?> subscriber) {
-            this.subscriber = subscriber;
+            this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
         }
 
         /**
@@ -391,7 +396,7 @@ public interface Stage {
         private final Collector<?, ?, ?> collector;
 
         public Collect(Collector<?, ?, ?> collector) {
-            this.collector = collector;
+            this.collector = Objects.requireNonNull(collector, "Collector must not be null");
         }
 
         /**
@@ -418,7 +423,7 @@ public interface Stage {
         private final Function<?, Graph> mapper;
 
         public FlatMap(Function<?, Graph> mapper) {
-            this.mapper = mapper;
+            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
         }
 
         /**
@@ -444,7 +449,7 @@ public interface Stage {
         private final Function<?, CompletionStage<?>> mapper;
 
         public FlatMapCompletionStage(Function<?, CompletionStage<?>> mapper) {
-            this.mapper = mapper;
+            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
         }
 
         /**
@@ -467,7 +472,7 @@ public interface Stage {
         private final Function<?, Iterable<?>> mapper;
 
         public FlatMapIterable(Function<?, Iterable<?>> mapper) {
-            this.mapper = mapper;
+            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
         }
 
         /**
@@ -493,7 +498,7 @@ public interface Stage {
 
 
         public OnError(Consumer<Throwable> consumer) {
-            this.consumer = consumer;
+            this.consumer = Objects.requireNonNull(consumer, "Consumer must not be null");
         }
 
         /**
@@ -520,7 +525,7 @@ public interface Stage {
         private final Runnable action;
 
         public OnTerminate(Runnable runnable) {
-            this.action = runnable;
+            this.action = Objects.requireNonNull(runnable, "Action must not be null");
         }
 
         /**
@@ -546,7 +551,7 @@ public interface Stage {
         private final Runnable action;
 
         public OnComplete(Runnable runnable) {
-            this.action = runnable;
+            this.action = Objects.requireNonNull(runnable, "Action must not be null");
         }
 
         /**
@@ -579,7 +584,7 @@ public interface Stage {
 
 
         public OnErrorResume(Function<Throwable, ?>  function) {
-            this.function = function;
+            this.function = Objects.requireNonNull(function, "Resume function must not be null");
         }
 
         /**
@@ -612,8 +617,8 @@ public interface Stage {
         private final Function<Throwable, Graph> function;
 
 
-        public OnErrorResumeWith(Function<Throwable, Graph>  function) {
-            this.function = function;
+        public OnErrorResumeWith(Function<Throwable, Graph> function) {
+            this.function = Objects.requireNonNull(function, "Resume with function must be empty");
         }
 
         /**
@@ -635,7 +640,7 @@ public interface Stage {
         private final Throwable error;
 
         public Failed(Throwable error) {
-            this.error = error;
+            this.error = Objects.requireNonNull(error, "Exception must not be null");
         }
 
         public Throwable getError() {

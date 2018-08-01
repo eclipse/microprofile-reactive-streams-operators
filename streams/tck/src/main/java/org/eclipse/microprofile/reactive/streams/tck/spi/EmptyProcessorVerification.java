@@ -17,62 +17,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
-import static org.testng.Assert.assertEquals;
+/**
+ * Verification for an empty processor, ie, the processor returned from ReactiveStreams.builder().buildRs().
+ */
+public class EmptyProcessorVerification extends AbstractStageVerification {
 
-public class MapStageVerification extends AbstractStageVerification {
-
-    MapStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    public EmptyProcessorVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
-    }
-
-    @Test
-    public void mapStageShouldMapElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
-            .map(Object::toString)
-            .toList()
-            .run(getEngine())), Arrays.asList("1", "2", "3"));
-    }
-
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void mapStageShouldPropagateRuntimeExceptions() {
-        await(ReactiveStreams.of("foo")
-            .map(foo -> {
-                throw new RuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine()));
     }
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
-        return Collections.singletonList(
-            new ProcessorVerification()
-        );
+        return Collections.singletonList(new ProcessorVerification());
     }
 
     public class ProcessorVerification extends StageProcessorVerification<Integer> {
-
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
-        }
-
-        @Override
-        public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-                .map(Function.identity()).buildRs(getEngine());
+            return ReactiveStreams.<Integer>builder().buildRs(getEngine());
         }
 
         @Override

@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Subscription;
@@ -29,7 +29,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionStage;
 
 public class SubscriberStageVerification extends AbstractStageVerification {
-    SubscriberStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    SubscriberStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 

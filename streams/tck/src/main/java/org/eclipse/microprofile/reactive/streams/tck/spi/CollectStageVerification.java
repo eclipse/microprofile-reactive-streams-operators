@@ -17,23 +17,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
 import org.reactivestreams.Subscriber;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
+/**
+ * Verification for the collect stage.
+ */
 public class CollectStageVerification extends AbstractStageVerification {
 
-    CollectStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    CollectStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -67,9 +76,9 @@ public class CollectStageVerification extends AbstractStageVerification {
             ).run(getEngine())).get(), 42);
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void collectShouldPropagateErrors() {
-        await(ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void collectShouldPropagateUpstreamErrors() {
+        await(ReactiveStreams.<Integer>failed(new QuietRuntimeException("failed"))
             .collect(
                 () -> new AtomicInteger(0),
                 AtomicInteger::addAndGet
@@ -83,11 +92,65 @@ public class CollectStageVerification extends AbstractStageVerification {
             .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void toListStageShouldPropagateErrors() {
-        await(ReactiveStreams.failed(new RuntimeException("failed"))
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void toListStageShouldPropagateUpstreamErrors() {
+        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
             .toList().run(getEngine()));
     }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void collectStageShouldPropagateErrorsFromSupplierThroughCompletionStage() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<Integer> result = null;
+        try {
+            result = infiniteStream()
+                .onTerminate(() -> cancelled.complete(null))
+                .collect(Collector.<Integer, Integer, Integer>of(() -> {
+                    throw new QuietRuntimeException("failed");
+                }, (a, b) -> {
+                }, (a, b) -> a + b, Function.identity()))
+                .run(getEngine());
+        }
+        catch (Exception e) {
+            fail("Exception thrown directly from stream, it should have been captured by the returned CompletionStage", e);
+        }
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void collectStageShouldPropagateErrorsFromAccumulator() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<String> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
+            .collect(Collector.of(() -> "", (a, b) -> {
+                throw new QuietRuntimeException("failed");
+            }, (a, b) -> a + b, Function.identity()))
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void collectStageShouldPropagateErrorsFromFinisher() {
+        CompletionStage<Integer> result = ReactiveStreams.of(1, 2, 3)
+            .collect(Collector.<Integer, Integer, Integer>of(() -> 0, (a, b) -> {
+                },
+                (a, b) -> a + b,
+                r -> {
+                    throw new QuietRuntimeException("failed");
+                }))
+            .run(getEngine());
+        await(result);
+    }
+
+    @Test
+    public void collectStageBuilderShouldBeReusable() {
+        SubscriberBuilder<Integer, List<Integer>> toList = ReactiveStreams.<Integer>builder().toList();
+        assertEquals(await(ReactiveStreams.of(1, 2, 3).to(toList).run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(await(ReactiveStreams.of(4, 5, 6).to(toList).run(getEngine())), Arrays.asList(4, 5, 6));
+    }
+
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {

@@ -27,10 +27,10 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -242,6 +242,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new subscriber builder.
      */
     public SubscriberBuilder<T, Void> forEach(Consumer<? super R> action) {
+        Objects.requireNonNull(action, "Action must not be null");
         return collect(Collector.<R, Void, Void>of(
             () -> null,
             (n, r) -> action.accept(r),
@@ -301,24 +302,6 @@ public final class ProcessorBuilder<T, R> {
      */
     public SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator) {
         return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
-    }
-
-    /**
-     * Perform a reduction on the elements of this stream, using the provided identity value, accumulation function and
-     * combiner function.
-     * <p>
-     * The result of the reduction is returned in the {@link CompletionSubscriber}.
-     *
-     * @param identity    The identity value.
-     * @param accumulator The accumulator function.
-     * @param combiner    The combiner function.
-     * @return A new subscriber builder.
-     */
-    public <S> SubscriberBuilder<T, S> reduce(S identity,
-                                              BiFunction<S, ? super R, S> accumulator,
-                                              BinaryOperator<S> combiner) {
-
-        return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator, combiner)));
     }
 
     /**
@@ -536,6 +519,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A {@link Processor} that will run this stream.
      */
     public Processor<T, R> buildRs(ReactiveStreamsEngine engine) {
+        Objects.requireNonNull(engine, "Engine must not be null");
         return engine.buildProcessor(toGraph());
     }
 

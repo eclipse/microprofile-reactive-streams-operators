@@ -17,8 +17,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
+import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -37,7 +39,7 @@ import java.util.function.Function;
 import static org.testng.Assert.assertEquals;
 
 public class FlatMapStageVerification extends AbstractStageVerification {
-    FlatMapStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    FlatMapStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -49,14 +51,46 @@ public class FlatMapStageVerification extends AbstractStageVerification {
             .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void flatMapStageShouldPropagateRuntimeExceptions() {
-        await(ReactiveStreams.of("foo")
+    @Test
+    public void flatMapStageShouldAllowEmptySubStreams() {
+        assertEquals(await(ReactiveStreams.of(ReactiveStreams.empty(), ReactiveStreams.of(1, 2))
+            .flatMap(Function.identity())
+            .toList()
+            .run(getEngine())), Arrays.asList(1, 2));
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapStageShouldHandleExceptions() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
             .flatMap(foo -> {
-                throw new RuntimeException("failed");
+                throw new QuietRuntimeException("failed");
             })
             .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapStageShouldPropagateUpstreamExceptions() {
+        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+            .flatMap(ReactiveStreams::of)
+            .toList()
             .run(getEngine()));
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapStageShouldPropagateSubstreamExceptions() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
+            .flatMap(f -> ReactiveStreams.failed(new QuietRuntimeException("failed")))
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
     }
 
     @Test
@@ -72,6 +106,29 @@ public class FlatMapStageVerification extends AbstractStageVerification {
             Arrays.asList(1, 2, 3, 4, 5));
     }
 
+    @Test
+    public void flatMapStageShouldPropgateCancelToSubstreams() {
+        CompletableFuture<Void> outerCancelled = new CompletableFuture<>();
+        CompletableFuture<Void> innerCancelled = new CompletableFuture<>();
+        await(infiniteStream()
+            .onTerminate(() -> outerCancelled.complete(null))
+            .flatMap(i -> infiniteStream().onTerminate(() -> innerCancelled.complete(null)))
+            .limit(5)
+            .toList()
+            .run(getEngine()));
+
+        await(outerCancelled);
+        await(innerCancelled);
+    }
+
+    @Test
+    public void flatMapStageBuilderShouldBeReusable() {
+        ProcessorBuilder<PublisherBuilder<Integer>, Integer> flatMap =
+            ReactiveStreams.<PublisherBuilder<Integer>>builder().flatMap(Function.identity());
+
+        assertEquals(await(ReactiveStreams.of(ReactiveStreams.of(1, 2)).via(flatMap).toList().run(getEngine())), Arrays.asList(1, 2));
+        assertEquals(await(ReactiveStreams.of(ReactiveStreams.of(3, 4)).via(flatMap).toList().run(getEngine())), Arrays.asList(3, 4));
+    }
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {

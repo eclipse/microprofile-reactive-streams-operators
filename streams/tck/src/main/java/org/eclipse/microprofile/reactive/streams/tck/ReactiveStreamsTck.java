@@ -20,16 +20,16 @@
 package org.eclipse.microprofile.reactive.streams.tck;
 
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.tck.api.ReactiveStreamsApiVerification;
+import org.eclipse.microprofile.reactive.streams.tck.spi.ReactiveStreamsSpiVerification;
 import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Factory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Function;
 
 /**
  * The Reactive Streams TCK.
@@ -75,6 +75,7 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         if (engine != null) {
             shutdownEngine(engine);
         }
+        executorService.shutdown();
     }
 
     @Factory
@@ -82,56 +83,15 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         engine = createEngine();
         executorService = Executors.newScheduledThreadPool(4);
 
-        List<Function<VerificationDeps, AbstractStageVerification>> stageVerifications = Arrays.asList(
-            OfStageVerification::new,
-            MapStageVerification::new,
-            FlatMapStageVerification::new,
-            FilterStageVerification::new,
-            FindFirstStageVerification::new,
-            CollectStageVerification::new,
-            TakeWhileStageVerification::new,
-            FlatMapPublisherStageVerification::new,
-            FlatMapCompletionStageVerification::new,
-            FlatMapIterableStageVerification::new,
-            ConcatStageVerification::new,
-            EmptyProcessorVerification::new,
-            CancelStageVerification::new,
-            SubscriberStageVerification::new,
-            PeekStageVerification::new,
-            DistinctStageVerification::new,
-            OnStagesVerification::new,
-            LimitStageVerification::new,
-            SkipStageVerification::new,
-            DropWhileStageVerification::new,
-            OnErrorResumeStageVerification::new
-        );
-
-        List<Object> allTests = new ArrayList<>();
-        VerificationDeps deps = new VerificationDeps();
-        for (Function<VerificationDeps, AbstractStageVerification> creator : stageVerifications) {
-            AbstractStageVerification stageVerification = creator.apply(deps);
-            allTests.add(stageVerification);
-            allTests.addAll(stageVerification.reactiveStreamsTckVerifiers());
-        }
+        ReactiveStreamsApiVerification apiVerification = new ReactiveStreamsApiVerification();
+        ReactiveStreamsSpiVerification spiVerification = new ReactiveStreamsSpiVerification(testEnvironment, engine, executorService);
 
         // Add tests that aren't dependent on the dependencies.
-        allTests.add(new GraphAccessorVerification());
+        List<Object> allTests = new ArrayList<>();
+
+        allTests.addAll(apiVerification.allTests());
+        allTests.addAll(spiVerification.allTests());
 
         return allTests.stream().filter(this::isEnabled).toArray();
     }
-
-    class VerificationDeps {
-        ReactiveStreamsEngine engine() {
-            return engine;
-        }
-
-        TestEnvironment testEnvironment() {
-            return testEnvironment;
-        }
-
-        ScheduledExecutorService executorService() {
-            return executorService;
-        }
-    }
-
 }

@@ -26,6 +26,7 @@ import org.reactivestreams.Subscriber;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -163,6 +164,7 @@ public class ReactiveStreams {
      * @return A publisher builder.
      */
     public static <T> PublisherBuilder<T> iterate(T seed, UnaryOperator<T> f) {
+        Objects.requireNonNull(f, "Operator must not be null");
         return fromIterable(() -> Stream.iterate(seed, f).iterator());
     }
 
@@ -174,6 +176,7 @@ public class ReactiveStreams {
      * @return A publisher builder.
      */
     public static <T> PublisherBuilder<T> generate(Supplier<? extends T> s) {
+        Objects.requireNonNull(s, "Supplier must not be null");
         return fromIterable(() -> Stream.<T>generate((Supplier) s).iterator());
     }
 

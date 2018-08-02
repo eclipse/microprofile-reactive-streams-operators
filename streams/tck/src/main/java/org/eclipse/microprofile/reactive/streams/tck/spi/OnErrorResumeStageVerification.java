@@ -76,7 +76,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
     assertEquals(await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
       .onErrorResumeWithPublisher(err -> {
         exception.set(err);
-        return ReactiveStreams.of("foo", "bar").buildRs();
+        return ReactiveStreams.of("foo", "bar").buildRs(getEngine());
       })
       .toList()
       .run(getEngine())), Arrays.asList("foo", "bar"));
@@ -133,7 +133,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
       })
       .onErrorResumeWithPublisher(err -> {
         exception.set(err);
-        return ReactiveStreams.of("foo", "bar").buildRs();
+        return ReactiveStreams.of("foo", "bar").buildRs(getEngine());
       })
       .toList()
       .run(getEngine())), Arrays.asList("A", "foo", "bar"));
@@ -182,7 +182,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
   public void onErrorResumeWithPublisherShouldBeAbleToInjectAFailure() {
     await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWithPublisher(err -> ReactiveStreams.failed(new QuietRuntimeException("boom")).buildRs())
+      .onErrorResumeWithPublisher(err -> ReactiveStreams.failed(new QuietRuntimeException("boom")).buildRs(getEngine()))
       .toList()
       .run(getEngine()));
   }

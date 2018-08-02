@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.api;
 
 import org.eclipse.microprofile.reactive.streams.GraphAccessor;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
@@ -33,8 +33,6 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * Test for the GraphAccessor class.
- * <p>
- * This does not need an implementation of the engine to verify it.
  */
 public class GraphAccessorVerification {
 

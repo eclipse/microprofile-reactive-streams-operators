@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -27,37 +28,53 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 
 import static org.testng.Assert.assertEquals;
 
-public class DistinctStageVerification extends AbstractStageVerification {
+public class MapStageVerification extends AbstractStageVerification {
 
-    DistinctStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    MapStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
     @Test
-    public void distinctStageShouldReturnDistinctElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 2, 3, 2, 1, 3)
-            .distinct()
+    public void mapStageShouldMapElements() {
+        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+            .map(Object::toString)
             .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3));
+            .run(getEngine())), Arrays.asList("1", "2", "3"));
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void mapStageShouldHandleExceptions() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
+            .map(foo -> {
+                throw new QuietRuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void mapStageShouldPropagateUpstreamExceptions() {
+        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+            .map(Function.identity())
+            .toList()
+            .run(getEngine()));
     }
 
     @Test
-    public void distinctStageShouldReturnAnEmptyStreamWhenCalledOnEmptyStreams() {
-        assertEquals(await(ReactiveStreams.empty()
-            .distinct()
-            .toList()
-            .run(getEngine())), Collections.emptyList());
-    }
-
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void distinctStageShouldPropagateExceptions() {
-        await(ReactiveStreams.failed(new RuntimeException("failed"))
-            .distinct()
-            .toList()
-            .run(getEngine()));
+    public void mapStageBuilderShouldBeReusable() {
+        ProcessorBuilder<Integer, Integer> map = ReactiveStreams.<Integer>builder().map(i -> i + 1);
+        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(map).toList().run(getEngine())), Arrays.asList(2, 3, 4));
+        assertEquals(await(ReactiveStreams.of(4, 5, 6).via(map).toList().run(getEngine())), Arrays.asList(5, 6, 7));
     }
 
     @Override
@@ -71,13 +88,13 @@ public class DistinctStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().distinct().buildRs(getEngine());
+            return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-                .distinct().buildRs(getEngine());
+                .map(Function.identity()).buildRs(getEngine());
         }
 
         @Override

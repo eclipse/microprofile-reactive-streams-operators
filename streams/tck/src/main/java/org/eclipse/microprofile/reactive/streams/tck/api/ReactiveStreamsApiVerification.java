@@ -17,34 +17,28 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.api;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
-import org.reactivestreams.Processor;
-
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
-public class EmptyProcessorVerification extends AbstractStageVerification {
+/**
+ * Factory for tests that verify the API itself without dependence on an SPI implementation.
+ * <p>
+ * These tests serve not only to test the API provided by the MicroProfile API project, but also to test clean room
+ * implementations of the API, that is, implementations that don't depend on the MicroProfile API artifact.
+ */
+public class ReactiveStreamsApiVerification {
 
-    public EmptyProcessorVerification(ReactiveStreamsTck.VerificationDeps deps) {
-        super(deps);
-    }
-
-    @Override
-    List<Object> reactiveStreamsTckVerifiers() {
-        return Collections.singletonList(new ProcessorVerification());
-    }
-
-    public class ProcessorVerification extends StageProcessorVerification<Integer> {
-        @Override
-        public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().buildRs(getEngine());
-        }
-
-        @Override
-        public Integer createElement(int element) {
-            return element;
-        }
+    public List<Object> allTests() {
+        return Arrays.asList(
+            new ReactiveStreamsVerification(),
+            new GraphAccessorVerification(),
+            new PublisherBuilderVerification(),
+            new ProcessorBuilderVerification(),
+            new SubscriberBuilderVerification(),
+            new CompletionRunnerVerification(),
+            new CompletionSubscriberVerification()
+        );
     }
 }

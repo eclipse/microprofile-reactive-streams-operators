@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.testng.annotations.Test;
@@ -33,8 +34,11 @@ import java.util.function.Function;
 
 import static org.testng.Assert.assertEquals;
 
+/**
+ * Verification for flat map completion stage.
+ */
 public class FlatMapCompletionStageVerification extends AbstractStageVerification {
-    FlatMapCompletionStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    FlatMapCompletionStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -105,6 +109,60 @@ public class FlatMapCompletionStageVerification extends AbstractStageVerificatio
         three.complete(3);
 
         assertEquals(await(result), Arrays.asList(1, 2, 3));
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapCsStageShouldPropagateUpstreamErrors() {
+        await(ReactiveStreams.<Integer>failed(new QuietRuntimeException("failed"))
+            .flatMapCompletionStage(CompletableFuture::completedFuture)
+            .toList()
+            .run(getEngine()));
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapCsStageShouldHandleErrorsThrownByCallback() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
+            .flatMapCompletionStage(i -> {
+                throw new QuietRuntimeException("failed");
+            })
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void flatMapCsStageShouldHandleFailedCompletionStages() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
+            .flatMapCompletionStage(i -> {
+                CompletableFuture<Object> failed = new CompletableFuture<>();
+                failed.completeExceptionally(new QuietRuntimeException("failed"));
+                return failed;
+            })
+            .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test
+    public void flatMapCsStageShouldPropagateCancel() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        await(infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .flatMapCompletionStage(CompletableFuture::completedFuture).cancel().run(getEngine()));
+        await(cancelled);
+    }
+
+    @Test
+    public void flatMapCsStageBuilderShouldBeResuable() {
+        ProcessorBuilder<Integer, Integer> mapper = ReactiveStreams.<Integer>builder()
+            .flatMapCompletionStage(i -> CompletableFuture.completedFuture(i + 1));
+        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(mapper).toList().run(getEngine())), Arrays.asList(2, 3, 4));
+        assertEquals(await(ReactiveStreams.of(4, 5, 6).via(mapper).toList().run(getEngine())), Arrays.asList(5, 6, 7));
     }
 
     @Override

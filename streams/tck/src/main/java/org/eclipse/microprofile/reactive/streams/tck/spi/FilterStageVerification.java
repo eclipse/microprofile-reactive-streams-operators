@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -27,12 +28,17 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static org.testng.Assert.assertEquals;
 
+/**
+ * Verification for the filter stage.
+ */
 public class FilterStageVerification extends AbstractStageVerification {
 
-    FilterStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    FilterStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -44,14 +50,40 @@ public class FilterStageVerification extends AbstractStageVerification {
             .run(getEngine())), Arrays.asList(1, 3, 5));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void filterStageShouldPropagateRuntimeExceptions() {
-        await(ReactiveStreams.of("foo")
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void filterStageShouldPropagateExceptions() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Integer>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
             .filter(foo -> {
-                throw new RuntimeException("failed");
+                throw new QuietRuntimeException("failed");
             })
             .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void filterStageShouldPropagateUpstreamExceptions() {
+        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+            .filter(foo -> true)
+            .toList()
             .run(getEngine()));
+    }
+
+    @Test
+    public void filterStageShouldPropagateCancel() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        await(infiniteStream().onTerminate(() -> cancelled.complete(null)).filter(i -> i < 3).cancel().run(getEngine()));
+        await(cancelled);
+    }
+
+    @Test
+    public void filterStageBuilderShouldBeReusable() {
+        ProcessorBuilder<Integer, Integer> filter = ReactiveStreams.<Integer>builder().filter(i -> i < 3);
+        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(filter).toList().run(getEngine())), Arrays.asList(1, 2));
+        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(filter).toList().run(getEngine())), Arrays.asList(1, 2));
     }
 
     @Override

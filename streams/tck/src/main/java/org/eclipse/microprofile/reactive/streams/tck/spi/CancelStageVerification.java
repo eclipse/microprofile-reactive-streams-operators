@@ -17,9 +17,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.testng.SkipException;
@@ -30,8 +31,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Verification for the cancel stage.
+ */
 public class CancelStageVerification extends AbstractStageVerification {
-    CancelStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+
+    CancelStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -50,6 +55,19 @@ public class CancelStageVerification extends AbstractStageVerification {
         })).cancel().run(getEngine());
         await(cancelled);
         await(result);
+    }
+
+    @Test
+    public void cancelStageShouldIgnoreAnyUpstreamFailures() {
+        await(ReactiveStreams.failed(new QuietRuntimeException())
+            .cancel().run(getEngine()));
+    }
+
+    @Test
+    public void cancelSubscriberBuilderShouldBeReusable() {
+        SubscriberBuilder<String, Void> cancel = ReactiveStreams.<String>builder().cancel();
+        await(ReactiveStreams.of("a").to(cancel).run(getEngine()));
+        await(ReactiveStreams.of("b").to(cancel).run(getEngine()));
     }
 
     @Override

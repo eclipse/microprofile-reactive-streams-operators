@@ -19,8 +19,8 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collector;
 
@@ -33,7 +33,7 @@ final class Reductions {
     }
 
     static <T> Collector<T, ?, Optional<T>> reduce(BinaryOperator<T> reducer) {
-
+        Objects.requireNonNull(reducer, "Reduction function must not be null");
         return Collector.of(Reduction<T>::new,
             (r, t) -> {
                 if (r.value == null) {
@@ -59,21 +59,10 @@ final class Reductions {
     }
 
     static <T> Collector<T, ?, T> reduce(T identity, BinaryOperator<T> reducer) {
-
+        Objects.requireNonNull(reducer, "Reduction function must not be null");
         return Collector.of(() -> new Reduction<>(identity),
             (r, t) -> r.value = reducer.apply(r.value, t),
             (r, s) -> r.replace(reducer.apply(r.value, s.value)),
-            r -> r.value
-        );
-    }
-
-    static <T, S> Collector<T, ?, S> reduce(S identity,
-                                            BiFunction<S, ? super T, S> accumulator,
-                                            BinaryOperator<S> combiner) {
-
-        return Collector.of(() -> new Reduction<>(identity),
-            (r, t) -> r.value = accumulator.apply(r.value, t),
-            (r, s) -> r.replace(combiner.apply(r.value, s.value)),
             r -> r.value
         );
     }

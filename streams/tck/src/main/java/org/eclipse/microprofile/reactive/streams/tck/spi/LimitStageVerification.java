@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -32,53 +33,60 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.testng.Assert.assertEquals;
 
-public class TakeWhileStageVerification extends AbstractStageVerification {
+public class LimitStageVerification extends AbstractStageVerification {
 
-    TakeWhileStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    LimitStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
     @Test
-    public void takeWhileStageShouldTakeWhileConditionIsTrue() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6, 1, 2)
-            .takeWhile(i -> i < 5)
+    public void limitStageShouldLimitTheOutputElements() {
+        assertEquals(await(infiniteStream()
+            .limit(3)
             .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3, 4));
+            .run(getEngine())), Arrays.asList(1, 2, 3));
     }
 
     @Test
-    public void takeWhileStageShouldEmitEmpty() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
-            .takeWhile(i -> false)
+    public void limitStageShouldAllowLimitingToZero() {
+        assertEquals(await(infiniteStream()
+            .limit(0)
             .toList()
             .run(getEngine())), Collections.emptyList());
     }
 
     @Test
-    public void takeWhileShouldCancelUpStreamWhenDone() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        ReactiveStreams.<Integer>fromPublisher(subscriber ->
+    public void limitStageToZeroShouldCompleteStreamEvenWhenNoElementsAreReceived() {
+        assertEquals(await(ReactiveStreams.fromPublisher(subscriber ->
             subscriber.onSubscribe(new Subscription() {
                 @Override
                 public void request(long n) {
-                    subscriber.onNext(1);
                 }
 
                 @Override
                 public void cancel() {
-                    cancelled.complete(null);
                 }
             })
-        ).takeWhile(t -> false)
+        ).limit(0)
+            .toList()
+            .run(getEngine())), Collections.emptyList());
+    }
+
+    @Test
+    public void limitStageShouldCancelUpStreamWhenDone() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
+            .limit(1)
             .toList()
             .run(getEngine());
         await(cancelled);
     }
 
     @Test
-    public void takeWhileShouldIgnoreSubsequentErrorsWhenDone() {
+    public void limitStageShouldIgnoreSubsequentErrorsWhenDone() {
         assertEquals(await(
-            ReactiveStreams.of(1, 2, 3, 4)
+            infiniteStream()
                 .flatMap(i -> {
                     if (i == 4) {
                         return ReactiveStreams.failed(new RuntimeException("failed"));
@@ -87,20 +95,36 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
                         return ReactiveStreams.of(i);
                     }
                 })
-                .takeWhile(t -> t < 3)
+                .limit(3)
                 .toList()
                 .run(getEngine())
-        ), Arrays.asList(1, 2));
+        ), Arrays.asList(1, 2, 3));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void takeWhileStageShouldHandleErrors() {
-        await(ReactiveStreams.of(1, 2, 3, 4)
-            .dropWhile(i -> {
-                throw new RuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine()));
+    @Test
+    public void limitStageShouldPropagateCancellation() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        await(
+            infiniteStream()
+                .onTerminate(() -> cancelled.complete(null))
+                .peek(i -> {
+                    if (i == 100) {
+                        cancelled.completeExceptionally(new RuntimeException("Was not cancelled"));
+                    }
+                })
+                .limit(100)
+                .limit(3)
+                .toList()
+                .run(getEngine())
+        );
+        await(cancelled);
+    }
+
+    @Test
+    public void limitStageBuilderShouldBeReusable() {
+        ProcessorBuilder<Integer, Integer> limit = ReactiveStreams.<Integer>builder().limit(3);
+        assertEquals(await(infiniteStream().via(limit).toList().run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(await(infiniteStream().map(i -> i + 1).via(limit).toList().run(getEngine())), Arrays.asList(2, 3, 4));
     }
 
     @Override
@@ -112,7 +136,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
             return ReactiveStreams.<Integer>builder()
-                .takeWhile(t -> true)
+                .limit(Long.MAX_VALUE)
                 .buildRs(getEngine());
         }
 
@@ -124,7 +148,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-                .takeWhile(t -> true)
+                .limit(Long.MAX_VALUE)
                 .buildRs(getEngine());
         }
     }

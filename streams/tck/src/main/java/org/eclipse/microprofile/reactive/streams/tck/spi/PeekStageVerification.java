@@ -17,8 +17,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.tck;
+package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -27,14 +28,18 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 public class PeekStageVerification extends AbstractStageVerification {
 
-    PeekStageVerification(ReactiveStreamsTck.VerificationDeps deps) {
+    PeekStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
@@ -48,14 +53,43 @@ public class PeekStageVerification extends AbstractStageVerification {
         assertEquals(count.get(), 3);
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void peekStageShouldPropagateRuntimeExceptions() {
-        await(ReactiveStreams.of("foo")
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void peekStageShouldHandleExceptions() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Integer>> result = infiniteStream()
+            .onTerminate(() -> cancelled.complete(null))
             .peek(x -> {
-                throw new RuntimeException("failed");
+                throw new QuietRuntimeException("failed");
             })
             .toList()
+            .run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    public void peekStageShouldPropagateUpstreamExceptions() {
+        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+            .peek(x -> {})
+            .toList()
             .run(getEngine()));
+    }
+
+    public void peekStageShouldNotBeExecutedForEmptyStreams() {
+        AtomicBoolean invoked = new AtomicBoolean();
+        await(ReactiveStreams.empty()
+            .peek(x -> invoked.set(true))
+            .toList()
+            .run(getEngine()));
+        assertFalse(invoked.get());
+    }
+
+    @Test
+    public void peekStageShouldBeReusable() {
+        ProcessorBuilder<Integer, Integer> peek = ReactiveStreams.<Integer>builder().peek(t -> {});
+
+        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(peek).toList().run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(await(ReactiveStreams.of(4, 5, 6).via(peek).toList().run(getEngine())), Arrays.asList(4, 5, 6));
     }
 
     @Override

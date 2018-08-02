@@ -27,8 +27,7 @@ import java.lang.annotation.Target;
 /**
  * Used to specify the topics that a TCK test works with.
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Topics {
-    String[] value();
 }

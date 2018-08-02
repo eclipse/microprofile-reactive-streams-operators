@@ -57,23 +57,31 @@ import static org.testng.Assert.assertTrue;
  * }
  * </pre>
  */
-@Topics({
-    CompletionStageIncomingMethodVerification.VOID_METHOD,
-    CompletionStageIncomingMethodVerification.NON_PARALLEL,
-    CompletionStageIncomingMethodVerification.NON_VOID_METHOD,
-    CompletionStageIncomingMethodVerification.SYNC_FAILING,
-    CompletionStageIncomingMethodVerification.ASYNC_FAILING,
-    CompletionStageIncomingMethodVerification.WRAPPED_MESSAGE,
-    CompletionStageIncomingMethodVerification.OUTGOING_WRAPPED,
-    CompletionStageIncomingMethodVerification.INCOMING_OUTGOING_WRAPPED
-})
 @Test(groups = {"all", "incoming"})
-public class CompletionStageIncomingMethodVerification extends Arquillian {
+public class IncomingCompletionStageMethodVerification extends Arquillian {
 
     @Deployment
     public static JavaArchive createDeployment() {
         return TckDeploymentUtils.createDeployment(Bean.class);
     }
+
+    private static final String VOID_METHOD = "void-method";
+    private static final String NON_PARALLEL = "non-parallel";
+    private static final String NON_VOID_METHOD = "non-void-method";
+    private static final String SYNC_FAILING = "sync-failing";
+    private static final String ASYNC_FAILING = "async-failing";
+    private static final String WRAPPED_MESSAGE = "wrapped-message";
+    private static final String OUTGOING_WRAPPED = "outgoing-wrapped";
+    private static final String INCOMING_OUTGOING_WRAPPED = "incoming-outgoing-wrapped";
+
+    @Topics
+    public static String[] topics() {
+        return new String[]{
+            VOID_METHOD, NON_PARALLEL, NON_VOID_METHOD, SYNC_FAILING, ASYNC_FAILING, WRAPPED_MESSAGE, OUTGOING_WRAPPED,
+            INCOMING_OUTGOING_WRAPPED
+        };
+    }
+
 
     @ArquillianResource
     private ContainerPuppet controller;
@@ -85,15 +93,6 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
 
     @Inject
     private Bean bean;
-
-    static final String VOID_METHOD = "void-method";
-    static final String NON_PARALLEL = "non-parallel";
-    static final String NON_VOID_METHOD = "non-void-method";
-    static final String SYNC_FAILING = "sync-failing";
-    static final String ASYNC_FAILING = "async-failing";
-    static final String WRAPPED_MESSAGE = "wrapped-message";
-    static final String OUTGOING_WRAPPED = "outgoing-wrapped";
-    static final String INCOMING_OUTGOING_WRAPPED = "incoming-outgoing-wrapped";
 
     @ApplicationScoped
     public static class Bean {
@@ -220,16 +219,21 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
             return incomingOutgoingWrappedFailed;
         }
 
+        // This is used to ensure that before we fail the stream, the first message was successfully acked.
+        private final CompletableFuture<Void> incomingOutgoingWrappedAcked = new CompletableFuture<>();
+
         @Incoming(topic = INCOMING_OUTGOING_WRAPPED)
         public CompletionStage<Message<Void>> handleIncomingOutgoingWrapped(Message<MockPayload> msg) {
             if (msg.getPayload().getField1().equals("acknowledged") || incomingOutgoingWrappedFailed.get()) {
                 manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-                return CompletableFuture.completedFuture(Message.of(null, msg::ack));
+                return CompletableFuture.completedFuture(Message.of(null, () -> msg.ack().thenAccept(incomingOutgoingWrappedAcked::complete)));
             }
             else if (msg.getPayload().getField1().equals("fail")) {
                 incomingOutgoingWrappedFailed.set(true);
                 manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
-                throw new QuietRuntimeException("failed");
+                return incomingOutgoingWrappedAcked.thenApply(v -> {
+                    throw new QuietRuntimeException("failed");
+                });
             }
             else {
                 manager.<MockPayload>getReceiver(INCOMING_OUTGOING_WRAPPED).receiveWrappedMessage(msg);
@@ -291,35 +295,31 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
     @Test(groups = {"ack"})
     public void completionStageMethodShouldRetryMessagesThatFailSynchronously() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(SYNC_FAILING);
-        MockPayload msg1 = new MockPayload("success", 1);
-        MockPayload msg2 = new MockPayload("fail", 2);
-        MockPayload msg3 = new MockPayload("success", 3);
+        MockPayload msg1 = new MockPayload("fail", 1);
+        MockPayload msg2 = new MockPayload("success", 2);
 
-        controller.sendPayloads(SYNC_FAILING, msg1, msg2, msg3);
+        controller.sendPayloads(SYNC_FAILING, msg1, msg2);
         // We should receive the fail message once, then failed should be true, then we should receive it again,
         // followed by the next message.
         receiver.expectNextMessageWithPayload(msg1);
-        receiver.expectNextMessageWithPayload(msg2);
         assertTrue(bean.getSyncFailed().get(), "Sync was not failed");
+        receiver.expectNextMessageWithPayload(msg1);
         receiver.expectNextMessageWithPayload(msg2);
-        receiver.expectNextMessageWithPayload(msg3);
     }
 
     @Test(groups = {"ack"})
     public void completionStageMethodShouldRetryMessagesThatFailAsynchronously() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(ASYNC_FAILING);
-        MockPayload msg1 = new MockPayload("success", 1);
-        MockPayload msg2 = new MockPayload("fail", 2);
-        MockPayload msg3 = new MockPayload("success", 3);
+        MockPayload msg1 = new MockPayload("fail", 1);
+        MockPayload msg2 = new MockPayload("success", 2);
 
-        controller.sendPayloads(ASYNC_FAILING, msg1, msg2, msg3);
+        controller.sendPayloads(ASYNC_FAILING, msg1, msg2);
         // We should receive the fail message once, then failed should be true, then we should receive it again,
         // followed by the next message.
         receiver.expectNextMessageWithPayload(msg1);
-        receiver.expectNextMessageWithPayload(msg2);
         assertTrue(bean.getAsyncFailed().get(), "Async was not failed");
+        receiver.expectNextMessageWithPayload(msg1);
         receiver.expectNextMessageWithPayload(msg2);
-        receiver.expectNextMessageWithPayload(msg3);
     }
 
     @Test(groups = {"ack"})
@@ -345,20 +345,16 @@ public class CompletionStageIncomingMethodVerification extends Arquillian {
     @Test(groups = {"ack"})
     public void completionStageWithOutgoingWrappedMessageShouldGetAcknowledged() {
         MockedReceiver<MockPayload> receiver = manager.getReceiver(OUTGOING_WRAPPED);
-        MockPayload msg1 = new MockPayload("success", 1);
-        MockPayload msg2 = new MockPayload("fail", 2);
-        MockPayload msg3 = new MockPayload("success", 3);
+        MockPayload msg1 = new MockPayload("fail", 1);
+        MockPayload msg2 = new MockPayload("success", 2);
 
-        controller.sendPayloads(OUTGOING_WRAPPED, msg1, msg2, msg3);
+        controller.sendPayloads(OUTGOING_WRAPPED, msg1, msg2);
         receiver.expectNextMessageWithPayload(msg1);
-        waitUntil(environment.receiveTimeout(), () -> assertTrue(bean.getAcked().get() > 1));
-        receiver.expectNextMessageWithPayload(msg2);
         assertTrue(bean.getOutgoingWrappedFailed().get(), "Outgoing wrapped was not failed");
 
+        receiver.expectNextMessageWithPayload(msg1);
         receiver.expectNextMessageWithPayload(msg2);
-        receiver.expectNextMessageWithPayload(msg3);
-        waitUntil(environment.receiveTimeout(), () -> assertTrue(bean.getAcked().get() > 2));
-        waitUntil(environment.receiveTimeout(), () -> assertEquals(bean.getAcked().get(), 3));
+        waitUntil(environment.receiveTimeout(), () -> assertEquals(bean.getAcked().get(), 2));
     }
 
     @Test(groups = {"ack"})

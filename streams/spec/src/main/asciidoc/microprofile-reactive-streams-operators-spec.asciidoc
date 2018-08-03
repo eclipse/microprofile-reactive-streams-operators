@@ -41,3 +41,5 @@ include::examples.asciidoc[]
 include::java-streams.asciidoc[]
 
 include::spi.asciidoc[]
+
+include::tck.asciidoc[]

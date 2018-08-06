@@ -69,20 +69,20 @@
        <g class="com.sun.star.drawing.RectangleShape">
         <g id="id3">
          <rect class="BoundingBox" stroke="none" fill="none" x="1920" y="13220" width="6961" height="2961"/>
-         <path fill="none" stroke="rgb(25,138,138)" stroke-width="159" stroke-linejoin="round" d="M 5400,16100 L 2000,16100 2000,13300 8800,13300 8800,16100 5400,16100 Z"/>
+         <path fill="none" stroke="rgb(25,64,91)" stroke-width="159" stroke-linejoin="round" d="M 5400,16100 L 2000,16100 2000,13300 8800,13300 8800,16100 5400,16100 Z"/>
          <text class="TextShape"><tspan class="TextParagraph" font-family="Roboto Mono for Powerline" font-size="494px" font-weight="400"><tspan class="TextPosition" x="4264" y="15778"><tspan fill="rgb(0,0,0)" stroke="none">Publisher</tspan></tspan></tspan></text>
         </g>
        </g>
        <g class="com.sun.star.drawing.CustomShape">
         <g id="id4">
          <rect class="BoundingBox" stroke="none" fill="none" x="2388" y="13750" width="2194" height="1432"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 2468,13830 L 4196,13830 4501,14465 4196,15101 2468,15101 2468,13830 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 2468,13830 L 4196,13830 4501,14465 4196,15101 2468,15101 2468,13830 Z"/>
         </g>
        </g>
        <g class="com.sun.star.drawing.CustomShape">
         <g id="id5">
          <rect class="BoundingBox" stroke="none" fill="none" x="5260" y="13750" width="2322" height="1432"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 5340,13830 L 7170,13830 7501,14465 7170,15101 5340,15101 5671,14465 5340,13830 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 5340,13830 L 7169,13830 7501,14465 7169,15101 5340,15101 5671,14465 5340,13830 Z"/>
         </g>
        </g>
        <g class="com.sun.star.drawing.LineShape">

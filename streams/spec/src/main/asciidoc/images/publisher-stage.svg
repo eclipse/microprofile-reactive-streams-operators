@@ -65,7 +65,7 @@
        <g class="com.sun.star.drawing.CustomShape">
         <g id="id3">
          <rect class="BoundingBox" stroke="none" fill="none" x="3372" y="6304" width="2194" height="1432"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 3452,6384 L 5180,6384 5485,7019 5180,7655 3452,7655 3452,6384 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 3452,6384 L 5180,6384 5485,7019 5180,7655 3452,7655 3452,6384 Z"/>
          <text class="TextShape"><tspan class="TextParagraph" font-family="Arimo, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="3861" y="7147"><tspan fill="rgb(0,0,0)" stroke="none">stage</tspan></tspan></tspan></text>
         </g>
        </g>

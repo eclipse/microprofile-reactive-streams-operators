@@ -66,14 +66,14 @@
        <g class="com.sun.star.drawing.RectangleShape">
         <g id="id3">
          <rect class="BoundingBox" stroke="none" fill="none" x="1620" y="16720" width="7461" height="2961"/>
-         <path fill="none" stroke="rgb(25,138,138)" stroke-width="159" stroke-linejoin="round" d="M 5350,19600 L 1700,19600 1700,16800 9000,16800 9000,19600 5350,19600 Z"/>
+         <path fill="none" stroke="rgb(25,64,91)" stroke-width="159" stroke-linejoin="round" d="M 5350,19600 L 1700,19600 1700,16800 9000,16800 9000,19600 5350,19600 Z"/>
          <text class="TextShape"><tspan class="TextParagraph" font-family="Roboto Mono for Powerline" font-size="494px" font-weight="400"><tspan class="TextPosition" x="4156" y="19278"><tspan fill="rgb(0,0,0)" stroke="none">Processor</tspan></tspan></tspan></text>
         </g>
        </g>
        <g class="com.sun.star.drawing.CustomShape">
         <g id="id4">
          <rect class="BoundingBox" stroke="none" fill="none" x="2560" y="17250" width="2322" height="1432"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 2640,17330 L 4470,17330 4801,17965 4470,18601 2640,18601 2971,17965 2640,17330 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 2640,17330 L 4469,17330 4801,17965 4469,18601 2640,18601 2971,17965 2640,17330 Z"/>
         </g>
        </g>
        <g class="com.sun.star.drawing.LineShape">
@@ -100,7 +100,7 @@
        <g class="com.sun.star.drawing.CustomShape">
         <g id="id8">
          <rect class="BoundingBox" stroke="none" fill="none" x="5608" y="17250" width="2322" height="1432"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 5688,17330 L 7518,17330 7849,17965 7518,18601 5688,18601 6019,17965 5688,17330 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 5688,17330 L 7517,17330 7849,17965 7517,18601 5688,18601 6019,17965 5688,17330 Z"/>
         </g>
        </g>
       </g>

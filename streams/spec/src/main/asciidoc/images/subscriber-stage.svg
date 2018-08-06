@@ -65,7 +65,7 @@
        <g class="com.sun.star.drawing.PolyPolygonShape">
         <g id="id3">
          <rect class="BoundingBox" stroke="none" fill="none" x="12997" y="6022" width="2193" height="1431"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 13077,6102 L 15109,6102 15109,7372 13077,7372 13458,6737 13077,6102 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 13077,6102 L 15109,6102 15109,7372 13077,7372 13458,6737 13077,6102 Z"/>
          <text class="TextShape"><tspan class="TextParagraph" font-family="Arimo, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="13685" y="6864"><tspan fill="rgb(0,0,0)" stroke="none">stage</tspan></tspan></tspan></text>
         </g>
        </g>

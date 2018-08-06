@@ -68,20 +68,20 @@
        <g class="com.sun.star.drawing.RectangleShape">
         <g id="id3">
          <rect class="BoundingBox" stroke="none" fill="none" x="10820" y="13320" width="6461" height="2961"/>
-         <path fill="none" stroke="rgb(25,138,138)" stroke-width="159" stroke-linejoin="round" d="M 14050,16200 L 10900,16200 10900,13400 17200,13400 17200,16200 14050,16200 Z"/>
+         <path fill="none" stroke="rgb(25,64,91)" stroke-width="159" stroke-linejoin="round" d="M 14050,16200 L 10900,16200 10900,13400 17200,13400 17200,16200 14050,16200 Z"/>
          <text class="TextShape"><tspan class="TextParagraph" font-family="Roboto Mono for Powerline" font-size="494px" font-weight="400"><tspan class="TextPosition" x="12734" y="15878"><tspan fill="rgb(0,0,0)" stroke="none">Subscriber</tspan></tspan></tspan></text>
         </g>
        </g>
        <g class="com.sun.star.drawing.CustomShape">
         <g id="id4">
          <rect class="BoundingBox" stroke="none" fill="none" x="11660" y="13850" width="2322" height="1432"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 11740,13930 L 13570,13930 13901,14565 13570,15201 11740,15201 12071,14565 11740,13930 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 11740,13930 L 13569,13930 13901,14565 13569,15201 11740,15201 12071,14565 11740,13930 Z"/>
         </g>
        </g>
        <g class="com.sun.star.drawing.PolyPolygonShape">
         <g id="id5">
          <rect class="BoundingBox" stroke="none" fill="none" x="14588" y="13850" width="2193" height="1431"/>
-         <path fill="none" stroke="rgb(255,102,51)" stroke-width="159" stroke-linejoin="round" d="M 14668,13930 L 16700,13930 16700,15200 14668,15200 15049,14565 14668,13930 Z"/>
+         <path fill="none" stroke="rgb(253,183,28)" stroke-width="159" stroke-linejoin="round" d="M 14668,13930 L 16700,13930 16700,15200 14668,15200 15049,14565 14668,13930 Z"/>
         </g>
        </g>
        <g class="com.sun.star.drawing.LineShape">

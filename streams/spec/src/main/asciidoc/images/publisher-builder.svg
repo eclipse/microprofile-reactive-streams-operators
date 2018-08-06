@@ -69,7 +69,7 @@
        <g class="com.sun.star.drawing.RectangleShape">
         <g id="id3">
          <rect class="BoundingBox" stroke="none" fill="none" x="1920" y="13220" width="6961" height="2961"/>
-         <path fill="none" stroke="rgb(25,64,91)" stroke-width="159" stroke-linejoin="round" d="M 5400,16100 L 2000,16100 2000,13300 8800,13300 8800,16100 5400,16100 Z"/>
+         <path fill="none" stroke="rgb(18,62,92)" stroke-width="159" stroke-linejoin="round" d="M 5400,16100 L 2000,16100 2000,13300 8800,13300 8800,16100 5400,16100 Z"/>
          <text class="TextShape"><tspan class="TextParagraph" font-family="Roboto Mono for Powerline" font-size="494px" font-weight="400"><tspan class="TextPosition" x="4264" y="15778"><tspan fill="rgb(0,0,0)" stroke="none">Publisher</tspan></tspan></tspan></text>
         </g>
        </g>

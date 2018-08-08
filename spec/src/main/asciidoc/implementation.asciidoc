@@ -1,0 +1,68 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+[[reactivestreamsimplementation]]
+== Implementation
+
+The behavior of each stage is specified in the javadocs for stages in the SPI, and tested by the TCK.
+
+Generally, across all stages, the following requirements exist:
+
+=== Memory visibility
+
+Within a single stage in a single stream, implementations must guarantee a _happens-before_ relationship between any invocation of all callbacks supplied to that stage.
+
+Between different stages of a single stream, it is recommended that a _happens-before_ relationship exists between callbacks of different stages, however this is not required, and end users of the API must not depend on this.
+Implementations are expected to implement this for performance reasons, this is also known as operator fusing.
+Implementations may decide, for whatever reason, not to fuse stages in certain circumstances, when this is done, it is said that there is an asynchronous boundary between the two stages.
+
+When Reactive Streams interfaces, that is, `Publisher`, `Subscriber` or `Processor`, are wrapped in a stage, implementations may place an asynchronous boundary between that stage and its neighbors if they choose.
+Whether implementations do or don't place an asynchronous boundary there, they must conform to the Reactive Streams specification with regards to memory visibility.
+
+=== User exceptions
+
+Exceptions thrown by user supplied callbacks must be caught and propagated downstream, unless otherwise handled by an error handling stage.
+
+User exceptions must not be thrown by the `build` or `run` methods of the builders.
+For example, if a user supplies an `Iterable` as a source for a `PublisherBuilder`, and the `iterator()` method is invoked synchronously from the `build` method on the publisher, and it throws an exception, this exception must be caught, and propagated through the stream, not thrown from the `build` method.
+
+An exception to this is the callbacks provided in user supplied Reactive Streams, ie `Publisher`, `Subscriber` and `Processor`.
+Since these interfaces are specified not to throw any exceptions when the consumer is adhering to the spec, implementations may assume that these interfaces won't throw exceptions, and the behavior of an implementation should these interfaces throw exceptions is unspecified.
+
+In some cases, exceptions may be wrapped, for example, `CompletableFuture` wraps exceptions in a `CompletionException`.
+It is recommended that implementations do not wrap exceptions if they don't need to, but rather that they propagate them downstream as is.
+
+=== Error propagation
+
+Errors may be eagerly propagated by stages if an implementation chooses to do this.
+Such propagation can aid with fast failure of stages, to ensure things like connection failures do not wait excessively to discover that they have failed.
+
+A consequence of this is that errors can in certain circumstances overtake elements.
+For example, the `flatMapCompletionStage` stage may receive an error while an element is being asynchronously processed.
+This error may immediately be propagated downstream, which will mean the eventual redemption of the `CompletionStage` returned by the mapper function for the stage will be ignored, and the element it is redeemed with will be dropped.
+
+When a user does not desire this behavior, and wants to guarantee that stages don't drop elements when upstream errors arrive, they may insert an error recovery stage, such as `onErrorResume`, before the stage that they don't want to drop elements from.
+They will then need to implement an out of band mechanism to propagate the error, such as wrapping it in an element, should they wish to handle it downstream.
+
+=== Cleanup
+
+Implementations must assume that any `PublisherBuilder`, `SubscriberBuilder` or `ProcessorBuilder` supplied to them, or any stages within, potentially hold resources, and must be cleaned up when the stream shuts down.
+For example, a `concat` stage accepts two `PublisherBuilder`'s.
+If the stream is cancelled before the first is finished, the second must still be built, and then cancelled too.
+
+=== null elements
+
+Reactive Streams does not allow `null` elements. Hence, any user callbacks that return `null` as an element to be emitted by a stage must cause the stage to fail with a `NullPointerException`.

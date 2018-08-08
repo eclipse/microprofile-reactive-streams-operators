@@ -1,0 +1,102 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+[[reactivestreamsdesign]]
+== Design
+
+The design of MicroProfile Reactive Streams Operators is centered around **builders** for the various shapes of streams.
+
+=== Stages
+
+Each builder contains zero or more stages. There are three different shapes of stages:
+
+* Publisher. A publisher stage has an outlet, but no inlet.
+
+image::images/publisher-stage.svg[Publisher stage,width=200,align="center"]
+
+* Processor. A processor stage has an inlet and an outlet.
+
+image::images/processor-stage.svg[Processor stage,width=250,align="center"]
+
+* Subscriber. A subscriber stage has an inlet, but no outlet.
+
+image::images/subscriber-stage.svg[Subscriber stage,width=180,align="center"]
+
+=== Graphs
+
+Stream stages can be built into graphs, using the builders. There are four different shapes of graphs that can be built:
+
+* Publishers. A publisher has one outlet but no inlet, and is represented as a Reactive Streams `Publisher` when built.
+It contains one publisher stage, followed by zero or more processor stages. This is called a `PublisherBuilder`
+
+image::images/publisher-builder.svg[Publisher,width=320,align="center"]
+
+* Processors. A processor has one inlet and one outlet, and is represented as a Reactive Streams `Processor` when built.
+It contains zero or more processor stages. This is called a `ProcessorBuilder`.
+
+image::images/processor-builder.svg[Processor,width=350,align="center"]
+
+* Subscribers. A subscriber has one inlet but no outlet, and it also has a result.
+It is represented as a product of a Reactive Streams `Subscriber` and a `CompletionStage` that is redeemed with the result, or error if the stream fails, when built.
+It contains zero or more processor stages, followed by a single subscriber stage. This is called a `SubscriberBuilder`.
+
+image::images/subscriber-builder.svg[Subscriber,width=300,align="center"]
+
+* Closed graphs. A closed graph has no inlet or outlet, both having being provided in during the construction of the graph.
+It is represented as a `CompletionStage` of the result of the stream.
+It contains a publisher stage, followed by zero or more processor stages, followed by a subscriber stage.
+This is called a `CompletionRunner`. The result is retrieved using the `run` method.
+
+image::images/closed-graph-builder.svg[Closed graph,width=420,align="center"]
+
+While building a stream, the stream may change shape during its construction.
+For example, a publisher may be collected into a `List` of elements.
+When this happens, the stream becomes a closed graph, since there is no longer an outlet, but just a result, the result being the `List` of elements:
+
+Here's an example of a more complex situation where a `PublisherBuilder` is plumbed to a `SubscriberBuilder`, producing a `CompletionRunner`:
+
+[source, java]
+----
+PublisherBuilder<Integer> evenIntsPublisher =
+  ReactiveStreams.of(1, 2, 3, 4)
+    .filter(i -> i % 2 == 0); <1>
+
+SubscriberBuilder<Integer, List<Integer>> doublingSubscriber =
+  ReactiveStreams.<Integer>builder()
+    .map(i -> i = i * 2)
+    .toList(); <2>
+
+CompletionRunner<List<Integer>> result =
+  eventIntsPublisher.to(doublingSubscriber); <3>
+----
+<1> A publisher of integers 2 and 4.
+<2> A subscriber that first doubles integers, then collects into a list.
+<3> A closed graph that when run, will produce the result in a `CompletionStage`.
+
+image::images/change-shape.svg[Combining two graphs,width=600,align="center"]
+
+=== Usage
+
+When MicroProfile specifications provide an API that uses Reactive Streams, it is intended that application developers can return and pass the builder interfaces directly to the MicroProfile APIs.
+In many cases, application developers will not need to run the streams themselves.
+However, should they need to run the streams directly themselves, they can do so by using the streams `build` or `run`
+methods. `PublisherBuilder`, `SubscriberBuilder` and `ProcessorBuilder` all provide a `build` method that returns a
+`Publisher`, `CompletionSubscriber` and `Processor` respectively, while `CompletionRunner`, since it actually
+runs the stream, provides a `run` method that returns a `CompletionStage`.
+
+The `CompletionSubscriber` class is so named because, where a `CompletionStage` is a stage of asynchronous computation that completes with a value or an error, a `CompletionSubscriber` is subscriber to an asynchronous stream that completes with a value or an error.
+
+The `build` and `run` methods both provide a zero arg variant, which uses the default Reactive Streams engine provided by the platform, as well as a overload that takes a `ReactiveStreamsEngine`, allowing application developers to use a custom engine when they please.

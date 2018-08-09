@@ -38,7 +38,7 @@
     <parent>
         <groupId>org.eclipse.microprofile.reactive.streams</groupId>
         <artifactId>microprofile-reactive-streams-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0-M1</version>
     </parent>
 
     <artifactId>microprofile-reactive-streams-operators-tck-arquillian</artifactId>

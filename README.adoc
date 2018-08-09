@@ -18,7 +18,7 @@
 //
 image:https://badges.gitter.im/eclipse/microprofile-reactive.svg[link="https://gitter.im/eclipse/microprofile-reactive"]
 
-= Reactive Streams Support for MicroProfile
+= MicroProfile Reactive Streams Operators
 
 == Rationale
 

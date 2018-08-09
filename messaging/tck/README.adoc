@@ -25,22 +25,26 @@ This project contains the TCK for MicroProfile Reactive Messaging.
 
 The TCK uses http://arquillian.org/[Arquillian], so an implementation needs Arquillian container support to run. In addition, the implementation must also implement the TCK's SPI in order to allow the TCK to interact and make assertions on messages sent and received from topics under test.
 
-=== `TckContainer`
+=== Optional features
 
-The primary entry point into the tck is the `org.eclipse.microprofile.reactive.messaging.tck.spi.TckContainer`. An instance of this must be provided through the JDK `ServiceLoader` mechanism (that is, provide a `META-INF/services/org.eclipse.microprofile.reactive.messaging.tck.spi.TckContainer` file that contains the fully qualified classname of the implementation).
+It is not mandatory to implement all features of the spec. The TCK defines TestNG groups for each feature. If a particular implementation (or a particular messaging provider being tested by the TCK) doesn't support a particular feature of the spec, it can exclude that feature from being tested by creating a TestNG test suite descriptor that includes the `all` group but excludes the group for that particular feature. Alternatively, an implementation can selectively enable the groups for the features that it does support. Currently, the groups defined are:
 
-This class provides a number of methods for telling the TCK which parts of the spec this implementation implements, for example, an implementation does not have to provide support for both incoming and outgoing messages, so this can be used to configure which ones it does support. Additionally, it allows the TCK to instruct the container to deploy and prepare topics for being published to and subscribed from.
+* `incoming` - supports incoming messages
+* `outgoing` - supports outgoing messages
+* `ack` - supports acking incoming messages
 
-=== `org.eclipse.microprofile.reactive.messaging.tck.spi.TestEnvironment`
+=== Deploying topics
 
-The `TestEnvironment` provides a mechanism for general environment configuration, such as what timeouts to use for various assertions.
+Each test requires a number of topics to be deployed in order to interact with it. Generally a container will need to do some setup to ensure that these topics are ready to be used by the tests, and some clean up after the tests are run. This can be done by creating an Arquillian `LoadableExtension` that registers an observer of the `DeployTopics` and `UnDeployTopics` events. These events will be fired before and after each test class is run. Handlers of `DeployTopics` should ensure not only that the topics are deployed, but that they don't have any old messages left over from previous test runs that weren't cleaned up properly that could be received by the tests.
 
 === `TckMessagingPuppet`
 
-The `org.eclipse.microprofile.reactive.messaging.tck.spi.TckMessagingPuppet` is for use in the container. It is the responsiblity of the `TckContainer` to return a deployment from its `createDeployments` method that provides a `TckMessagingPuppet` that can be injected into the tests and beans under test. This is used to trigger the container to send a message to certain queues, and receive messages from queues.
+The `org.eclipse.microprofile.reactive.messaging.tck.container.TckMessagingPuppet` is for use in the container. If you are new to Arquillian, note that Arquillian has two environments, the client environment, which coordinates the running of the tests, and the container environment, which tests get deployed to. `TckMessagingPuppet` must be supplied to the container as an Arquillian service via a `RemoteLoadableExtension`. `RemoteLoadableExtension`'s must be deployed to the container, typically by an `AuxillaryArchiveAppender` service registered in a `LoadableExtension`.
+
+Note that in the case of embedded containers, the remote extension doesn't need to be deployed, just declared as a regular `LoadableExtension`. In addition to this, the `TckArquillianRemoteExtension` should also be added to the `META-INF/services` for `LoadableExtension`'s, so that it gets loaded.
 
 == TCK design
 
-In general, each test class defines a single bean that it returns in a deployment. This bean will generally have one `@Incoming` or `@Outgoing` annotated method per test method, each working with a unique topic name. This ensures isolation between tests. The test class defines an `@Topics` annotation that allows the TCK to discover which topics the test uses, it then passes this list of topics to the SPI implementation to instruct it to create and/or reset the topics before each class is run.
+In general, each test class defines a single bean that it returns in a deployment. This bean will generally have one `@Incoming` or `@Outgoing` annotated method per test method, each working with a unique topic name. This ensures isolation between tests. The test class defines an `@Topics` annotated method that allows the TCK to discover which topics the test uses, the TCK will fire the events to deploy and undeploy these during the `BeforeDeploy` and `AfterUnDeploy` callbacks in the Arquillian lifecycle.
 
 In each test method, `MockedSender` and `MockedReceiver` are used to register the receipt of individual messages, or to create publishers and subscribers to be returned by the method. These then capture messages received, and enqueue messages to be sent, so that the test cases can work with them. A `TckMessagingManager` holds a map of topics to `MockedSender` and `MockedReceiver` instances, so that both the bean and the tests can access them easily.

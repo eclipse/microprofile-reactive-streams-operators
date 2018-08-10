@@ -1,0 +1,9 @@
+{
+    "name": "svg-marbles",
+    "dependencies": {
+        "svg.js": "2.6.5"
+    },
+    "devDependencies": {
+        "svgdom": "0.0.15"
+    }
+}

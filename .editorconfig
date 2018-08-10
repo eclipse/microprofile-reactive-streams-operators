@@ -17,3 +17,6 @@ trim_trailing_whitespace = false
 
 [*.adoc]
 trim_trailing_whitespace = false
+
+[*.js]
+indent_size = 2

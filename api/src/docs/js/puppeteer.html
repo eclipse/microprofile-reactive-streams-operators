@@ -17,7 +17,7 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<!-- Used for seeing all the diagrams in the browser. -->
+<!-- Used by generate-marble-diagroms.js script to generate then screenshot each diagram. -->
 
 <html>
 <head>
@@ -27,13 +27,19 @@
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
     <style>
-        .diagram { margin: 50px; }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #diagram {
+            margin: 0;
+            padding: 0;
+            font-family: "Source Code Pro";
+        }
     </style>
 </head>
 <body>
-<div id="marbles"></div>
-<script type="text/javascript">
-    m.draw(window.document.getElementById("marbles"), window.document);
-</script>
+<div id="diagram">This div exists to force the browser to load the Source Code Pro font
+    before we start rendering images.</div>
 </body>
 </html>

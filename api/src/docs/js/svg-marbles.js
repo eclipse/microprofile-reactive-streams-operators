@@ -17,37 +17,70 @@
  * limitations under the License.
  ******************************************************************************/
 
+/**
+ * Reactive Streams marble diagram DSL.
+ */
 function SvgMarbles() {
 
-  let graphs = {};
+  this.graphs = {};
 
   let graphPrototype = {
-    colors: ["#F1948A", "#82E0AA", "#5DADE2", "#F7DC6F"],
+    colors: ["#F1948A", "#82E0AA", "#5DADE2", "#F7DC6F", "#C39BD3", "#EB984E"],
     width: 500,
     marble: {
-      radius: 20
+      radius: 16
+    },
+    effect: {
+      radius: {
+        width: 30,
+        height: 15
+      },
+      offset: 20
     },
     stream: {
       spacing: 50,
     },
     op: {
       height: 40,
-      spacing: 80
+      spacing: 80,
+      fontSize: "18pt"
+    },
+    fonts: {
+      code: "Source Code Pro"
     }
   };
 
   this.term = {
+    clazz: "marble",
     type: "term"
   };
 
   this.n = element => {
     return {
+      clazz: "marble",
       type: "next",
       element: element
     };
   };
 
+  this.nterm = element => {
+    return {
+      clazz: "marble",
+      type: "nextterm",
+      element: element
+    };
+  };
+
+  this.e = effect => {
+    return {
+      clazz: "marble",
+      type: "effect",
+      effect: effect
+    };
+  };
+
   this.none = {
+    clazz: "marble",
     type: "none"
   };
 
@@ -59,26 +92,40 @@ function SvgMarbles() {
     return array;
   }
 
-  this.ins = function() {
-    return {
+  /**
+   * The first argument to the stage may be a properties array. If it is, we extract it.
+   */
+  function stream(args, type) {
+    let props = {};
+    if (args[0].clazz === undefined) {
+      props = args[0];
+      delete args[0];
+    }
+    let stage = {
+      clazz: "stage",
       type: "stream",
-      streamType: "in",
-      events: argsToArray(arguments)
+      streamType: type,
+      events: argsToArray(args)
     };
+    return deepMerge(props, stage);
+  }
+
+  this.ins = function() {
+    return stream(arguments, "in");
   };
 
   this.out = function() {
-    return {
-      type: "stream",
-      streamType: "out",
-      events: argsToArray(arguments)
-    };
+    return stream(arguments, "out");
   };
 
   this.sub = function() {
+    return stream(arguments, "sub");
+  };
+
+  this.eff = function() {
     return {
-      type: "stream",
-      streamType: "sub",
+      clazz: "stage",
+      type: "effect",
       events: argsToArray(arguments)
     };
   };
@@ -108,7 +155,7 @@ function SvgMarbles() {
 
   this.addGraphs = (gs) => {
     Object.keys(gs).forEach(key => {
-      graphs[key] = deepMerge(graphPrototype, gs[key]);
+      this.graphs[key] = deepMerge(graphPrototype, gs[key]);
     });
   };
 
@@ -117,6 +164,11 @@ function SvgMarbles() {
     stage.box.line(0, 0, end, 0).stroke({ width: 2 });
     stage.box.polygon([[end - 10, 0], [end - 15, 10], [end, 0], [end - 15, -10]])
       .fill({color: "black"}).stroke({ width: 1 });
+    if (stage.label !== undefined) {
+      stage.box.text(stage.label)
+        .font({size: "8pt", family: graph.fonts.code})
+        .move(0, 5);
+    }
   }
 
   function drawMarbleLine(box, position, arrowStart, arrowEnd) {
@@ -124,7 +176,6 @@ function SvgMarbles() {
       .stroke({width: 1, color: "#888"});
     box.polygon([[position, arrowEnd - 5], [position - 5, arrowEnd - 7], [position, arrowEnd],
       [position + 5, arrowEnd - 7]]).fill({color: "#888"}).stroke({width: 1, color: "#888"});
-
   }
 
   function drawMarbles(graph, stage) {
@@ -135,7 +186,6 @@ function SvgMarbles() {
     let arrowStart = 0;
     let arrowEnd = 0;
     // Find out where our box sits
-    console.log(stage.box.y(), graph.opStagePosition);
     if (stage.box.y() < graph.opStagePosition) {
       // We are above the op
       arrowStart = radius + 1;
@@ -147,19 +197,60 @@ function SvgMarbles() {
     }
 
     stage.events.forEach(event => {
-      if (event.type === "next") {
+      if (event.type === "next" || event.type === "nextterm") {
+        if (event.type === "nextterm") {
+          stage.box.line(position, -radius - 8, position, radius + 8)
+            .stroke({width: 3, color: "black"});
+          drawMarbleLine(stage.box, position, arrowStart, arrowEnd - 7);
+        } else {
+          drawMarbleLine(stage.box, position, arrowStart, arrowEnd);
+        }
+
         stage.box.circle(radius * 2)
           .fill({color: graph.colors[event.color]})
           .stroke({width: 2, color: "black"})
           .center(position, 0);
-        stage.box.text(event.element.toString())
-          .font({anchor: "middle", size: "16pt"})
-          .move(position, -8);
-        drawMarbleLine(stage.box, position, arrowStart, arrowEnd);
+        stage.box.plain(event.element.toString())
+          .font({"text-anchor": "middle", "dominant-baseline": "central", size: "16pt", family: graph.fonts.code})
+          .attr({x: position, y: 0});
       } else if (event.type === "term") {
         stage.box.line(position, -radius, position, radius)
-          .stroke({width: 2, color: "black"});
+          .stroke({width: 3, color: "black"});
         drawMarbleLine(stage.box, position, arrowStart, arrowEnd);
+      }
+
+      position += spacing;
+    });
+  }
+
+  function drawEffects(graph, stage) {
+    let spacing = graph.width / graph.totalLength;
+    let position = spacing / 2;
+    const radius = graph.effect.radius.width;
+    const offset = graph.effect.offset;
+
+    // We are below the op
+    const arrowStart = (graph.opStagePosition + graph.op.height) - stage.box.y();
+
+    stage.events.forEach(effect => {
+
+      if (effect.type === "effect") {
+        stage.box.line(position, arrowStart, position, 0)
+          .stroke({width: 1, color: "#888"});
+        stage.box.line(position, 0, position + offset, 0)
+          .stroke({width: 1, color: "#888"});
+        stage.box.polygon([[position + offset - 5, 0], [position + offset - 7, -5], [position + offset, 0], [position + offset - 7, 5]])
+          .fill({color: "#888"}).stroke({width: 1, color: "#888"});
+
+        const effectCenter = position + offset + radius;
+
+        stage.box.ellipse(radius * 2, graph.effect.radius.height * 2)
+          .fill("none")
+          .stroke({width: 2, color: "black"})
+          .center(effectCenter, 0);
+        stage.box.plain(effect.effect)
+          .font({"text-anchor": "middle", "dominant-baseline": "central", size: "12pt", family: graph.fonts.code})
+          .attr({x: effectCenter, y: 0});
       }
 
       position += spacing;
@@ -169,14 +260,17 @@ function SvgMarbles() {
   function drawOp(graph, stage) {
     stage.box.rect(graph.width, graph.op.height)
       .fill("none").stroke({width: 1});
-    // Todo, positioning here doesn't actually vertically align it
-    stage.box.text(stage.description).font({anchor: "middle", family: "Source Code Pro", size: "18pt"})
-      .move(graph.width / 2, graph.op.height / 4);
+    stage.box.plain(stage.description)
+      .font({"text-anchor": "middle", "dominant-baseline": "central", family: graph.fonts.code, size: graph.op.fontSize})
+      // svg.js does some magic to work out the height of the text box before moving it, we don't want that since
+      // we've used dominant-baseline central as the center.
+      .attr({x: graph.width / 2, y: graph.op.height / 2});
   }
 
   this.drawSingle = (element, graph) => {
     computeTotalLength(graph);
     computeColors(graph);
+    computerSubStreamLabels(graph);
 
     let svg = SVG(element);
     let position = 0;
@@ -187,15 +281,19 @@ function SvgMarbles() {
       stage.box = box;
       if (stage.type === "stream") {
         position += (graph.stream.spacing / 2);
-        box.move(0, position);
+        box.move(10, position);
         drawStreamLine(graph, stage);
         position += (graph.stream.spacing / 2);
       } else if (stage.type === "op") {
         let boxTop = position + (graph.op.spacing - graph.op.height) / 2;
         graph.opStagePosition = boxTop;
-        box.move(0, boxTop);
+        box.move(10, boxTop);
         drawOp(graph, stage);
         position += graph.op.spacing;
+      } else if (stage.type === "effect") {
+        position += (graph.stream.spacing / 4);
+        box.move(10, position);
+        position += (graph.stream.spacing / 2);
       }
     });
     svg.size(graph.width + 20, position);
@@ -204,16 +302,22 @@ function SvgMarbles() {
     graph.stages.forEach(stage => {
       if (stage.type === "stream") {
         drawMarbles(graph, stage);
+      } else if (stage.type === "effect") {
+        drawEffects(graph, stage);
       }
     });
+    return {
+      width: graph.width + 20,
+      height: position
+    };
   };
 
   this.draw = (element, document) => {
-    Object.keys(graphs).forEach(key => {
+    Object.keys(this.graphs).forEach(key => {
       let graphElement = document.createElement("div");
       graphElement.classList.add("diagram");
       graphElement.id = key;
-      this.drawSingle(graphElement, graphs[key]);
+      this.drawSingle(graphElement, this.graphs[key]);
       element.appendChild(graphElement);
     });
   };
@@ -237,7 +341,7 @@ function SvgMarbles() {
         if (stage.type === "stream") {
           if (stage.events.length > i) {
             let event = stage.events[i];
-            if (event.type === "next") {
+            if (event.type === "next" || event.type === "nextterm") {
               if (stage.streamType === "in") {
                 currentColor += 1;
               }
@@ -247,6 +351,18 @@ function SvgMarbles() {
         }
       });
     }
+  }
+
+  function computerSubStreamLabels(graph) {
+    let subStream = 0;
+    graph.stages.forEach(stage => {
+      if (stage.type === "stream" && stage.streamType === "sub") {
+        subStream += 1;
+        if (stage.label === undefined) {
+          stage.label = "stream[" + subStream + "]";
+        }
+      }
+    });
   }
 
 }

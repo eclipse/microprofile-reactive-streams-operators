@@ -4,6 +4,6 @@
         "svg.js": "2.6.5"
     },
     "devDependencies": {
-        "svgdom": "0.0.15"
+        "puppeteer": "1.7.0"
     }
 }

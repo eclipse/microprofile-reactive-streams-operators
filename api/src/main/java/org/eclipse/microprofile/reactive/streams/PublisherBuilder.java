@@ -59,7 +59,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Map the elements emitted by this publisher using the {@code mapper} function.
-     *
+     * <p>
+     * <img src="doc-files/map.png"/>
      * @param mapper The function to use to map the elements.
      * @param <R>    The type of elements that the {@code mapper} function emits.
      * @return A new publisher builder that emits the mapped elements.
@@ -71,6 +72,8 @@ public final class PublisherBuilder<T> {
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
      * element.
+     * <p>
+     * <img src="doc-files/peek.png"/>
      *
      * @param consumer The function called for every element.
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
@@ -85,6 +88,8 @@ public final class PublisherBuilder<T> {
      * <p>
      * Any elements that return {@code true} when passed to the {@link Predicate} will be emitted, all other
      * elements will be dropped.
+     * <p>
+     * <img src="doc-files/filter.png"/>
      *
      * @param predicate The predicate to apply to each element.
      * @return A new publisher builder.
@@ -95,6 +100,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
+     * <p>
+     * <img src="doc-files/distinct.png"/>
      *
      * @return A new publisher builder emitting the distinct elements from this stream.
      */
@@ -105,6 +112,8 @@ public final class PublisherBuilder<T> {
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
      * {@code mapper} function are emitted from this stream.
+     * <p>
+     * <img src="doc-files/flatMap.png"/>
      * <p>
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
@@ -123,6 +132,8 @@ public final class PublisherBuilder<T> {
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
      * {@code mapper} function are emitted from this stream.
+     * <p>
+     * <img src="doc-files/flatMapPublisher.png"/>
      * <p>
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
@@ -144,6 +155,8 @@ public final class PublisherBuilder<T> {
      * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
      * {@link CompletionStage} are emitted from this publisher.
      * <p>
+     * <img src="doc-files/flatMapCompletionStage.png"/>
+     * <p>
      * This method only works with one element at a time. When an element is received, the {@code mapper} function is
      * executed, and the next element is not consumed or passed to the {@code mapper} function until the previous
      * {@link CompletionStage} is redeemed. Hence this method also guarantees that ordering of the stream is maintained.
@@ -160,6 +173,8 @@ public final class PublisherBuilder<T> {
      * Map the elements to {@link Iterable}'s, and flatten so that the elements contained in each iterable are
      * emitted by this stream.
      * <p>
+     * <img src="doc-files/flatMapIterable.png"/>
+     * <p>
      * This method operates on one iterable at a time. The result is a concatenation of elements contain in all the
      * iterables returned by the {@code mapper} function.
      *
@@ -173,6 +188,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Truncate this stream, ensuring the stream is no longer than {@code maxSize} elements in length.
+     * <p>
+     * <img src="doc-files/limit.png"/>
      * <p>
      * If {@code maxSize} is reached, the stream will be completed, and upstream will be cancelled. Completion of the
      * stream will occur immediately when the element that satisfies the {@code maxSize} is received.
@@ -193,6 +210,8 @@ public final class PublisherBuilder<T> {
     /**
      * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
      * effectively be an empty stream.
+     * <p>
+     * <img src="doc-files/skip.png"/>
      *
      * @param n The number of elements to discard.
      * @return A new publisher builder.
@@ -207,6 +226,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Take the longest prefix of elements from this stream that satisfy the given {@code predicate}.
+     * <p>
+     * <img src="doc-files/takeWhile.png"/>
      * <p>
      * When the {@code predicate} returns false, the stream will be completed, and upstream will be cancelled.
      *

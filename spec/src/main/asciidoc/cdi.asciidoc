@@ -1,0 +1,67 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+[[reactivestreamscdi]]
+== CDI Integration
+
+MicroProfile Reactive Streams Operators implementations may be used independently of a CDI container.
+Consequently, implementations are not required to provide any integration with CDI.
+
+This section of the specification is intended to provide advice for how other specifications may integrate CDI with MicroProfile Reactive Streams Operators.
+
+=== Injection of engines
+
+If a MicroProfile container provides an implementation of MicroProfile Reactive Streams Operators, then it must make an application scoped `ReactiveStreamsEngine` available for injection.
+
+=== Contexts
+
+This specification places no requirements on the propagation of CDI context, or what context(s) should be active when user supplied callbacks are executed during the running of a stream.
+
+Other specifications that use this specification may require that implementations make certain context's to be active when user callbacks are executed.
+In this case, it is expected that such specifications will have the responsibility of running the streams.
+
+For example, a hypothetical WebSocket specification may allow user code to return a `ProcessorBuilder` to handle messages:
+
+[source, java]
+----
+@WebSocket("/echo")
+public ProcessorBuilder<Message, Message> echoWebsocket() {
+  return ReactiveStreams.<Message>builder().map(message ->
+    new Message("Echoing " + message.getText())
+  );
+}
+----
+
+In this case, the implementation of that hypothetical WebSocket specification is responsible for running the `ProcessorBuilder` returned by the user, and that specification may require that the engine it uses to run it makes the request context active in callbacks, such as the `map` callback above.
+Since the implementation of that specification is in control of which engine is used to run the processor, this requirement can be made by that specification.
+It is the responsibility of that implementation (and the MicroProfile container that pulls these implementations together) to ensure that the MicroProfile Reactive Streams Operators implementation used is able to support CDI context propagation.
+
+In contrast, if a user is responsible for executing a stream, like in the following hypothetical example:
+
+[source, java]
+----
+@WebSocket("/echo")
+public void echoWebsocket(PublisherBuilder<Message> incoming,
+  SubscriberBuilder<Message, Void> outgoing) {
+
+  incoming.map(message ->
+    new Message("Echoing " + message.getText()
+  ).to(outgoing).run();
+}
+----
+
+Then there is no clear way for the container to control how the engine used there, which in this case would be loaded through the Java `ServiceLoader` API, would propagate context.
+For this reason, any cases where users are running their own streams are not expected to require any CDI context propagation, and it is recommended that specifications favour APIs where the container runs the stream, not the user, to facilitate context propagation.

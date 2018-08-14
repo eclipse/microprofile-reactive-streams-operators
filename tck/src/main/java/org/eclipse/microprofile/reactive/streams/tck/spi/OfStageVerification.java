@@ -116,6 +116,11 @@ public class OfStageVerification extends AbstractStageVerification {
             .run(getEngine()));
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void ofStageShouldFailIfNullProduced() {
+        await(ReactiveStreams.fromIterable(Arrays.asList(null, null)).toList().run(getEngine()));
+    }
+
     @Test
     public void ofStageShouldBeReusable() {
         PublisherBuilder<Integer> publisher = ReactiveStreams.of(1, 2, 3);

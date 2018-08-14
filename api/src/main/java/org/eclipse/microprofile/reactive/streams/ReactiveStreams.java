@@ -72,7 +72,8 @@ public class ReactiveStreams {
      * @return A publisher builder that will emit the element.
      */
     public static <T> PublisherBuilder<T> of(T t) {
-        return new PublisherBuilder<>(new Stage.Of(Collections.singletonList(t)));
+        return new PublisherBuilder<>(new Stage.Of(Collections.singletonList(
+            Objects.requireNonNull(t, "Reactive Streams does not support null elements"))));
     }
 
     /**

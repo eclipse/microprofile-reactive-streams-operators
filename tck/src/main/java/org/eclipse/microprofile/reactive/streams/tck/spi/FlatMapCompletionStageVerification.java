@@ -157,6 +157,16 @@ public class FlatMapCompletionStageVerification extends AbstractStageVerificatio
         await(cancelled);
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void flatMapCsStageShouldFailIfNullIsReturned() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .flatMapCompletionStage(t -> CompletableFuture.completedFuture(null))
+            .toList().run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
     @Test
     public void flatMapCsStageBuilderShouldBeResuable() {
         ProcessorBuilder<Integer, Integer> mapper = ReactiveStreams.<Integer>builder()

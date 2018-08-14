@@ -60,6 +60,11 @@ public class ReactiveStreamsVerification {
         assertEquals(getStage(Stage.Of.class, graph).getElements(), Collections.singletonList("foo"));
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void ofSingleNull() {
+        ReactiveStreams.of((Object) null);
+    }
+
     @Test
     public void ofVarArgs() {
         Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.of("a", "b", "c"));

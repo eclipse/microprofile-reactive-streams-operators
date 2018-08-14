@@ -35,6 +35,9 @@ include::license-alv2.asciidoc[]
 == MicroProfile Reactive Streams Operators
 
 include::architecture.asciidoc[]
+include::design.asciidoc[]
+include::implementation.asciidoc[]
+include::cdi.asciidoc[]
 
 include::examples.asciidoc[]
 

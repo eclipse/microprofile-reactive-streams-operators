@@ -209,12 +209,7 @@ public final class ProcessorBuilder<T, R> {
      * @throws IllegalArgumentException If {@code maxSize} is less than zero.
      */
     public ProcessorBuilder<T, R> limit(long maxSize) {
-        if (maxSize < 0) {
-            throw new IllegalArgumentException("Cannot limit a stream to less than zero elements.");
-        }
-        else {
-            return addStage(new Stage.Limit(maxSize));
-        }
+        return addStage(new Stage.Limit(maxSize));
     }
 
     /**
@@ -228,9 +223,6 @@ public final class ProcessorBuilder<T, R> {
      * @throws IllegalArgumentException If {@code n} is less than zero.
      */
     public ProcessorBuilder<T, R> skip(long n) {
-        if (n < 0) {
-            throw new IllegalArgumentException("Cannot skip less than zero elements");
-        }
         return addStage(new Stage.Skip(n));
     }
 
@@ -453,7 +445,7 @@ public final class ProcessorBuilder<T, R> {
      * encountered.
      *
      * @param errorHandler the function returning the value that need to be emitting instead of the error.
-     *                     The function must not return {@code null}
+     *                     The function must not return {@code null}.
      * @return The new processor
      */
     public ProcessorBuilder<T, R> onErrorResume(Function<Throwable, R> errorHandler) {
@@ -476,7 +468,7 @@ public final class ProcessorBuilder<T, R> {
      * may never know that an error happened.
      *
      * @param errorHandler the function returning the stream that need to be emitting instead of the error.
-     *                     The function must not return {@code null}
+     *                     The function must not return {@code null}.
      * @return The new processor
      */
     public ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, PublisherBuilder<R>> errorHandler) {
@@ -499,7 +491,7 @@ public final class ProcessorBuilder<T, R> {
      * may never know that an error happened.
      *
      * @param errorHandler the function returning the stream that need to be emitting instead of the error.
-     *                     The function must not return {@code null}
+     *                     The function must not return {@code null}.
      * @return The new processor
      */
     public ProcessorBuilder<T, R> onErrorResumeWithPublisher(Function<Throwable, Publisher<R>> errorHandler) {

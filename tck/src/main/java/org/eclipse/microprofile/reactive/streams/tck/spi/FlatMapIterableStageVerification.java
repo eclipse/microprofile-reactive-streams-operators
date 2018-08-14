@@ -143,6 +143,36 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
         assertEquals(await(ReactiveStreams.of(1, 2).via(mapper).toList().run(getEngine())), Arrays.asList(1, 1, 2, 2));
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void flatMapIterableStageShouldFailIfNullIterableReturned() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .flatMapIterable(t -> null)
+            .toList().run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void flatMapIterableStageShouldFailIfNullIteratorReturned() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .flatMapIterable(t -> () -> null)
+            .toList().run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void flatMapIterableStageShouldFailIfNullElementReturnedFromIterator() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .flatMapIterable(t -> Collections.singletonList(null))
+            .toList().run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Collections.singletonList(new ProcessorVerification());

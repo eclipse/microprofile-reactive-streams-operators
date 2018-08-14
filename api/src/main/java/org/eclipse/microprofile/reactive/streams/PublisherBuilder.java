@@ -209,12 +209,7 @@ public final class PublisherBuilder<T> {
      * @throws IllegalArgumentException If {@code maxSize} is less than zero.
      */
     public PublisherBuilder<T> limit(long maxSize) {
-        if (maxSize < 0) {
-            throw new IllegalArgumentException("Cannot limit a stream to less than zero elements.");
-        }
-        else {
-            return addStage(new Stage.Limit(maxSize));
-        }
+        return addStage(new Stage.Limit(maxSize));
     }
 
     /**
@@ -228,9 +223,6 @@ public final class PublisherBuilder<T> {
      * @throws IllegalArgumentException If {@code n} is less than zero.
      */
     public PublisherBuilder<T> skip(long n) {
-        if (n < 0) {
-            throw new IllegalArgumentException("Cannot skip less than zero elements");
-        }
         return addStage(new Stage.Skip(n));
     }
 

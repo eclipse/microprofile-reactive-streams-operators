@@ -70,6 +70,16 @@ public class MapStageVerification extends AbstractStageVerification {
             .run(getEngine()));
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void mapStageShouldFailIfNullReturned() {
+        CompletableFuture<Void> cancelled = new CompletableFuture<>();
+        CompletionStage<List<Object>> result = infiniteStream().onTerminate(() -> cancelled.complete(null))
+            .map(t -> null)
+            .toList().run(getEngine());
+        await(cancelled);
+        await(result);
+    }
+
     @Test
     public void mapStageBuilderShouldBeReusable() {
         ProcessorBuilder<Integer, Integer> map = ReactiveStreams.<Integer>builder().map(i -> i + 1);

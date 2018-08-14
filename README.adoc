@@ -72,3 +72,39 @@ The whole MicroProfile Reactive Streams project can be built via Apache Maven.
 
 `$> mvn clean install`
 
+== Diagrams
+
+The API documentation makes extensive use of marble diagrams to visualize what each operator does. These diagrams are generated using a DSL written specifically for this purpose, rather creating them in a visual diagram editor which would make it very difficult to ensure consistency, especially between different contributors.
+
+The DSL is implemented in JavaScript, and the diagrams are created using SVG. This combination of technologies allows rapid development of the diagrams, since they can be run, inspected, debugged and tweaked directly in a web browser. They are then exported to PNG files using [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a high level JavaScript API for controlling headless Chrome, running on node.
+
+=== Editing diagrams
+
+All the diagrams are declared in [mp-rs-ops-marbles.js](api/src/docs/js/mp-rs-ops-marbles.js). This contains a map of all the graphs. Each graph has an array of stages, and stages have zero to many elements. The stages are as follows:
+
+* `ins` - An input stream. Called `ins` because `in` is a JavaScript keyword, and `ins` makes the width 3 characters for nice alignment with other stages. The first parameter may optionally be a map of options, the only option currently read is `label`, which is used to label the stage.
+* `sub` - A sub stream. This will automatically have a label generated for it, `stream[n]`, where `n` is the number of the sub stage, starting from one.
+* `out` - An output stream, the difference between `out` and `ins` is that `out` marbles inherit their colour from the previous `ins` marble.
+* `op` - The operator stage. The first argument must be the operator, this may be followed by zero to many intermediate value marbles.
+* `eff` - An effect stream. Used to visualize side effects (eg, callbacks executed by `forEach`).
+* `res` - A result stage. This displays the result that gets redeemed by a `CompletionSubscriber` when it completes.
+
+Each of the stages support zero to many marbles, which are declared as follows:
+
+* `n` - an ‘onNext’ marble. A regular element passed through the stream. The colour is automatically computed - each marble in an `ins` stream gets a new colour, while all other marbles have their colour selected based on the previous `ins` marble, searching up vertically first, then left. May optionally take a options argument, supporting a `link` argument which indicates that this marble should be linked to (eg as a feedback loop from the output back to the input) another marble.
+* `term` - an `onComplete` marble, indicating successful termination of the stream.
+* `nterm` - a hybrid between `n` and `term`, allowing a marble to also carry a termination signal. This is used to make it clear that when a certain marble is emitted, that is the last marble and the stream will be terminated immediately.
+* `err` - an `onError` marble, indicating failed termination of the stream.
+* `e` - a side effect. Should usually contain an example callback invocation.
+* `i` - an intermediate value. This is used for operators that compute intermediate values that are fed back into the operator callbacks with the next element.
+* `r` - a result value. This is used with the `res` stage, to indicate the value that gets redeemed by the result `CompletionSubscriber`.
+* `none` - No marble. Inserts a blank space between marbles. Needed to ensure alignment of cause and effected marbles.
+
+After editing or creating a new diagram, you can test your changes by opening them in a browser. Before you do this, you need to run `npm install from the `api/src/docs/js` directory, this will download the dependencies, in particular, `svg.js`. Having done that, you can then open [`api/src/docs/js/index.html`](api/src/docs/js/index.html), this will show you all the rendered diagrams. No generation step is required to view these diagrams, you can simply hit refresh in the browser after making changes.
+
+=== Generating diagrams
+
+Once you have edited the diagrams file, before committing, you will need to generate new PNG files for the diagrams. This can be done by running `node [api/src/docs/js/generate-marble-diagrams.js](api/src/docs/js/generate-marble-diagrams.js)`. This will output all the diagrams to `api/src/main/java/org/eclipse/microprofile/reactive/streams/doc-files`, the directory that javadoc supports for placing images. You can then run `mvn package` to generate the javadocs and see the results.
+
+
+

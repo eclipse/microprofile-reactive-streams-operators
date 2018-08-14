@@ -91,5 +91,14 @@
  *       .build()
  *   );
  * </pre>
+ * <p>
+ * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
+ * applying some transformation or some side effect, termination and error signals potentially being passed, and
+ * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * <p>
+ * Below is an example diagram labelling all the parts of the stream.
+ * <p>
+ * <img src="doc-files/example.png" alt="Example marble diagram">
  */
 package org.eclipse.microprofile.reactive.streams;

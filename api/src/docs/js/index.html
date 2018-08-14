@@ -24,16 +24,35 @@
     <script type="text/javascript" src="node_modules/svg.js/dist/svg.js"></script>
     <script type="text/javascript" src="svg-marbles.js"></script>
     <script type="text/javascript" src="mp-rs-ops-marbles.js"></script>
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
     <style>
+        @font-face {
+            font-family: "Source Code Pro";
+            src: url(SourceCodePro-Regular.ttf);
+        }
+        #loadfont {
+            position: absolute;
+            left: -500px;
+            width: 500px;
+            font-family: "Source Code Pro";
+        }
         .diagram { margin: 50px; }
+        h3 {
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
 <div id="marbles"></div>
+<div id="loadfont">This div exists so that the browser will load the Source Code Pro font before we render the marbles,
+    ensuring it gets the leading and sizes right.</div>
 <script type="text/javascript">
-    m.draw(window.document.getElementById("marbles"), window.document);
+    window.setTimeout(function() {
+        createMarbles().draw(window.document.getElementById("marbles"), window.document);
+        if (window.location.hash) {
+            // And if we were on a hash, navigate to it now that it's there.
+            window.location.href = window.location.hash;
+        }
+    }, 100);
 </script>
 </body>
 </html>

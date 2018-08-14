@@ -22,11 +22,204 @@
  */
 function SvgMarbles() {
 
+  function deepMerge(from, to) {
+    Object.keys(from).forEach(key => {
+      if (typeof from[key] === "object") {
+        if (to[key] === undefined) {
+          to[key] = {};
+        }
+        deepMerge(from[key], to[key]);
+      } else {
+        if (to[key] === undefined) {
+          to[key] = from[key];
+        }
+      }
+    });
+    return to;
+  }
+
+  function argsToArray(args) {
+    let array = new Array(args.length);
+    Object.keys(args).forEach((k, idx) => {
+      array[idx] = args[idx];
+    });
+    return array;
+  }
+
+  /**
+   * The first argument to the stage may be a properties array. If it is, we extract it.
+   */
+  function stream(args, type) {
+    let props = {};
+    const argsArray = argsToArray(args);
+    if (argsArray[0].clazz === undefined) {
+      props = argsArray[0];
+      argsArray.shift();
+    }
+    let stage = {
+      clazz: "stage",
+      type: "stream",
+      streamType: type,
+      events: argsArray
+    };
+    return deepMerge(props, stage);
+  }
+
+  /**
+   * The DSL.
+   */
+  this.dsl = {
+    /**
+     * A terminator marble.
+     */
+    term: {
+      clazz: "marble",
+      type: "term"
+    },
+
+    /**
+     * An error marble.
+     */
+    err: {
+      clazz: "marble",
+      type: "error"
+    },
+
+    /**
+     * A next marble (passed to onNext).
+     */
+    n: (element, props) => {
+      if (props === undefined) {
+        props = {};
+      }
+      return deepMerge(props, {
+        clazz: "marble",
+        type: "next",
+        element: element
+      });
+    },
+
+    /**
+     * A next terminating marble.
+     */
+    nterm: element => {
+      return {
+        clazz: "marble",
+        type: "nextterm",
+        element: element
+      };
+    },
+
+    /**
+     * An effect marble.
+     */
+    e: effect => {
+      return {
+        clazz: "marble",
+        type: "effect",
+        effect: effect
+      };
+    },
+
+    /**
+     * No marble.
+     */
+    none: {
+      clazz: "marble",
+      type: "none"
+    },
+
+    /**
+     * A result marble.
+     */
+    r: value => {
+      return {
+        clazz: "marble",
+        type: "result",
+        value: value
+      }
+    },
+
+    /**
+     * An intermediate value marble.
+     */
+    i: value => {
+      return {
+        clazz: "marble",
+        type: "intermediate",
+        value: value
+      }
+    },
+
+    /**
+     * An in stream.
+     */
+    ins: function () {
+      return stream(arguments, "in");
+    },
+
+    /**
+     * An out stream.
+     */
+    out: function () {
+      return stream(arguments, "out");
+    },
+
+    /**
+     * A sub stream.
+     */
+    sub: function () {
+      return stream(arguments, "sub");
+    },
+
+    /**
+     * An effect stream.
+     */
+    eff: function () {
+      return {
+        clazz: "stage",
+        type: "effect",
+        events: argsToArray(arguments)
+      };
+    },
+
+    /**
+     * An operator description.
+     */
+    op: function () {
+      const args = argsToArray(arguments);
+      const description = args[0];
+      args.shift();
+      return {
+        type: "op",
+        description: description,
+        events: args
+      };
+    },
+
+    /**
+     * A result stream.
+     */
+    res: function () {
+      return {
+        clazz: "stage",
+        type: "result",
+        events: argsToArray(arguments)
+      };
+    }
+  };
+
   this.graphs = {};
 
-  let graphPrototype = {
+  const graphPrototype = {
     colors: ["#F1948A", "#82E0AA", "#5DADE2", "#F7DC6F", "#C39BD3", "#EB984E"],
     width: 500,
+    margin: {
+      xl: 10,
+      xr: 10,
+      yt: 10,
+      yb: 10
+    },
     marble: {
       radius: 16
     },
@@ -50,108 +243,6 @@ function SvgMarbles() {
     }
   };
 
-  this.term = {
-    clazz: "marble",
-    type: "term"
-  };
-
-  this.n = element => {
-    return {
-      clazz: "marble",
-      type: "next",
-      element: element
-    };
-  };
-
-  this.nterm = element => {
-    return {
-      clazz: "marble",
-      type: "nextterm",
-      element: element
-    };
-  };
-
-  this.e = effect => {
-    return {
-      clazz: "marble",
-      type: "effect",
-      effect: effect
-    };
-  };
-
-  this.none = {
-    clazz: "marble",
-    type: "none"
-  };
-
-  function argsToArray(args) {
-    let array = new Array(args.length);
-    Object.keys(args).forEach((k, idx) => {
-      array[idx] = args[idx];
-    });
-    return array;
-  }
-
-  /**
-   * The first argument to the stage may be a properties array. If it is, we extract it.
-   */
-  function stream(args, type) {
-    let props = {};
-    if (args[0].clazz === undefined) {
-      props = args[0];
-      delete args[0];
-    }
-    let stage = {
-      clazz: "stage",
-      type: "stream",
-      streamType: type,
-      events: argsToArray(args)
-    };
-    return deepMerge(props, stage);
-  }
-
-  this.ins = function() {
-    return stream(arguments, "in");
-  };
-
-  this.out = function() {
-    return stream(arguments, "out");
-  };
-
-  this.sub = function() {
-    return stream(arguments, "sub");
-  };
-
-  this.eff = function() {
-    return {
-      clazz: "stage",
-      type: "effect",
-      events: argsToArray(arguments)
-    };
-  };
-
-  this.op = description => {
-    return {
-      type: "op",
-      description: description
-    };
-  };
-
-  function deepMerge(from, to) {
-    Object.keys(from).forEach(key => {
-      if (typeof from[key] === "object") {
-        if (to[key] === undefined) {
-          to[key] = {};
-        }
-        deepMerge(from[key], to[key]);
-      } else {
-        if (to[key] === undefined) {
-          to[key] = from[key];
-        }
-      }
-    });
-    return to;
-  }
 
   this.addGraphs = (gs) => {
     Object.keys(gs).forEach(key => {
@@ -161,9 +252,9 @@ function SvgMarbles() {
 
   function drawStreamLine(graph, stage) {
     let end = graph.width;
-    stage.box.line(0, 0, end, 0).stroke({ width: 2 });
+    stage.box.line(0, 0, end, 0).stroke({width: 2});
     stage.box.polygon([[end - 10, 0], [end - 15, 10], [end, 0], [end - 15, -10]])
-      .fill({color: "black"}).stroke({ width: 1 });
+      .fill({color: "black"}).stroke({width: 1});
     if (stage.label !== undefined) {
       stage.box.text(stage.label)
         .font({size: "8pt", family: graph.fonts.code})
@@ -217,6 +308,27 @@ function SvgMarbles() {
         stage.box.line(position, -radius, position, radius)
           .stroke({width: 3, color: "black"});
         drawMarbleLine(stage.box, position, arrowStart, arrowEnd);
+      } else if (event.type === "error") {
+        stage.box.line(position - radius, -radius, position + radius, radius)
+          .stroke({width: 3, color: "black"});
+        stage.box.line(position - radius, radius, position + radius, -radius)
+          .stroke({width: 3, color: "black"});
+        drawMarbleLine(stage.box, position, arrowStart, arrowEnd);
+      } else if (event.type === "result") {
+        const text = stage.box.plain(event.value)
+          .font({"text-anchor": "end", "dominant-baseline": "central", family: graph.fonts.code, size: "16pt"})
+          .attr({x: position + 20, y: graph.op.height / 2});
+        let textBox = text.bbox();
+        if (textBox.x < 10) {
+          text.attr({"text-anchor": "start", x: 10});
+          textBox = text.bbox();
+        }
+        stage.box.rect(textBox.width + 20, graph.op.height)
+          .radius(5)
+          .move(textBox.x - 10, 0)
+          .stroke({width: 2, color: "black"})
+          .fill("none");
+        drawMarbleLine(stage.box, position, arrowStart, -1);
       }
 
       position += spacing;
@@ -226,7 +338,6 @@ function SvgMarbles() {
   function drawEffects(graph, stage) {
     let spacing = graph.width / graph.totalLength;
     let position = spacing / 2;
-    const radius = graph.effect.radius.width;
     const offset = graph.effect.offset;
 
     // We are below the op
@@ -235,33 +346,104 @@ function SvgMarbles() {
     stage.events.forEach(effect => {
 
       if (effect.type === "effect") {
+        const start = position + offset;
         stage.box.line(position, arrowStart, position, 0)
           .stroke({width: 1, color: "#888"});
         stage.box.line(position, 0, position + offset, 0)
           .stroke({width: 1, color: "#888"});
-        stage.box.polygon([[position + offset - 5, 0], [position + offset - 7, -5], [position + offset, 0], [position + offset - 7, 5]])
+        stage.box.polygon([[start - 6, 0], [start - 8, -5], [start - 1, 0], [start - 8, 5]])
           .fill({color: "#888"}).stroke({width: 1, color: "#888"});
 
-        const effectCenter = position + offset + radius;
+        const textBox = stage.box.plain(effect.effect)
+          .font({"text-anchor": "start", "dominant-baseline": "central", size: "12pt", family: graph.fonts.code})
+          .attr({x: start + 10, y: 0}).bbox();
 
-        stage.box.ellipse(radius * 2, graph.effect.radius.height * 2)
+        stage.box.ellipse(textBox.width + 20, graph.effect.radius.height * 2)
           .fill("none")
           .stroke({width: 2, color: "black"})
-          .center(effectCenter, 0);
-        stage.box.plain(effect.effect)
-          .font({"text-anchor": "middle", "dominant-baseline": "central", size: "12pt", family: graph.fonts.code})
-          .attr({x: effectCenter, y: 0});
+          .cy(0)
+          .x(start);
       }
 
       position += spacing;
     });
   }
 
+  /**
+   * This should be invoked on stages after marbles are drawn, since this is likely to draw intemediate values
+   * on top of marble lines, which we want.
+   */
+  function drawIntermediateValues(graph, stage) {
+    const spacing = graph.width / graph.totalLength;
+    let position = spacing / 2;
+    const radius = graph.marble.radius;
+    const offset = graph.op.height + radius / 2;
+
+    stage.events.forEach(event => {
+
+      let linkStart = radius;
+
+      if (event.type === "intermediate") {
+        const ellipse = stage.box.ellipse(radius * 2, radius * 2)
+          .center(position, offset)
+          .stroke({width: 2, color: "#888"})
+          .fill({color: "white"});
+
+        const textBox = stage.box.plain(event.value.toString())
+          .font({
+            "text-anchor": "middle",
+            "dominant-baseline": "central",
+            size: "16pt",
+            family: graph.fonts.code,
+            fill: "#888"
+          })
+          .attr({x: position, y: offset}).bbox();
+
+        if (textBox.width > radius * 2) {
+          ellipse.rx(textBox.width / 2 + 10);
+        }
+
+        linkStart = graph.op.height + radius / 2 + radius;
+      }
+
+
+      if (event.link !== undefined) {
+        // Calculate what we're linking to
+        const linkStage = graph.stages[event.link[0]];
+        // only support op for now
+        if (linkStage.type === "op") {
+          const linkX = (spacing / 2) + event.link[1] * spacing;
+          const linkY = linkStage.box.y() - stage.box.y();
+
+          stage.box.path([
+            "M", position, linkStart, "C", position + 20, linkStart + 60,
+            linkX, linkY - 80, linkX, linkY
+          ].join(" "))
+            .fill("none")
+            .stroke({width: 1, color: "#888"});
+
+          stage.box.polygon([[linkX, linkY - 5], [linkX - 5, linkY - 7], [linkX, linkY],
+            [linkX + 5, linkY - 7]]).fill({color: "#888"}).stroke({width: 1, color: "#888"});
+        }
+
+      }
+
+      position += spacing;
+    });
+
+
+  }
+
   function drawOp(graph, stage) {
     stage.box.rect(graph.width, graph.op.height)
       .fill("none").stroke({width: 1});
     stage.box.plain(stage.description)
-      .font({"text-anchor": "middle", "dominant-baseline": "central", family: graph.fonts.code, size: graph.op.fontSize})
+      .font({
+        "text-anchor": "middle",
+        "dominant-baseline": "central",
+        family: graph.fonts.code,
+        size: graph.op.fontSize
+      })
       // svg.js does some magic to work out the height of the text box before moving it, we don't want that since
       // we've used dominant-baseline central as the center.
       .attr({x: graph.width / 2, y: graph.op.height / 2});
@@ -270,53 +452,86 @@ function SvgMarbles() {
   this.drawSingle = (element, graph) => {
     computeTotalLength(graph);
     computeColors(graph);
-    computerSubStreamLabels(graph);
+    computeSubStreamLabels(graph);
+    computeLinks(graph);
 
-    let svg = SVG(element);
-    let position = 0;
+    graph.marbleCoords = marbleCoords;
+    const svg = SVG(element);
+    graph.svg = svg;
+    const marginX = graph.margin.xl;
+
+    let position = graph.margin.yt;
 
     // First, render the lines and the op stage
     graph.stages.forEach(stage => {
-      let box = svg.nested();
+      const box = svg.nested();
       stage.box = box;
       if (stage.type === "stream") {
         position += (graph.stream.spacing / 2);
-        box.move(10, position);
+        box.move(marginX, position);
         drawStreamLine(graph, stage);
         position += (graph.stream.spacing / 2);
       } else if (stage.type === "op") {
-        let boxTop = position + (graph.op.spacing - graph.op.height) / 2;
+        const boxTop = position + (graph.op.spacing - graph.op.height) / 2;
         graph.opStagePosition = boxTop;
-        box.move(10, boxTop);
+        box.move(marginX, boxTop);
         drawOp(graph, stage);
         position += graph.op.spacing;
       } else if (stage.type === "effect") {
         position += (graph.stream.spacing / 4);
-        box.move(10, position);
+        box.move(marginX, position);
         position += (graph.stream.spacing / 2);
+      } else if (stage.type === "result") {
+        const boxTop = position + (graph.op.spacing - graph.op.height) / 2;
+        box.move(marginX, boxTop);
+        position += graph.op.spacing;
       }
     });
-    svg.size(graph.width + 20, position);
 
     // Now that we know where the op stage is, render the marbles
     graph.stages.forEach(stage => {
-      if (stage.type === "stream") {
+      if (stage.type === "stream" || stage.type === "result") {
         drawMarbles(graph, stage);
       } else if (stage.type === "effect") {
         drawEffects(graph, stage);
       }
     });
+
+    // And render intermediate values and links
+    graph.stages.forEach(stage => {
+      if (stage.type === "op" || stage.type === "stream") {
+        drawIntermediateValues(graph, stage);
+      }
+    });
+
+    svg.size(graph.width + marginX + graph.margin.xr, position + graph.margin.yb);
+    if (graph.postProcess !== undefined) {
+      graph.postProcess(graph);
+    }
     return {
-      width: graph.width + 20,
-      height: position
+      width: graph.width + marginX + graph.margin.xr,
+      height: position + graph.margin.yb
     };
   };
 
+  function marbleCoords(stageN, eventN) {
+    const spacing = this.width / this.totalLength;
+    const x = this.margin.xl + (spacing / 2) + eventN * spacing;
+    const y = this.stages[stageN].box.y();
+    return [x, y];
+  }
+
   this.draw = (element, document) => {
     Object.keys(this.graphs).forEach(key => {
-      let graphElement = document.createElement("div");
+      const a = document.createElement("a");
+      a.href = "#" + key;
+      a.textContent = key;
+      const heading = document.createElement("h3");
+      heading.appendChild(a);
+      heading.id = key;
+      element.appendChild(heading);
+      const graphElement = document.createElement("div");
       graphElement.classList.add("diagram");
-      graphElement.id = key;
       this.drawSingle(graphElement, this.graphs[key]);
       element.appendChild(graphElement);
     });
@@ -341,8 +556,8 @@ function SvgMarbles() {
         if (stage.type === "stream") {
           if (stage.events.length > i) {
             let event = stage.events[i];
-            if (event.type === "next" || event.type === "nextterm") {
-              if (stage.streamType === "in") {
+            if (event.type === "next" || event.type === "nextterm" || event.type === "error") {
+              if (stage.streamType === "in" || currentColor === -1) {
                 currentColor += 1;
               }
               event.color = currentColor;
@@ -353,7 +568,7 @@ function SvgMarbles() {
     }
   }
 
-  function computerSubStreamLabels(graph) {
+  function computeSubStreamLabels(graph) {
     let subStream = 0;
     graph.stages.forEach(stage => {
       if (stage.type === "stream" && stage.streamType === "sub") {
@@ -363,6 +578,22 @@ function SvgMarbles() {
         }
       }
     });
+  }
+
+  function computeLinks(graph) {
+    for (let i = 0; i < graph.stages.length; i++) {
+      const stage = graph.stages[i];
+      if (stage.type === "op") {
+        for (let j = 0; j < stage.events.length; j++) {
+          const el = stage.events[j];
+          if (el.type === "intermediate") {
+            if (el.link === undefined) {
+              el.link = [i, j + 1];
+            }
+          }
+        }
+      }
+    }
   }
 
 }

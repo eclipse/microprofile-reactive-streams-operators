@@ -41,6 +41,15 @@ import java.util.stream.Collectors;
 
 /**
  * A builder for a {@link Publisher}.
+ * <p>
+ * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
+ * applying some transformation or some side effect, termination and error signals potentially being passed, and
+ * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * <p>
+ * Below is an example diagram labelling all the parts of the stream.
+ * <p>
+ * <img src="doc-files/example.png">
  *
  * @param <T> The type of the elements that the publisher emits.
  * @see ReactiveStreams
@@ -60,7 +69,8 @@ public final class PublisherBuilder<T> {
     /**
      * Map the elements emitted by this publisher using the {@code mapper} function.
      * <p>
-     * <img src="doc-files/map.png"/>
+     * <img src="doc-files/map.png">
+     *
      * @param mapper The function to use to map the elements.
      * @param <R>    The type of elements that the {@code mapper} function emits.
      * @return A new publisher builder that emits the mapped elements.
@@ -73,7 +83,7 @@ public final class PublisherBuilder<T> {
      * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
      * element.
      * <p>
-     * <img src="doc-files/peek.png"/>
+     * <img src="doc-files/peek.png">
      *
      * @param consumer The function called for every element.
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
@@ -89,7 +99,7 @@ public final class PublisherBuilder<T> {
      * Any elements that return {@code true} when passed to the {@link Predicate} will be emitted, all other
      * elements will be dropped.
      * <p>
-     * <img src="doc-files/filter.png"/>
+     * <img src="doc-files/filter.png">
      *
      * @param predicate The predicate to apply to each element.
      * @return A new publisher builder.
@@ -101,7 +111,7 @@ public final class PublisherBuilder<T> {
     /**
      * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
      * <p>
-     * <img src="doc-files/distinct.png"/>
+     * <img src="doc-files/distinct.png">
      *
      * @return A new publisher builder emitting the distinct elements from this stream.
      */
@@ -113,7 +123,7 @@ public final class PublisherBuilder<T> {
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
      * {@code mapper} function are emitted from this stream.
      * <p>
-     * <img src="doc-files/flatMap.png"/>
+     * <img src="doc-files/flatMap.png">
      * <p>
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
@@ -133,7 +143,7 @@ public final class PublisherBuilder<T> {
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
      * {@code mapper} function are emitted from this stream.
      * <p>
-     * <img src="doc-files/flatMapPublisher.png"/>
+     * <img src="doc-files/flatMapPublisher.png">
      * <p>
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
@@ -155,7 +165,7 @@ public final class PublisherBuilder<T> {
      * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
      * {@link CompletionStage} are emitted from this publisher.
      * <p>
-     * <img src="doc-files/flatMapCompletionStage.png"/>
+     * <img src="doc-files/flatMapCompletionStage.png">
      * <p>
      * This method only works with one element at a time. When an element is received, the {@code mapper} function is
      * executed, and the next element is not consumed or passed to the {@code mapper} function until the previous
@@ -173,7 +183,7 @@ public final class PublisherBuilder<T> {
      * Map the elements to {@link Iterable}'s, and flatten so that the elements contained in each iterable are
      * emitted by this stream.
      * <p>
-     * <img src="doc-files/flatMapIterable.png"/>
+     * <img src="doc-files/flatMapIterable.png">
      * <p>
      * This method operates on one iterable at a time. The result is a concatenation of elements contain in all the
      * iterables returned by the {@code mapper} function.
@@ -189,7 +199,7 @@ public final class PublisherBuilder<T> {
     /**
      * Truncate this stream, ensuring the stream is no longer than {@code maxSize} elements in length.
      * <p>
-     * <img src="doc-files/limit.png"/>
+     * <img src="doc-files/limit.png">
      * <p>
      * If {@code maxSize} is reached, the stream will be completed, and upstream will be cancelled. Completion of the
      * stream will occur immediately when the element that satisfies the {@code maxSize} is received.
@@ -211,7 +221,7 @@ public final class PublisherBuilder<T> {
      * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
      * effectively be an empty stream.
      * <p>
-     * <img src="doc-files/skip.png"/>
+     * <img src="doc-files/skip.png">
      *
      * @param n The number of elements to discard.
      * @return A new publisher builder.
@@ -227,7 +237,7 @@ public final class PublisherBuilder<T> {
     /**
      * Take the longest prefix of elements from this stream that satisfy the given {@code predicate}.
      * <p>
-     * <img src="doc-files/takeWhile.png"/>
+     * <img src="doc-files/takeWhile.png">
      * <p>
      * When the {@code predicate} returns false, the stream will be completed, and upstream will be cancelled.
      *
@@ -240,6 +250,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Drop the longest prefix of elements from this stream that satisfy the given {@code predicate}.
+     * <p>
+     * <img src="doc-files/dropWhile.png">
      * <p>
      * As long as the {@code predicate} returns true, no elements will be emitted from this stream. Once the first element
      * is encountered for which the {@code predicate} returns false, all subsequent elements will be emitted, and the
@@ -254,6 +266,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Performs an action for each element on this stream.
+     * <p>
+     * <img src="doc-files/forEach.png">
      * <p>
      * The returned {@link CompletionStage} will be redeemed when the stream completes, either successfully if the stream
      * completes normally, or with an error if the stream completes with an error or if the action throws an exception.
@@ -273,6 +287,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Ignores each element of this stream.
+     * <p>
+     * <img src="doc-files/ignore.png">
      * <p>
      * The returned {@link CompletionStage} will be redeemed when the stream completes, either successfully if the
      * stream completes normally, or with an error if the stream completes with an error or if the action throws an
@@ -300,6 +316,8 @@ public final class PublisherBuilder<T> {
      * Perform a reduction on the elements of this stream, using the provided identity value and the accumulation
      * function.
      * <p>
+     * <img src="doc-files/reduce-identity.png">
+     * <p>
      * The result of the reduction is returned in the {@link CompletionStage}.
      *
      * @param identity    The identity value.
@@ -312,6 +330,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Perform a reduction on the elements of this stream, using provided the accumulation function.
+     * <p>
+     * <img src="doc-files/reduce.png">
      * <p>
      * The result of the reduction is returned in the {@link CompletionStage}. If there are no elements in this stream,
      * empty will be returned.
@@ -326,6 +346,8 @@ public final class PublisherBuilder<T> {
     /**
      * Find the first element emitted by the {@link Publisher}, and return it in a
      * {@link CompletionStage}.
+     * <p>
+     * <img src="doc-files/findFirst.png">
      * <p>
      * If the stream is completed before a single element is emitted, then {@link Optional#empty()} will be emitted.
      *
@@ -354,6 +376,8 @@ public final class PublisherBuilder<T> {
      * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
      * {@link Supplier supplier} and {@link BiConsumer accumulator}.
      * <p>
+     * <img src="doc-files/collect.png">
+     * <p>
      * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does not
      * accept a <em>combiner</em> method.
      *
@@ -370,6 +394,8 @@ public final class PublisherBuilder<T> {
 
     /**
      * Collect the elements emitted by this publisher builder into a {@link List}
+     * <p>
+     * <img src="doc-files/toList.png">
      *
      * @return A {@link CompletionRunner} that emits the list.
      */
@@ -421,6 +447,8 @@ public final class PublisherBuilder<T> {
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action if this
      * stream conveys an error. The given consumer is called with the failure.
+     * <p>
+     * <img src="doc-files/onError.png">
      *
      * @param errorHandler The function called with the failure.
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. If the
@@ -433,7 +461,9 @@ public final class PublisherBuilder<T> {
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
      * invoking {@link #onError(Consumer)}, it invokes the given method and emits the result as final event of the stream.
-     *
+     * <p>
+     * <img src="doc-files/onErrorResume.png">
+     * <p>
      * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
      * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
      * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
@@ -453,7 +483,9 @@ public final class PublisherBuilder<T> {
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
      * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
      * instead.
-     *
+     * <p>
+     * <img src="doc-files/onErrorResumeWith.png">
+     * <p>
      * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
      * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
      * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
@@ -474,7 +506,9 @@ public final class PublisherBuilder<T> {
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
      * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
      * instead.
-     *
+     * <p>
+     * <img src="doc-files/onErrorResumeWithPublisher.png">
+     * <p>
      * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
      * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
      * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
@@ -500,6 +534,8 @@ public final class PublisherBuilder<T> {
      * stream completes or failed. The given action does not know if the stream failed or completed. If you need to
      * distinguish use {@link #onError(Consumer)} and {@link #onComplete(Runnable)}. In addition, the action is called if
      * the stream is cancelled downstream.
+     * <p>
+     * <img src="doc-files/onTerminate.png">
      *
      * @param action The function called when the stream completes or failed.
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
@@ -512,6 +548,8 @@ public final class PublisherBuilder<T> {
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
      * stream completes.
+     * <p>
+     * <img src="doc-files/onComplete.png">
      *
      * @param action The function called when the stream completes.
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given

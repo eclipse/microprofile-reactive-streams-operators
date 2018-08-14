@@ -33,11 +33,12 @@ const puppeteer = require("puppeteer");
   // Important to wait until networkidle0, otherwise fonts won't be loaded.
   await page.goto(htmlPage, {waitUntil: "networkidle0"});
 
-  const graphs = await page.evaluate(() => {
-    return m.graphs;
+  const keys = await page.evaluate(() => {
+    window.marbles = createMarbles();
+    return Object.keys(marbles.graphs);
   });
 
-  console.log("Rendering diagrams for " + Object.keys(graphs));
+  console.log("Rendering diagrams for " + keys);
 
   const renderDiagrams = async (keys) => {
     if (keys.length > 0) {
@@ -46,7 +47,7 @@ const puppeteer = require("puppeteer");
       const dimensions = await page.evaluate((key) => {
         const diagram = window.document.getElementById("diagram");
         diagram.innerHTML = "";
-        return m.drawSingle(diagram, m.graphs[key]);
+        return window.marbles.drawSingle(diagram, window.marbles.graphs[key]);
       }, key);
       await page.screenshot({path: outputDir + "/" + key + ".png", clip: {
         x: 0,
@@ -59,6 +60,6 @@ const puppeteer = require("puppeteer");
     }
   };
 
-  await renderDiagrams(Object.keys(graphs));
+  await renderDiagrams(keys);
   await browser.close();
 })();

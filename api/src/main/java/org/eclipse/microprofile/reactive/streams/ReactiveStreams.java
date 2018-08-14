@@ -44,7 +44,7 @@ import java.util.stream.Stream;
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
- * <img src="doc-files/example.png">
+ * <img src="doc-files/example.png" alt="Example marble diagram">
  */
 public class ReactiveStreams {
 
@@ -65,7 +65,7 @@ public class ReactiveStreams {
     /**
      * Create a {@link PublisherBuilder} that emits a single element.
      * <p>
-     * <img src="doc-files/of-single.png">
+     * <img src="doc-files/of-single.png" alt="of marble diagram">
      *
      * @param t   The element to emit.
      * @param <T> The type of the element.
@@ -78,7 +78,7 @@ public class ReactiveStreams {
     /**
      * Create a {@link PublisherBuilder} that emits the given elements.
      * <p>
-     * <img src="doc-files/of-many.png">
+     * <img src="doc-files/of-many.png" alt="of marble diagram">
      *
      * @param ts  The elements to emit.
      * @param <T> The type of the elements.
@@ -91,7 +91,7 @@ public class ReactiveStreams {
     /**
      * Create an empty {@link PublisherBuilder}.
      * <p>
-     * <img src="doc-files/empty.png">
+     * <img src="doc-files/empty.png" alt="empty marble diagram">
      *
      * @param <T> The type of the publisher builder.
      * @return A publisher builder that will just emit a completion signal.
@@ -104,7 +104,7 @@ public class ReactiveStreams {
      * Create a {@link PublisherBuilder} that will emit a single element if <code>t</code> is not null, otherwise will be
      * empty.
      * <p>
-     * <img src="doc-files/ofNullable.png">
+     * <img src="doc-files/ofNullable.png" alt="ofNullable marble diagram">
      *
      * @param t   The element to emit, <code>null</code> if to element should be emitted.
      * @param <T> The type of the element.
@@ -117,7 +117,7 @@ public class ReactiveStreams {
     /**
      * Create a {@link PublisherBuilder} that will emits the elements produced by the passed in {@link Iterable}.
      * <p>
-     * <img src="doc-files/fromIterable.png">
+     * <img src="doc-files/fromIterable.png" alt="fromIterable marble diagram">
      *
      * @param ts  The elements to emit.
      * @param <T> The type of the elements.
@@ -130,7 +130,7 @@ public class ReactiveStreams {
     /**
      * Create a failed {@link PublisherBuilder}.
      * <p>
-     * <img src="doc-files/failed.png">
+     * <img src="doc-files/failed.png" alt="failed marble diagram">
      * <p>
      * This publisher will just emit an error.
      *
@@ -145,7 +145,7 @@ public class ReactiveStreams {
     /**
      * Create a {@link ProcessorBuilder}. This builder will start as an identity processor.
      * <p>
-     * <img src="doc-files/identity.png">
+     * <img src="doc-files/identity.png" alt="identity marble diagram">
      *
      * @param <T> The type of elements that the processor consumes and emits.
      * @return The identity processor builder.
@@ -181,7 +181,7 @@ public class ReactiveStreams {
      * Creates an infinite stream produced by the iterative application of the function {@code f} to an initial element
      * {@code seed} consisting of {@code seed}, {@code f(seed)}, {@code f(f(seed))}, etc.
      * <p>
-     * <img src="doc-files/iterate.png">
+     * <img src="doc-files/iterate.png" alt="iterate marble diagram">
      *
      * @param seed The initial element.
      * @param f    A function applied to the previous element to produce the next element.
@@ -196,7 +196,7 @@ public class ReactiveStreams {
     /**
      * Creates an infinite stream that emits elements supplied by the supplier {@code s}.
      * <p>
-     * <img src="doc-files/generate.png">
+     * <img src="doc-files/generate.png" alt="generate marble diagram">
      *
      * @param s   The supplier.
      * @param <T> The type of stream elements.
@@ -210,7 +210,7 @@ public class ReactiveStreams {
     /**
      * Concatenates two publishers.
      * <p>
-     * <img src="doc-files/concat.png">
+     * <img src="doc-files/concat.png" alt="concat marble diagram">
      * <p>
      * The resulting stream will be produced by subscribing to the first publisher, and emitting the elements it emits,
      * until it emits a completion signal, at which point the second publisher will be subscribed to, and its elements

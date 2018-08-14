@@ -99,6 +99,6 @@
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
- * <img src="doc-files/example.png">
+ * <img src="doc-files/example.png" alt="Example marble diagram">
  */
 package org.eclipse.microprofile.reactive.streams;

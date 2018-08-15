@@ -1,0 +1,20 @@
+{
+    "name": "svg-marbles",
+    "version": "1.0.0",
+    "description": "Marble diagram generator",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/eclipse/microprofile-reactive-streams.git"
+    },
+    "license": "Apache-2.0",
+    "dependencies": {
+        "svg.js": "2.6.5"
+    },
+    "devDependencies": {
+        "puppeteer": "1.7.0",
+        "shelljs": "0.8.2"
+    },
+    "scripts": {
+        "generate-marble-diagrams": "node src/docs/js/generate-marble-diagrams.js"
+    }
+}

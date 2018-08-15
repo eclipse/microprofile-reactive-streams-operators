@@ -27,6 +27,7 @@ import org.reactivestreams.Subscriber;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -230,5 +231,24 @@ public class ReactiveStreams {
     public static <T> PublisherBuilder<T> concat(PublisherBuilder<? extends T> a,
                                                  PublisherBuilder<? extends T> b) {
         return new PublisherBuilder<>(new Stage.Concat(a.toGraph(), b.toGraph()));
+    }
+
+    /**
+     * Creates a publisher from a {@link CompletionStage}.
+     * <p>
+     * <img src="doc-files/fromCompletionStage.png" alt="fromCompletionStage marble diagram">
+     * <p>
+     * When the {@code CompletionStage} is redeemed, the publisher will emit the redeemed element, and then signal
+     * completion. If the completion stage is redeemed with {@code null}, no element will be emitted, the publisher
+     * will immediately signal completion.
+     * <p>
+     * If the {@code CompletionStage} is completed with a failure, this failure will be propagated through the stream.
+     *
+     * @param completionStage The {@code CompletionStage} to create the publisher from.
+     * @param <T> The type of the {@code CompletionStage} value.
+     * @return A {@code PublisherBuilder} representation of this {@code CompletionStage}.
+     */
+    public static <T> PublisherBuilder<T> fromCompletionStage(CompletionStage<? extends T> completionStage) {
+        return new PublisherBuilder<>(new Stage.FromCompletionStage(completionStage));
     }
 }

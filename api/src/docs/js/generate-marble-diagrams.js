@@ -61,4 +61,7 @@ const puppeteer = require("puppeteer");
 
   await renderDiagrams(keys);
   await browser.close();
-})();
+})().catch(error => {
+  console.log(error);
+  process.exit(1);
+});

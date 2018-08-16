@@ -20,12 +20,16 @@
 /**
  * Run this script in Puppeteer (ie, headless Chrome) to actually render each diagram.
  */
-const htmlPage = "file://" + __dirname + "/puppeteer.html";
-const outputDir = __dirname + "/../../../target/apidocs/org/eclipse/microprofile/reactive/streams/doc-files";
+const path = require("path");
+const projectBaseDir = path.normalize(__dirname + "/../../..");
+const htmlPage = "file://" + projectBaseDir + "/src/docs/js/puppeteer.html";
+const outputDir = projectBaseDir + "/src/main/java/org/eclipse/microprofile/reactive/streams/doc-files";
 
 const shell = require("shelljs");
 shell.mkdir("-p", outputDir);
 
+const crypto = require("crypto");
+const fs = require("fs");
 const puppeteer = require("puppeteer");
 
 (async () => {
@@ -61,6 +65,29 @@ const puppeteer = require("puppeteer");
 
   await renderDiagrams(keys);
   await browser.close();
+
+  // Now update MD5 hashes of everything
+  console.log("Generating marble-diagram-hashes.json");
+  const files = {};
+  function md5File(file) {
+    const md5sum = crypto.createHash('md5');
+    const data = fs.readFileSync(file);
+    md5sum.update(data);
+    files[path.relative(projectBaseDir, file)] = md5sum.digest("hex");
+  }
+
+  shell.ls(__dirname + "/*.js", __dirname + "/*.html", __dirname + "/*.ttf").forEach(md5File);
+  shell.ls(outputDir + "/*.png").forEach(md5File);
+
+  fs.writeFileSync(__dirname + "/marble-diagram-hashes.json", JSON.stringify({
+    description1: "This file contains hashes of all the input and output files from the marble diagram generation ",
+    description2: "process. Unfortunately due to limitations in the MicroProfile CI build and release environment, we can't ",
+    description3: "generate diagrams as part of the build, so instead we have to check them into the build. This hash file is ",
+    description4: "used to ensure the output files are up to date with the input files, and is verifyied by the Maven verify ",
+    description5: "phase, so if they aren't, the build will fail.",
+    files: files
+  }, null, 2));
+
 })().catch(error => {
   console.log(error);
   process.exit(1);

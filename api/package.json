@@ -15,6 +15,7 @@
         "shelljs": "0.8.2"
     },
     "scripts": {
-        "generate-marble-diagrams": "node src/docs/js/generate-marble-diagrams.js"
+        "generate-marble-diagrams": "node src/docs/js/generate-marble-diagrams.js",
+        "verify-marble-diagrams": "node src/docs/js/verify-marble-diagrams.js"
     }
 }

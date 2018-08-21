@@ -1,9 +1,0 @@
-{
-    "name": "svg-marbles",
-    "dependencies": {
-        "svg.js": "2.6.5"
-    },
-    "devDependencies": {
-        "puppeteer": "1.7.0"
-    }
-}

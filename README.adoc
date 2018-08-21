@@ -100,11 +100,28 @@ Each of the stages support zero to many marbles, which are declared as follows:
 * `r` - a result value. This is used with the `res` stage, to indicate the value that gets redeemed by the result `CompletionSubscriber`.
 * `none` - No marble. Inserts a blank space between marbles. Needed to ensure alignment of cause and effected marbles.
 
-After editing or creating a new diagram, you can test your changes by opening them in a browser. Before you do this, you need to run `npm install from the `api/src/docs/js` directory, this will download the dependencies, in particular, `svg.js`. Having done that, you can then open [`api/src/docs/js/index.html`](api/src/docs/js/index.html), this will show you all the rendered diagrams. No generation step is required to view these diagrams, you can simply hit refresh in the browser after making changes.
+After editing or creating a new diagram, you can test your changes by opening them in a browser. Before you do this on the very first time, you need to run `npm install` in the `api` module to ensure the JavaScript dependencies are installed. This will be done automatically if you run `mvn process-resources` (or any lifecycle phase after `process-resources`, such as `compile` or `install`) - the build uses the Maven frontend plugin to install Node, install npm, then run npm to install the dependencies. Included in the dependencies is an installation of Chromium which is used to generate the PNG diagrams for inclusion in the javadocs, this may take a while to download.
+
+Once the dependencies are installed, you can then open [`api/src/docs/js/index.html`](api/src/docs/js/index.html), this will show you all the rendered diagrams. No generation step is required to view these diagrams, you can simply hit refresh in the browser after making any changes.
 
 === Generating diagrams
 
-Once you have edited the diagrams file, before committing, you will need to generate new PNG files for the diagrams. This can be done by running `node [api/src/docs/js/generate-marble-diagrams.js](api/src/docs/js/generate-marble-diagrams.js)`. This will output all the diagrams to `api/src/main/java/org/eclipse/microprofile/reactive/streams/doc-files`, the directory that javadoc supports for placing images. You can then run `mvn package` to generate the javadocs and see the results.
+We convert the diagrams to SVG, then to PNG, by using Puppeteer, a high level API on top of Chrome running in headless mode. The SVG diagrams are generated in Chrome, and then screenshotted to create the PNGs. This is automatically done by Puppeteer. However, we can't run this as a part of the regular build because the MicroProfile CI and release server does not have the necessary dependencies to run Chrome. We've investigated a variety of different alternatives, including using different strategies for generating the diagrams, but nothing viable has come up, and unfortunately installing shared libraries in the Eclipse CBI is too high a maintenance burden for the Eclispe CBI maintainers, so they've refused to do it. Consequently, we need to check the diagrams into git, which means whenever they are changed, they need to be manually regenerated.
 
+To generate the diagrams, run:
 
+```
+mvn -Pmarble-diagrams clean package
+```
 
+The diagrams will be saved to `api/src/main/java/org/eclipse/microprofile/reactive/streams/doc-files`, from there they can be included in the javadocs using an image tag, eg:
+
+```html
+<img src="doc-files/map.png" alt="map marble diagram">
+```
+
+Make sure to include the `alt` text, the CI build will fail if it's not there.
+
+You can then view the diagrams in the api docs by opening `api/target/apidocs/index.html`, and navigating to the class that you added the marble diagram to.
+
+Before committing your changes, make sure to use the above command to generate the diagrams, and then check the results of it into git, including the updated `marble-diagram-hashes.json` file. As part of the verification of the build, we have a task that checks that all the hashes of all the input and output files from the diagram generation process match the hashes when the diagrams were last generated. Failure to do this will result in the build failing in CI, and so it won't pass PR validation.

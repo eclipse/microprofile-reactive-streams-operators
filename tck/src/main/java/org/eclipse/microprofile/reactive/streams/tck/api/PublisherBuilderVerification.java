@@ -127,8 +127,8 @@ public class PublisherBuilderVerification {
     }
 
     @Test
-    public void flatMapPublisher() {
-        Graph graph = GraphAccessor.buildGraphFor(builder().flatMapPublisher(i -> Mocks.PUBLISHER));
+    public void flatMapRsPublisher() {
+        Graph graph = GraphAccessor.buildGraphFor(builder().flatMapRsPublisher(i -> Mocks.PUBLISHER));
         assertTrue(graph.hasOutlet());
         Function flatMap = getAddedStage(Stage.FlatMap.class, graph).getMapper();
         Object result = flatMap.apply(1);
@@ -143,8 +143,8 @@ public class PublisherBuilderVerification {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void flatMapPublisherNullMapper() {
-        builder().flatMapPublisher(null);
+    public void flatMapRsPublisherNullMapper() {
+        builder().flatMapRsPublisher(null);
     }
 
     @Test
@@ -477,8 +477,8 @@ public class PublisherBuilderVerification {
     }
 
     @Test
-    public void onErrorResumeWithPublisher() {
-        Graph graph = GraphAccessor.buildGraphFor(builder().onErrorResumeWithPublisher(t -> Mocks.PUBLISHER));
+    public void onErrorResumeWithRsPublisher() {
+        Graph graph = GraphAccessor.buildGraphFor(builder().onErrorResumeWithRsPublisher(t -> Mocks.PUBLISHER));
         assertTrue(graph.hasOutlet());
         Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertEquals(resumeWith.getStages().size(), 1);
@@ -486,8 +486,8 @@ public class PublisherBuilderVerification {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void onErrorResumeWithPublisherNull() {
-        builder().onErrorResumeWithPublisher(null);
+    public void onErrorResumeWithRsPublisherNull() {
+        builder().onErrorResumeWithRsPublisher(null);
     }
 
     @Test

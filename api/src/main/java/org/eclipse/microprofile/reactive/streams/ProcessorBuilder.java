@@ -129,7 +129,7 @@ public final class ProcessorBuilder<T, R> {
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
      * <p>
-     * Unlike {@link #flatMapPublisher(Function)}, the mapper function returns a {@link PublisherBuilder} and not a
+     * Unlike {@link #flatMapRsPublisher(Function)}, the mapper function returns a {@link PublisherBuilder} and not a
      * {@link Publisher}.
      *
      * @param mapper The mapper function.
@@ -144,7 +144,7 @@ public final class ProcessorBuilder<T, R> {
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
      * {@code mapper} function are emitted from this stream.
      * <p>
-     * <img src="doc-files/flatMapPublisher.png" alt="flatMapPublisher marble diagram">
+     * <img src="doc-files/flatMapRsPublisher.png" alt="flatMapRsPublisher marble diagram">
      * <p>
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
@@ -155,7 +155,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>    The type of the elements emitted from the new processor.
      * @return A new processor builder.
      */
-    public <S> ProcessorBuilder<T, S> flatMapPublisher(Function<? super R, Publisher<? extends S>> mapper) {
+    public <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, Publisher<? extends S>> mapper) {
         return addStage(new Stage.FlatMap(mapper
             .andThen(ReactiveStreams::fromPublisher)
             .andThen(PublisherBuilder::toGraph)));
@@ -480,7 +480,7 @@ public final class ProcessorBuilder<T, R> {
      * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
      * instead.
      * <p>
-     * <img src="doc-files/onErrorResumeWithPublisher.png" alt="onErrorResumeWithPublisher marble diagram">
+     * <img src="doc-files/onErrorResumeWithRsPublisher.png" alt="onErrorResumeWithRsPublisher marble diagram">
      * <p>
      * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
      * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
@@ -494,7 +494,7 @@ public final class ProcessorBuilder<T, R> {
      *                     The function must not return {@code null}.
      * @return The new processor
      */
-    public ProcessorBuilder<T, R> onErrorResumeWithPublisher(Function<Throwable, Publisher<R>> errorHandler) {
+    public ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<R>> errorHandler) {
         return addStage(new Stage.OnErrorResumeWith(
             errorHandler
                 .andThen(ReactiveStreams::fromPublisher)

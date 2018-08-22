@@ -68,12 +68,12 @@ function createMarbles() {
         out(none, n(4), n(5), none, none, n(3), n(6), none, term )
       ]
     },
-    flatMapPublisher: {
+    flatMapRsPublisher: {
       stages: [
         ins(n(1), none, none, none, n(2), none, none, none, term ),
         sub(none, n(4), n(5), term                               ),
         sub(none, none, none, none, none, n(3), n(6), term       ),
-        op(".flatMapPublisher(i -> stream[i])"),
+        op(".flatMapRsPublisher(i -> stream[i])"),
         out(none, n(4), n(5), none, none, n(3), n(6), none, term )
       ]
     },
@@ -207,14 +207,14 @@ function createMarbles() {
         out(n(1), n(5), none, n(3), n(4), term )
       ]
     },
-    onErrorResumeWithPublisher: {
+    onErrorResumeWithRsPublisher: {
       op: {
         fontSize: "12pt"
       },
       stages: [
         ins(n(1), n(5), err),
         ins({label: "alternate"}, none, none, none, n(3), n(4), term),
-        op(".onErrorResumeWithPublisher(err -> alternate)"),
+        op(".onErrorResumeWithRsPublisher(err -> alternate)"),
         out(n(1), n(5), none, n(3), n(4), term )
       ]
     },

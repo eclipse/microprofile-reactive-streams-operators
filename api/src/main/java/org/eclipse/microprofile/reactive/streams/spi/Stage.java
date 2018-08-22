@@ -831,8 +831,9 @@ public interface Stage {
      * A publisher representation of a {@link CompletionStage}.
      * <p>
      * This stage must emit the value produced by the {@code CompletionStage}, then immediately complete the stream.
-     * If the value is {@code null}, then no element must be emitted, and the stream must be immediately completed.
-     * If the {@code CompletionStage} is redeemed with a failure, the stream must be failed with that failure.
+     * If the value is {@code null}, then no element must be emitted, and the stream should be failed with a
+     * {@link NullPointerException}. If the {@code CompletionStage} is redeemed with a failure, the stream must be
+     * failed with that failure.
      * <p>
      * If the stream is cancelled by downstream before the {@code CompletionStage} has been redeemed, then this stage
      * must do nothing. It must not cancel the {@code CompletionStage} (since {@code CompletionStage} offers no API
@@ -849,4 +850,28 @@ public interface Stage {
             return completionStage;
         }
     }
+
+    /**
+     * A publisher representation of a {@link CompletionStage}.
+     * <p>
+     * This stage must emit the value produced by the {@code CompletionStage}, then immediately complete the stream.
+     * If the value is {@code null}, then no element must be emitted, and the stream must be immediately completed.
+     * If the {@code CompletionStage} is redeemed with a failure, the stream must be failed with that failure.
+     * <p>
+     * If the stream is cancelled by downstream before the {@code CompletionStage} has been redeemed, then this stage
+     * must do nothing. It must not cancel the {@code CompletionStage} (since {@code CompletionStage} offers no API
+     * for cancellation), and it must not emit any further signals when the {@code CompletionStage} is redeemed.
+     */
+    final class FromCompletionStageNullable implements Outlet {
+        private final CompletionStage<?> completionStage;
+
+        public FromCompletionStageNullable(CompletionStage<?> completionStage) {
+            this.completionStage = Objects.requireNonNull(completionStage, "CompletionStage must not be null");
+        }
+
+        public CompletionStage<?> getCompletionStage() {
+            return completionStage;
+        }
+    }
+
 }

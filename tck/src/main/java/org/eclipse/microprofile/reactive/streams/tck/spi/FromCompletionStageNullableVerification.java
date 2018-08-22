@@ -32,25 +32,25 @@ import java.util.concurrent.CompletionStage;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-public class FromCompletionStageVerification extends AbstractStageVerification {
+public class FromCompletionStageNullableVerification extends AbstractStageVerification {
 
-    FromCompletionStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
+    FromCompletionStageNullableVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
         super(deps);
     }
 
     @Test
-    public void fromCsStageShouldEmitAnElementWhenAlreadyRedeemed() {
+    public void fromCsNullableStageShouldEmitAnElementWhenAlreadyRedeemed() {
         assertEquals(await(
-            ReactiveStreams.fromCompletionStage(CompletableFuture.completedFuture(10))
+            ReactiveStreams.fromCompletionStageNullable(CompletableFuture.completedFuture(10))
                 .toList()
                 .run(getEngine())
         ), Collections.singletonList(10));
     }
 
     @Test
-    public void fromCsStageShouldEmitAnElementWhenRedeemedLater() throws InterruptedException {
+    public void fromCsNullableStageShouldEmitAnElementWhenRedeemedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStage(future)
+        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStageNullable(future)
             .toList()
             .run(getEngine());
         // Give it some time to not complete
@@ -60,43 +60,43 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
         assertEquals(await(result), Collections.singletonList(10));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void fromCsStageShouldFailWhenAlreadyRedeemedWithNull() {
-        await(
-            ReactiveStreams.fromCompletionStage(CompletableFuture.completedFuture(null))
+    @Test
+    public void fromCsNullableStageShouldBeEmptyWhenAlreadyRedeemedWithNull() {
+        assertEquals(await(
+            ReactiveStreams.fromCompletionStageNullable(CompletableFuture.completedFuture(null))
                 .toList()
                 .run(getEngine())
-        );
+        ), Collections.emptyList());
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void fromCsStageShouldFailWhenRedeemedWithNullLater() throws InterruptedException {
+    @Test
+    public void fromCsNullableStageShouldBeEmptyWhenRedeemedWithNullLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStage(future)
+        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStageNullable(future)
             .toList()
             .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
         future.complete(null);
-        await(result);
+        assertEquals(await(result), Collections.emptyList());
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void fromCsStageShouldPropagateAlreadyRedeemedExceptions() {
+    public void fromCsNullableStageShouldPropagateAlreadyRedeemedExceptions() {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         future.completeExceptionally(new QuietRuntimeException("failed"));
         await(
-            ReactiveStreams.fromCompletionStage(future)
+            ReactiveStreams.fromCompletionStageNullable(future)
                 .toList()
                 .run(getEngine())
         );
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
-    public void fromCsStageShouldPropagateExceptionsWhenFailedLater() throws InterruptedException {
+    public void fromCsNullableStageShouldPropagateExceptionsWhenFailedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStage(future)
+        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStageNullable(future)
             .toList()
             .run(getEngine());
         // Give it some time to not complete
@@ -107,9 +107,9 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     }
 
     @Test
-    public void fromCsStageShouldBeReusable() {
+    public void fromCsNullableStageShouldBeReusable() {
         PublisherBuilder<Integer> publisher =
-            ReactiveStreams.fromCompletionStage(CompletableFuture.completedFuture(10));
+            ReactiveStreams.fromCompletionStageNullable(CompletableFuture.completedFuture(10));
 
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
@@ -123,14 +123,9 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     public class PublisherVerification extends StagePublisherVerification<String> {
         @Override
         public Publisher<String> createPublisher(long elements) {
-            if (elements == 0) {
-                return ReactiveStreams.<String>empty().buildRs(getEngine());
-            }
-            else {
-                return ReactiveStreams.fromCompletionStage(
-                    CompletableFuture.completedFuture("value")
-                ).buildRs(getEngine());
-            }
+            return ReactiveStreams.fromCompletionStageNullable(
+                CompletableFuture.completedFuture(elements == 0 ? null : "value")
+            ).buildRs(getEngine());
         }
 
         @Override

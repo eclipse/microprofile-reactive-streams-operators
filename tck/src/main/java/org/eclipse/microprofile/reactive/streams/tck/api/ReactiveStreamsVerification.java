@@ -231,6 +231,21 @@ public class ReactiveStreamsVerification {
         ReactiveStreams.fromCompletionStage(null);
     }
 
+    @Test
+    public void fromCompletionStageNullable() {
+        CompletableFuture<Integer> future = CompletableFuture.completedFuture(1);
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromCompletionStageNullable(future));
+        assertFalse(graph.hasInlet());
+        assertTrue(graph.hasOutlet());
+        Stage.FromCompletionStageNullable fromCompletionStage = getStage(Stage.FromCompletionStageNullable.class, graph);
+        assertSame(fromCompletionStage.getCompletionStage(), future);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void fromCompletionStageNullableNull() {
+        ReactiveStreams.fromCompletionStageNullable(null);
+    }
+
     private <S extends Stage> S getStage(Class<S> clazz, Graph graph) {
         assertEquals(graph.getStages().size(), 1, "Graph does not have a single stage");
         Stage s = graph.getStages().iterator().next();

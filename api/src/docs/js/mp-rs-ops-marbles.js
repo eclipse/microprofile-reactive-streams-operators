@@ -321,6 +321,15 @@ function createMarbles() {
         ins(none, n(3), term, none, none, )
       ]
     },
+    fromCompletionStageNullable: {
+      op: {
+        fontSize: "12pt"
+      },
+      stages: [
+        op("ReactiveStreams.fromCompletionStageNullable(asyncEcho(null))"),
+        ins(none, term, none, none, )
+      ]
+    },
 
     /**
      * This is the example diagram, with labels explaining what everything is.

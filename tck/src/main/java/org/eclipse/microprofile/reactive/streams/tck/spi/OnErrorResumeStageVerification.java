@@ -71,10 +71,10 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   }
 
   @Test
-  public void onErrorResumeWithPublisherShouldCatchErrorFromSource() {
+  public void onErrorResumeWithRsPublisherShouldCatchErrorFromSource() {
     AtomicReference<Throwable> exception = new AtomicReference<>();
     assertEquals(await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWithPublisher(err -> {
+      .onErrorResumeWithRsPublisher(err -> {
         exception.set(err);
         return ReactiveStreams.of("foo", "bar").buildRs(getEngine());
       })
@@ -122,7 +122,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   }
 
   @Test
-  public void onErrorResumeWithPublisherShouldCatchErrorFromStage() {
+  public void onErrorResumeWithRsPublisherShouldCatchErrorFromStage() {
     AtomicReference<Throwable> exception = new AtomicReference<>();
     assertEquals(await(ReactiveStreams.of("a", "b", "c")
       .map(word -> {
@@ -131,7 +131,7 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
         }
         return word.toUpperCase();
       })
-      .onErrorResumeWithPublisher(err -> {
+      .onErrorResumeWithRsPublisher(err -> {
         exception.set(err);
         return ReactiveStreams.of("foo", "bar").buildRs(getEngine());
       })
@@ -162,9 +162,9 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*failed.*")
-  public void onErrorResumeWithPublisherStageShouldPropagateRuntimeExceptions() {
+  public void onErrorResumeWithRsPublisherStageShouldPropagateRuntimeExceptions() {
     await(ReactiveStreams.failed(new QuietRuntimeException("source-failure"))
-      .onErrorResumeWithPublisher(t -> {
+      .onErrorResumeWithRsPublisher(t -> {
         throw new QuietRuntimeException("failed");
       })
       .toList()
@@ -180,9 +180,9 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
   }
 
   @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
-  public void onErrorResumeWithPublisherShouldBeAbleToInjectAFailure() {
+  public void onErrorResumeWithRsPublisherShouldBeAbleToInjectAFailure() {
     await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWithPublisher(err -> ReactiveStreams.failed(new QuietRuntimeException("boom")).buildRs(getEngine()))
+      .onErrorResumeWithRsPublisher(err -> ReactiveStreams.failed(new QuietRuntimeException("boom")).buildRs(getEngine()))
       .toList()
       .run(getEngine()));
   }

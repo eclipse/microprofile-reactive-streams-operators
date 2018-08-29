@@ -302,11 +302,32 @@ function createMarbles() {
       ]
     },
     concat: {
+      op: {
+        fontSize: "12pt"
+      },
       stages: [
         ins({label: "stream1"}, none, n(3), n(5), term),
         ins({label: "stream2"}, none, none, none, none, n(4), n(2), n(1), term),
-        op(".concat(stream1, stream2)"),
+        op("ReactiveStreams.concat(stream1, stream2)"),
         out(none, n(3), n(5), none, n(4), n(2), n(1), term )
+      ]
+    },
+    fromCompletionStage: {
+      op: {
+        fontSize: "12pt"
+      },
+      stages: [
+        op("ReactiveStreams.fromCompletionStage(asyncEcho(3))"),
+        ins(none, n(3), term, none, none, )
+      ]
+    },
+    fromCompletionStageNullable: {
+      op: {
+        fontSize: "12pt"
+      },
+      stages: [
+        op("ReactiveStreams.fromCompletionStageNullable(asyncEcho(null))"),
+        ins(none, term, none, none, )
       ]
     },
 

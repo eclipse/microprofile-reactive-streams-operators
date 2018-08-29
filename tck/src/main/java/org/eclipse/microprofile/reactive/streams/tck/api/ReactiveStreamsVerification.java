@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -213,6 +214,36 @@ public class ReactiveStreamsVerification {
     @Test(expectedExceptions = NullPointerException.class)
     public void concatSecondNull() {
         ReactiveStreams.concat(ReactiveStreams.empty(), null);
+    }
+
+    @Test
+    public void fromCompletionStage() {
+        CompletableFuture<Integer> future = CompletableFuture.completedFuture(1);
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromCompletionStage(future));
+        assertFalse(graph.hasInlet());
+        assertTrue(graph.hasOutlet());
+        Stage.FromCompletionStage fromCompletionStage = getStage(Stage.FromCompletionStage.class, graph);
+        assertSame(fromCompletionStage.getCompletionStage(), future);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void fromCompletionStageNull() {
+        ReactiveStreams.fromCompletionStage(null);
+    }
+
+    @Test
+    public void fromCompletionStageNullable() {
+        CompletableFuture<Integer> future = CompletableFuture.completedFuture(1);
+        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromCompletionStageNullable(future));
+        assertFalse(graph.hasInlet());
+        assertTrue(graph.hasOutlet());
+        Stage.FromCompletionStageNullable fromCompletionStage = getStage(Stage.FromCompletionStageNullable.class, graph);
+        assertSame(fromCompletionStage.getCompletionStage(), future);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void fromCompletionStageNullableNull() {
+        ReactiveStreams.fromCompletionStageNullable(null);
     }
 
     private <S extends Stage> S getStage(Class<S> clazz, Graph graph) {

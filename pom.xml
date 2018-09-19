@@ -17,13 +17,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.eclipse.microprofile.reactive.streams</groupId>
     <artifactId>microprofile-reactive-streams-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-RC1</version>
     <packaging>pom</packaging>
 
     <name>MicroProfile Reactive Streams Support</name>
@@ -81,7 +80,7 @@
         <connection>scm:git:https://github.com/eclipse/microprofile-reactive-streams.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/microprofile-reactive-streams.git</developerConnection>
         <url>https://github.com/eclipse/microprofile-reactive-streams</url>
-        <tag>HEAD</tag>
+        <tag>1.0-RC1</tag>
     </scm>
 
     <distributionManagement>

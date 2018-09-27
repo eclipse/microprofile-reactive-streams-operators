@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -44,7 +44,7 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
 
     @Test
     public void flatMapIterableStageShouldMapElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .flatMapIterable(n -> Arrays.asList(n, n, n))
             .toList()
             .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
@@ -52,7 +52,7 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
 
     @Test
     public void flatMapIterableStageShouldSupportEmptyMappingOfElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .flatMapIterable(n -> Collections.emptyList())
             .toList()
             .run(getEngine())), Collections.emptyList());
@@ -130,7 +130,7 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void flatMapIterableStageShouldPropagateUpstreamExceptions() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+        await(rs.failed(new QuietRuntimeException("failed"))
             .flatMapIterable(Collections::singletonList)
             .toList()
             .run(getEngine()));
@@ -138,9 +138,9 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
 
     @Test
     public void flatMapIterableBuilderShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> mapper = ReactiveStreams.<Integer>builder().flatMapIterable(i -> Arrays.asList(i, i));
-        assertEquals(await(ReactiveStreams.of(1, 2).via(mapper).toList().run(getEngine())), Arrays.asList(1, 1, 2, 2));
-        assertEquals(await(ReactiveStreams.of(1, 2).via(mapper).toList().run(getEngine())), Arrays.asList(1, 1, 2, 2));
+        ProcessorBuilder<Integer, Integer> mapper = rs.<Integer>builder().flatMapIterable(i -> Arrays.asList(i, i));
+        assertEquals(await(rs.of(1, 2).via(mapper).toList().run(getEngine())), Arrays.asList(1, 1, 2, 2));
+        assertEquals(await(rs.of(1, 2).via(mapper).toList().run(getEngine())), Arrays.asList(1, 1, 2, 2));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -185,12 +185,12 @@ public class FlatMapIterableStageVerification extends AbstractStageVerification 
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().flatMapIterable(Arrays::asList).buildRs(getEngine());
+            return rs.<Integer>builder().flatMapIterable(Arrays::asList).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .flatMapIterable(Arrays::asList).buildRs(getEngine());
         }
 

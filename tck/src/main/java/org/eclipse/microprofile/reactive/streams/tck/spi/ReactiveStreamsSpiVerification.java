@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
+import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.reactivestreams.tck.TestEnvironment;
 
@@ -34,16 +35,23 @@ import java.util.function.Function;
 public class ReactiveStreamsSpiVerification {
 
     private final TestEnvironment testEnvironment;
+    private final ReactiveStreamsFactory rs;
     private final ReactiveStreamsEngine engine;
     private final ScheduledExecutorService executorService;
 
-    public ReactiveStreamsSpiVerification(TestEnvironment testEnvironment, ReactiveStreamsEngine engine, ScheduledExecutorService executorService) {
+    public ReactiveStreamsSpiVerification(TestEnvironment testEnvironment, ReactiveStreamsFactory rs,
+        ReactiveStreamsEngine engine, ScheduledExecutorService executorService) {
         this.testEnvironment = testEnvironment;
+        this.rs = rs;
         this.engine = engine;
         this.executorService = executorService;
     }
 
     class VerificationDeps {
+        ReactiveStreamsFactory rs() {
+            return rs;
+        }
+
         ReactiveStreamsEngine engine() {
             return engine;
         }

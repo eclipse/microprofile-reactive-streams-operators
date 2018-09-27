@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
@@ -45,9 +44,9 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test
     public void concatStageShouldConcatTwoGraphs() {
         assertEquals(await(
-            ReactiveStreams.concat(
-                ReactiveStreams.of(1, 2, 3),
-                ReactiveStreams.of(4, 5, 6)
+            rs.concat(
+                rs.of(1, 2, 3),
+                rs.of(4, 5, 6)
             )
                 .toList()
                 .run(getEngine())
@@ -58,8 +57,8 @@ public class ConcatStageVerification extends AbstractStageVerification {
     public void concatStageShouldCancelSecondStageIfFirstFails() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
 
-        CompletionStage<Void> completion = ReactiveStreams.concat(
-            ReactiveStreams.failed(new QuietRuntimeException("failed")),
+        CompletionStage<Void> completion = rs.concat(
+            rs.failed(new QuietRuntimeException("failed")),
             infiniteStream().onTerminate(() -> cancelled.complete(null))
         )
             .ignore()
@@ -73,7 +72,7 @@ public class ConcatStageVerification extends AbstractStageVerification {
     public void concatStageShouldCancelSecondStageIfFirstCancellationOccursDuringFirst() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
 
-        CompletionStage<List<Integer>> result = ReactiveStreams.concat(
+        CompletionStage<List<Integer>> result = rs.concat(
             infiniteStream(),
             infiniteStream().onTerminate(() -> cancelled.complete(null))
         )
@@ -89,8 +88,8 @@ public class ConcatStageVerification extends AbstractStageVerification {
     public void concatStageShouldCancelSecondStageIfCancellationOccursDuringSecond() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
 
-        CompletionStage<List<Integer>> result = ReactiveStreams.concat(
-            ReactiveStreams.of(1, 2, 3),
+        CompletionStage<List<Integer>> result = rs.concat(
+            rs.of(1, 2, 3),
             infiniteStream().onTerminate(() -> cancelled.complete(null))
         )
             .limit(5)
@@ -104,9 +103,9 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void concatStageShouldPropagateExceptionsFromSecondStage() {
         await(
-            ReactiveStreams.concat(
-                ReactiveStreams.of(1, 2, 3),
-                ReactiveStreams.failed(new QuietRuntimeException("failed"))
+            rs.concat(
+                rs.of(1, 2, 3),
+                rs.failed(new QuietRuntimeException("failed"))
             ).toList().run(getEngine())
         );
     }
@@ -114,9 +113,9 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test
     public void concatStageShouldWorkWithEmptyFirstGraph() {
         assertEquals(await(
-            ReactiveStreams.concat(
-                ReactiveStreams.empty(),
-                ReactiveStreams.of(1, 2, 3)
+            rs.concat(
+                rs.empty(),
+                rs.of(1, 2, 3)
             )
                 .toList()
                 .run(getEngine())
@@ -126,9 +125,9 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test
     public void concatStageShouldWorkWithEmptySecondGraph() {
         assertEquals(await(
-            ReactiveStreams.concat(
-                ReactiveStreams.of(1, 2, 3),
-                ReactiveStreams.empty()
+            rs.concat(
+                rs.of(1, 2, 3),
+                rs.empty()
             )
                 .toList()
                 .run(getEngine())
@@ -138,9 +137,9 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test
     public void concatStageShouldWorkWithBothGraphsEmpty() {
         assertEquals(await(
-            ReactiveStreams.concat(
-                ReactiveStreams.empty(),
-                ReactiveStreams.empty()
+            rs.concat(
+                rs.empty(),
+                rs.empty()
             )
                 .toList()
                 .run(getEngine())
@@ -150,14 +149,14 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test
     public void concatStageShouldSupportNestedConcats() {
         assertEquals(await(
-            ReactiveStreams.concat(
-                ReactiveStreams.concat(
-                    ReactiveStreams.of(1, 2, 3),
-                    ReactiveStreams.of(4, 5, 6)
+            rs.concat(
+                rs.concat(
+                    rs.of(1, 2, 3),
+                    rs.of(4, 5, 6)
                 ),
-                ReactiveStreams.concat(
-                    ReactiveStreams.of(7, 8, 9),
-                    ReactiveStreams.of(10, 11, 12)
+                rs.concat(
+                    rs.of(7, 8, 9),
+                    rs.of(10, 11, 12)
                 )
             )
                 .toList()
@@ -167,9 +166,9 @@ public class ConcatStageVerification extends AbstractStageVerification {
 
     @Test
     public void concatStageBuilderShouldBeReusable() {
-        PublisherBuilder<Integer> concated = ReactiveStreams.concat(
-            ReactiveStreams.of(1, 2, 3),
-            ReactiveStreams.of(4, 5, 6)
+        PublisherBuilder<Integer> concated = rs.concat(
+            rs.of(1, 2, 3),
+            rs.of(4, 5, 6)
         );
         assertEquals(await(concated.toList().run(getEngine())), Arrays.asList(1, 2, 3, 4, 5, 6));
         assertEquals(await(concated.toList().run(getEngine())), Arrays.asList(1, 2, 3, 4, 5, 6));
@@ -185,11 +184,11 @@ public class ConcatStageVerification extends AbstractStageVerification {
         public Publisher<Long> createPublisher(long elements) {
             long toEmitFromFirst = elements / 2;
 
-            return ReactiveStreams.concat(
-                ReactiveStreams.fromIterable(
+            return rs.concat(
+                rs.fromIterable(
                     () -> LongStream.rangeClosed(1, toEmitFromFirst).boxed().iterator()
                 ),
-                ReactiveStreams.fromIterable(
+                rs.fromIterable(
                     () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()
                 )
             ).buildRs(getEngine());

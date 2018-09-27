@@ -19,15 +19,12 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
@@ -37,7 +34,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * A builder for a {@link Publisher}.
@@ -54,17 +50,7 @@ import java.util.stream.Collectors;
  * @param <T> The type of the elements that the publisher emits.
  * @see ReactiveStreams
  */
-public final class PublisherBuilder<T> {
-
-    private final ReactiveStreamsGraphBuilder graphBuilder;
-
-    PublisherBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
-        this.graphBuilder = graphBuilder;
-    }
-
-    PublisherBuilder(Stage stage) {
-        this.graphBuilder = new ReactiveStreamsGraphBuilder(stage);
-    }
+public interface PublisherBuilder<T> {
 
     /**
      * Map the elements emitted by this publisher using the {@code mapper} function.
@@ -75,9 +61,7 @@ public final class PublisherBuilder<T> {
      * @param <R>    The type of elements that the {@code mapper} function emits.
      * @return A new publisher builder that emits the mapped elements.
      */
-    public <R> PublisherBuilder<R> map(Function<? super T, ? extends R> mapper) {
-        return addStage(new Stage.Map(mapper));
-    }
+    <R> PublisherBuilder<R> map(Function<? super T, ? extends R> mapper);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
@@ -89,9 +73,7 @@ public final class PublisherBuilder<T> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
      * the given function is called for each element.
      */
-    public PublisherBuilder<T> peek(Consumer<? super T> consumer) {
-        return addStage(new Stage.Peek(consumer));
-    }
+    PublisherBuilder<T> peek(Consumer<? super T> consumer);
 
     /**
      * Filter elements emitted by this publisher using the given {@link Predicate}.
@@ -104,9 +86,7 @@ public final class PublisherBuilder<T> {
      * @param predicate The predicate to apply to each element.
      * @return A new publisher builder.
      */
-    public PublisherBuilder<T> filter(Predicate<? super T> predicate) {
-        return addStage(new Stage.Filter(predicate));
-    }
+    PublisherBuilder<T> filter(Predicate<? super T> predicate);
 
     /**
      * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
@@ -115,9 +95,7 @@ public final class PublisherBuilder<T> {
      *
      * @return A new publisher builder emitting the distinct elements from this stream.
      */
-    public PublisherBuilder<T> distinct() {
-        return addStage(Stage.Distinct.INSTANCE);
-    }
+    PublisherBuilder<T> distinct();
 
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
@@ -135,9 +113,7 @@ public final class PublisherBuilder<T> {
      * @param <S>    The type of the elements emitted from the new publisher.
      * @return A new publisher builder.
      */
-    public <S> PublisherBuilder<S> flatMap(Function<? super T, PublisherBuilder<? extends S>> mapper) {
-        return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
-    }
+    <S> PublisherBuilder<S> flatMap(Function<? super T, PublisherBuilder<? extends S>> mapper);
 
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
@@ -155,11 +131,7 @@ public final class PublisherBuilder<T> {
      * @param <S>    The type of the elements emitted from the new publisher.
      * @return A new publisher builder.
      */
-    public <S> PublisherBuilder<S> flatMapRsPublisher(Function<? super T, Publisher<? extends S>> mapper) {
-        return addStage(new Stage.FlatMap(mapper
-            .andThen(ReactiveStreams::fromPublisher)
-            .andThen(PublisherBuilder::toGraph)));
-    }
+    <S> PublisherBuilder<S> flatMapRsPublisher(Function<? super T, Publisher<? extends S>> mapper);
 
     /**
      * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
@@ -175,9 +147,7 @@ public final class PublisherBuilder<T> {
      * @param <S>    The type of the elements emitted from the new publisher.
      * @return A new publisher builder.
      */
-    public <S> PublisherBuilder<S> flatMapCompletionStage(Function<? super T, ? extends CompletionStage<? extends S>> mapper) {
-        return addStage(new Stage.FlatMapCompletionStage((Function) mapper));
-    }
+    <S> PublisherBuilder<S> flatMapCompletionStage(Function<? super T, ? extends CompletionStage<? extends S>> mapper);
 
     /**
      * Map the elements to {@link Iterable}'s, and flatten so that the elements contained in each iterable are
@@ -192,9 +162,7 @@ public final class PublisherBuilder<T> {
      * @param <S>    The type of the elements emitted from the new publisher.
      * @return A new publisher builder.
      */
-    public <S> PublisherBuilder<S> flatMapIterable(Function<? super T, ? extends Iterable<? extends S>> mapper) {
-        return addStage(new Stage.FlatMapIterable((Function) mapper));
-    }
+    <S> PublisherBuilder<S> flatMapIterable(Function<? super T, ? extends Iterable<? extends S>> mapper);
 
     /**
      * Truncate this stream, ensuring the stream is no longer than {@code maxSize} elements in length.
@@ -208,9 +176,7 @@ public final class PublisherBuilder<T> {
      * @return A new publisher builder.
      * @throws IllegalArgumentException If {@code maxSize} is less than zero.
      */
-    public PublisherBuilder<T> limit(long maxSize) {
-        return addStage(new Stage.Limit(maxSize));
-    }
+    PublisherBuilder<T> limit(long maxSize);
 
     /**
      * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
@@ -222,9 +188,7 @@ public final class PublisherBuilder<T> {
      * @return A new publisher builder.
      * @throws IllegalArgumentException If {@code n} is less than zero.
      */
-    public PublisherBuilder<T> skip(long n) {
-        return addStage(new Stage.Skip(n));
-    }
+    PublisherBuilder<T> skip(long n);
 
     /**
      * Take the longest prefix of elements from this stream that satisfy the given {@code predicate}.
@@ -236,9 +200,7 @@ public final class PublisherBuilder<T> {
      * @param predicate The predicate.
      * @return A new publisher builder.
      */
-    public PublisherBuilder<T> takeWhile(Predicate<? super T> predicate) {
-        return addStage(new Stage.TakeWhile(predicate));
-    }
+    PublisherBuilder<T> takeWhile(Predicate<? super T> predicate);
 
     /**
      * Drop the longest prefix of elements from this stream that satisfy the given {@code predicate}.
@@ -252,9 +214,7 @@ public final class PublisherBuilder<T> {
      * @param predicate The predicate.
      * @return A new publisher builder.
      */
-    public PublisherBuilder<T> dropWhile(Predicate<? super T> predicate) {
-        return addStage(new Stage.DropWhile(predicate));
-    }
+    PublisherBuilder<T> dropWhile(Predicate<? super T> predicate);
 
     /**
      * Performs an action for each element on this stream.
@@ -267,15 +227,7 @@ public final class PublisherBuilder<T> {
      * @param action The action.
      * @return A new completion builder.
      */
-    public CompletionRunner<Void> forEach(Consumer<? super T> action) {
-        Objects.requireNonNull(action, "Action must not be null");
-        return collect(Collector.<T, Void, Void>of(
-            () -> null,
-            (n, t) -> action.accept(t),
-            (v1, v2) -> null,
-            v -> null
-        ));
-    }
+    CompletionRunner<Void> forEach(Consumer<? super T> action);
 
     /**
      * Ignores each element of this stream.
@@ -288,10 +240,7 @@ public final class PublisherBuilder<T> {
      *
      * @return A new completion builder.
      */
-    public CompletionRunner<Void> ignore() {
-        return forEach(r -> {
-        });
-    }
+    CompletionRunner<Void> ignore();
 
     /**
      * Cancels the stream as soon as it starts.
@@ -300,9 +249,7 @@ public final class PublisherBuilder<T> {
      *
      * @return A new completion builder.
      */
-    public CompletionRunner<Void> cancel() {
-        return addTerminalStage(Stage.Cancel.INSTANCE);
-    }
+    CompletionRunner<Void> cancel();
 
     /**
      * Perform a reduction on the elements of this stream, using the provided identity value and the accumulation
@@ -316,9 +263,7 @@ public final class PublisherBuilder<T> {
      * @param accumulator The accumulator function.
      * @return A new completion builder.
      */
-    public CompletionRunner<T> reduce(T identity, BinaryOperator<T> accumulator) {
-        return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator)));
-    }
+    CompletionRunner<T> reduce(T identity, BinaryOperator<T> accumulator);
 
     /**
      * Perform a reduction on the elements of this stream, using provided the accumulation function.
@@ -331,9 +276,7 @@ public final class PublisherBuilder<T> {
      * @param accumulator The accumulator function.
      * @return A new completion builder.
      */
-    public CompletionRunner<Optional<T>> reduce(BinaryOperator<T> accumulator) {
-        return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
-    }
+    CompletionRunner<Optional<T>> reduce(BinaryOperator<T> accumulator);
 
     /**
      * Find the first element emitted by the {@link Publisher}, and return it in a
@@ -345,9 +288,7 @@ public final class PublisherBuilder<T> {
      *
      * @return A {@link CompletionRunner} that emits the element when found.
      */
-    public CompletionRunner<Optional<T>> findFirst() {
-        return addTerminalStage(Stage.FindFirst.INSTANCE);
-    }
+    CompletionRunner<Optional<T>> findFirst();
 
     /**
      * Collect the elements emitted by this publisher builder using the given {@link Collector}.
@@ -360,9 +301,7 @@ public final class PublisherBuilder<T> {
      * @param <A>       The accumulator type.
      * @return A {@link CompletionRunner} that emits the collected result.
      */
-    public <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector) {
-        return addTerminalStage(new Stage.Collect(collector));
-    }
+    <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector);
 
     /**
      * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
@@ -379,10 +318,7 @@ public final class PublisherBuilder<T> {
      * @param <R>         The result of the collector.
      * @return A {@link CompletionRunner} that emits the collected result.
      */
-    public <R> CompletionRunner<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator) {
-        // The combiner is not used, so the used, but should not be null
-        return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
-    }
+    <R> CompletionRunner<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator);
 
     /**
      * Collect the elements emitted by this publisher builder into a {@link List}
@@ -391,9 +327,7 @@ public final class PublisherBuilder<T> {
      *
      * @return A {@link CompletionRunner} that emits the list.
      */
-    public CompletionRunner<List<T>> toList() {
-        return collect(Collectors.toList());
-    }
+    CompletionRunner<List<T>> toList();
 
     /**
      * Connect the outlet of the {@link Publisher} built by this builder to the given {@link Subscriber}.
@@ -401,9 +335,7 @@ public final class PublisherBuilder<T> {
      * @param subscriber The subscriber to connect.
      * @return A {@link CompletionRunner} that completes when the stream completes.
      */
-    public CompletionRunner<Void> to(Subscriber<T> subscriber) {
-        return addTerminalStage(new Stage.SubscriberStage(subscriber));
-    }
+    CompletionRunner<Void> to(Subscriber<T> subscriber);
 
     /**
      * Connect the outlet of this publisher builder to the given {@link SubscriberBuilder} graph.
@@ -411,30 +343,23 @@ public final class PublisherBuilder<T> {
      * @param subscriber The subscriber builder to connect.
      * @return A {@link CompletionRunner} that completes when the stream completes.
      */
-    public <R> CompletionRunner<R> to(SubscriberBuilder<T, R> subscriber) {
-        Objects.requireNonNull(subscriber, "Subscriber must not be null");
-        return addTerminalStage(new InternalStages.Nested(subscriber.getGraphBuilder()));
-    }
+    <R> CompletionRunner<R> to(SubscriberBuilder<T, R> subscriber);
 
     /**
-     * Connect the outlet of the {@link Publisher} built by this builder to the given {@link Processor}.
+     * Connect the outlet of the {@link Publisher} built by this builder to the given {@link ProcessorBuilder}.
      *
      * @param processor The processor to connect.
      * @return A {@link PublisherBuilder} that represents the passed in processors outlet.
      */
-    public <R> PublisherBuilder<R> via(ProcessorBuilder<T, R> processor) {
-        return addStage(new InternalStages.Nested(processor.getGraphBuilder()));
-    }
+    <R> PublisherBuilder<R> via(ProcessorBuilder<T, R> processor);
 
     /**
-     * Connect the outlet of this publisher builder to the given {@link ProcessorBuilder} graph.
+     * Connect the outlet of this publisher builder to the given {@link Processor} graph.
      *
      * @param processor The processor builder to connect.
      * @return A {@link PublisherBuilder} that represents the passed in processor builders outlet.
      */
-    public <R> PublisherBuilder<R> via(Processor<T, R> processor) {
-        return addStage(new Stage.ProcessorStage(processor));
-    }
+    <R> PublisherBuilder<R> via(Processor<T, R> processor);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action if this
@@ -446,9 +371,7 @@ public final class PublisherBuilder<T> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. If the
      * stream conveys a failure, the given error handler is called.
      */
-    public PublisherBuilder<T> onError(Consumer<Throwable> errorHandler) {
-        return addStage(new Stage.OnError(errorHandler));
-    }
+    PublisherBuilder<T> onError(Consumer<Throwable> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
@@ -467,9 +390,7 @@ public final class PublisherBuilder<T> {
      *                     The function must not return {@code null}
      * @return The new publisher
      */
-    public PublisherBuilder<T> onErrorResume(Function<Throwable, T> errorHandler) {
-        return addStage(new Stage.OnErrorResume(errorHandler));
-    }
+    PublisherBuilder<T> onErrorResume(Function<Throwable, T> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
@@ -490,9 +411,7 @@ public final class PublisherBuilder<T> {
      *                     The function must not return {@code null}
      * @return The new publisher
      */
-    public PublisherBuilder<T> onErrorResumeWith(Function<Throwable, PublisherBuilder<T>> errorHandler) {
-        return addStage(new Stage.OnErrorResumeWith(errorHandler.andThen(PublisherBuilder::toGraph)));
-    }
+    PublisherBuilder<T> onErrorResumeWith(Function<Throwable, PublisherBuilder<T>> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
@@ -513,13 +432,7 @@ public final class PublisherBuilder<T> {
      *                     The function must not return {@code null}
      * @return The new publisher
      */
-    public <S> PublisherBuilder<S> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<? extends S>> errorHandler) {
-        return addStage(new Stage.OnErrorResumeWith(
-            errorHandler
-                .andThen(ReactiveStreams::fromPublisher)
-                .andThen(PublisherBuilder::toGraph))
-        );
-    }
+    <S> PublisherBuilder<S> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<? extends S>> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
@@ -533,9 +446,7 @@ public final class PublisherBuilder<T> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
      * action is called when the stream completes or fails.
      */
-    public PublisherBuilder<T> onTerminate(Runnable action) {
-        return addStage(new Stage.OnTerminate(action));
-    }
+    PublisherBuilder<T> onTerminate(Runnable action);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
@@ -547,22 +458,14 @@ public final class PublisherBuilder<T> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
      * action is called when the stream completes.
      */
-    public PublisherBuilder<T> onComplete(Runnable action) {
-        return addStage(new Stage.OnComplete(action));
-    }
-
-    Graph toGraph() {
-        return graphBuilder.build(false, true);
-    }
+    PublisherBuilder<T> onComplete(Runnable action);
 
     /**
      * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
      *
      * @return A {@link Processor} that will run this stream.
      */
-    public Publisher<T> buildRs() {
-        return buildRs(ReactiveStreamsGraphBuilder.defaultEngine());
-    }
+    Publisher<T> buildRs();
 
     /**
      * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
@@ -570,16 +473,5 @@ public final class PublisherBuilder<T> {
      * @param engine The engine to run the stream with.
      * @return A {@link Publisher} that will run this stream.
      */
-    public Publisher<T> buildRs(ReactiveStreamsEngine engine) {
-        Objects.requireNonNull(engine, "Engine must not be null");
-        return engine.buildPublisher(toGraph());
-    }
-
-    private <R> PublisherBuilder<R> addStage(Stage stage) {
-        return new PublisherBuilder<>(graphBuilder.addStage(stage));
-    }
-
-    private <R> CompletionRunner<R> addTerminalStage(Stage stage) {
-        return new CompletionRunner<>(graphBuilder.addStage(stage));
-    }
+    Publisher<T> buildRs(ReactiveStreamsEngine engine);
 }

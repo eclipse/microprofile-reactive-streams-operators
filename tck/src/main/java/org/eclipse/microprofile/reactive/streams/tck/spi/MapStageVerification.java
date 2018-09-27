@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -42,7 +42,7 @@ public class MapStageVerification extends AbstractStageVerification {
 
     @Test
     public void mapStageShouldMapElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .map(Object::toString)
             .toList()
             .run(getEngine())), Arrays.asList("1", "2", "3"));
@@ -64,7 +64,7 @@ public class MapStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void mapStageShouldPropagateUpstreamExceptions() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+        await(rs.failed(new QuietRuntimeException("failed"))
             .map(Function.identity())
             .toList()
             .run(getEngine()));
@@ -82,9 +82,9 @@ public class MapStageVerification extends AbstractStageVerification {
 
     @Test
     public void mapStageBuilderShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> map = ReactiveStreams.<Integer>builder().map(i -> i + 1);
-        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(map).toList().run(getEngine())), Arrays.asList(2, 3, 4));
-        assertEquals(await(ReactiveStreams.of(4, 5, 6).via(map).toList().run(getEngine())), Arrays.asList(5, 6, 7));
+        ProcessorBuilder<Integer, Integer> map = rs.<Integer>builder().map(i -> i + 1);
+        assertEquals(await(rs.of(1, 2, 3).via(map).toList().run(getEngine())), Arrays.asList(2, 3, 4));
+        assertEquals(await(rs.of(4, 5, 6).via(map).toList().run(getEngine())), Arrays.asList(5, 6, 7));
     }
 
     @Override
@@ -98,12 +98,12 @@ public class MapStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().map(Function.identity()).buildRs(getEngine());
+            return rs.<Integer>builder().map(Function.identity()).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .map(Function.identity()).buildRs(getEngine());
         }
 

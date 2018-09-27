@@ -23,8 +23,6 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
-import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -61,26 +59,6 @@ public interface Stage {
     }
 
     /**
-     * Convenience interface for inlet stages.
-     */
-    interface Inlet extends Stage {
-        @Override
-        default boolean hasInlet() {
-            return true;
-        }
-    }
-
-    /**
-     * Convenience interface for outlet stages.
-     */
-    interface Outlet extends Stage {
-        @Override
-        default boolean hasOutlet() {
-            return true;
-        }
-    }
-
-    /**
      * A map stage.
      * <p>
      * The given mapper function must be invoked on each element consumed, and the output of the function must be
@@ -90,21 +68,13 @@ public interface Stage {
      * must be cancelled. Any subsequent elements received from upstream before the cancellation signal is handled
      * must be dropped.
      */
-    final class Map implements Inlet, Outlet {
-        private final Function<?, ?> mapper;
-
-        public Map(Function<?, ?> mapper) {
-            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
-        }
-
+    interface Map extends Stage {
         /**
          * The mapper function.
          *
          * @return The mapper function.
          */
-        public Function<?, ?> getMapper() {
-            return mapper;
-        }
+        Function<?, ?> getMapper();
     }
 
     /**
@@ -117,21 +87,13 @@ public interface Stage {
      * must be cancelled. Any subsequent elements received from upstream before the cancellation signal is handled
      * must be dropped.
      */
-    final class Peek implements Inlet, Outlet {
-        private final Consumer<?> consumer;
-
-        public Peek(Consumer<?> consumer) {
-            this.consumer = Objects.requireNonNull(consumer, "Consumer must not be null");
-        }
-
+    interface Peek extends Stage {
         /**
          * The consumer function.
          *
          * @return The consumer function.
          */
-        public Consumer<?> getConsumer() {
-            return consumer;
-        }
+        Consumer<?> getConsumer();
     }
 
     /**
@@ -144,21 +106,13 @@ public interface Stage {
      * must be cancelled. Any subsequent elements received from upstream before the cancellation signal is handled
      * must be dropped.
      */
-    final class Filter implements Inlet, Outlet {
-        private final Predicate<?> predicate;
-
-        public Filter(Predicate<?> predicate) {
-            this.predicate = Objects.requireNonNull(predicate, "Predicate must not be null");
-        }
-
+    interface Filter extends Stage {
         /**
          * The predicate.
          *
          * @return The predicate.
          */
-        public Predicate<?> getPredicate() {
-            return predicate;
-        }
+        Predicate<?> getPredicate();
     }
 
     /**
@@ -176,21 +130,13 @@ public interface Stage {
      * must be cancelled. Any subsequent elements received from upstream before the cancellation signal is handled
      * must be dropped.
      */
-    final class DropWhile implements Inlet, Outlet {
-        private final Predicate<?> predicate;
-
-        public DropWhile(Predicate<?> predicate) {
-            this.predicate = Objects.requireNonNull(predicate, "Predicate must not be null");
-        }
-
+    interface DropWhile extends Stage {
         /**
          * The predicate.
          *
          * @return The predicate.
          */
-        public Predicate<?> getPredicate() {
-            return predicate;
-        }
+        Predicate<?> getPredicate();
     }
 
     /**
@@ -203,30 +149,13 @@ public interface Stage {
      * If less than {@code skip} elements are emitted before termination, then the termination must be propagated
      * downstream as normal.
      */
-    final class Skip implements Inlet, Outlet {
-        private final long skip;
-
-        /**
-         * Create a skip stage.
-         *
-         * @param skip The number of elements to skip.
-         * @throws IllegalArgumentException If the number of elements is less than zero.
-         */
-        public Skip(long skip) {
-            if (skip < 0) {
-                throw new IllegalArgumentException("Cannot skip less than zero elements");
-            }
-            this.skip = skip;
-        }
-
+    interface Skip extends Stage {
         /**
          * The number of elements to skip.
          *
          * @return The number of elements to skip.
          */
-        public long getSkip() {
-            return skip;
-        }
+        long getSkip();
     }
 
     /**
@@ -239,30 +168,13 @@ public interface Stage {
      * If less than {@code limit} elements are received before termination, then the termination must be propagated
      * downstream as normal.
      */
-    final class Limit implements Inlet, Outlet {
-        private final long limit;
-
-        /**
-         * Create a limit stage.
-         *
-         * @param limit The number of elements to limit the stream to.
-         * @throws IllegalArgumentException If the number of elements is less than zero.
-         */
-        public Limit(long limit) {
-            if (limit < 0) {
-                throw new IllegalArgumentException("Cannot limit a stream to less than zero elements.");
-            }
-            this.limit = limit;
-        }
-
+    interface Limit extends Stage {
         /**
          * The limit.
          *
          * @return The limit.
          */
-        public long getLimit() {
-            return limit;
-        }
+        long getLimit();
     }
 
     /**
@@ -272,19 +184,8 @@ public interface Stage {
      * Any {@link RuntimeException} thrown by the {@code equals} or {@code hashCode} methods of elements must be
      * propagated downstream as an error, and upstream must be cancelled.
      */
-    final class Distinct implements Inlet, Outlet {
-
-        /**
-         * The singleton instance of the distinct stage. Implementations may use reference equality to test for this
-         * stage.
-         */
-        public static final Distinct INSTANCE = new Distinct();
-
-        private Distinct() {
-            // Avoid direct instantiation.
-        }
+    interface Distinct extends Stage {
     }
-
 
     /**
      * A take while stage.
@@ -300,21 +201,13 @@ public interface Stage {
      * must be cancelled. Any subsequent elements received from upstream before the cancellation signal is handled
      * must be dropped.
      */
-    final class TakeWhile implements Inlet, Outlet {
-        private final Predicate<?> predicate;
-
-        public TakeWhile(Predicate<?> predicate) {
-            this.predicate = Objects.requireNonNull(predicate, "Predicate must not be null");
-        }
-
+    interface TakeWhile extends Stage {
         /**
          * The predicate.
          *
          * @return The predicate.
          */
-        public Predicate<?> getPredicate() {
-            return predicate;
-        }
+        Predicate<?> getPredicate();
     }
 
     /**
@@ -323,21 +216,13 @@ public interface Stage {
      * The given {@code publisher} must be subscribed to whatever subscriber is provided to this graph, via any
      * other subsequent stages.
      */
-    final class PublisherStage implements Outlet {
-        private final Publisher<?> publisher;
-
-        public PublisherStage(Publisher<?> publisher) {
-            this.publisher = Objects.requireNonNull(publisher, "Publisher must not be null");
-        }
-
+    interface PublisherStage extends Stage {
         /**
          * The publisher.
          *
          * @return The publisher.
          */
-        public Publisher<?> getRsPublisher() {
-            return publisher;
-        }
+        Publisher<?> getRsPublisher();
     }
 
     /**
@@ -349,27 +234,13 @@ public interface Stage {
      * Any exceptions thrown by the iterator must be propagated downstream, or by the invocation of the
      * {@code iterator} method, must be propagated downstream.
      */
-    final class Of implements Outlet {
-        /**
-         * The singleton instance of the stage used in the case of an empty list. Implementations may use reference
-         * equality to test for this stage.
-         */
-        public static final Of EMPTY = new Of(Collections.emptyList());
-
-        private final Iterable<?> elements;
-
-        public Of(Iterable<?> elements) {
-            this.elements = Objects.requireNonNull(elements, "Iterable must not be null");
-        }
-
+    interface Of extends Stage {
         /**
          * The elements to emit.
          *
          * @return The elements to emit.
          */
-        public Iterable<?> getElements() {
-            return elements;
-        }
+        Iterable<?> getElements();
     }
 
     /**
@@ -377,21 +248,13 @@ public interface Stage {
      * <p>
      * When built, must connect upstream of the graph to the inlet of this processor, and downstream to the outlet.
      */
-    final class ProcessorStage implements Inlet, Outlet {
-        private final Processor<?, ?> processor;
-
-        public ProcessorStage(Processor<?, ?> processor) {
-            this.processor = Objects.requireNonNull(processor, "Processor must not be null");
-        }
-
+    interface ProcessorStage extends Stage {
         /**
          * The processor.
          *
          * @return The processor.
          */
-        public Processor<?, ?> getRsProcessor() {
-            return processor;
-        }
+        Processor<?, ?> getRsProcessor();
     }
 
     /**
@@ -404,16 +267,7 @@ public interface Stage {
      * If an error is emitted before the first element is encountered, the stream must redeem the completion stage with
      * that error.
      */
-    final class FindFirst implements Inlet {
-
-        /**
-         * The singleton instance of the find first stage. Implementations may use reference equality to test for this
-         * stage.
-         */
-        public static final FindFirst INSTANCE = new FindFirst();
-
-        private FindFirst() {
-        }
+    interface FindFirst extends Stage {
     }
 
     /**
@@ -424,21 +278,13 @@ public interface Stage {
      * <p>
      * Implementing this will typically require inserting a handler before the subscriber that listens for errors.
      */
-    final class SubscriberStage implements Inlet {
-        private final Subscriber<?> subscriber;
-
-        public SubscriberStage(Subscriber<?> subscriber) {
-            this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
-        }
-
+    interface SubscriberStage extends Stage {
         /**
          * The subscriber.
          *
          * @return The subscriber.
          */
-        public Subscriber<?> getRsSubscriber() {
-            return subscriber;
-        }
+        Subscriber<?> getRsSubscriber();
     }
 
     /**
@@ -452,21 +298,13 @@ public interface Stage {
      * If the collector throws an exception, the upstream must be cancelled, and the {@link CompletionStage} must be
      * redeemed with that error.
      */
-    final class Collect implements Inlet {
-        private final Collector<?, ?, ?> collector;
-
-        public Collect(Collector<?, ?, ?> collector) {
-            this.collector = Objects.requireNonNull(collector, "Collector must not be null");
-        }
-
+    interface Collect extends Stage {
         /**
          * The collector.
          *
          * @return The collector.
          */
-        public Collector<?, ?, ?> getCollector() {
-            return collector;
-        }
+        Collector<?, ?, ?> getCollector();
     }
 
     /**
@@ -495,21 +333,13 @@ public interface Stage {
      * error downstream. For the purpose of failing fast, so that network failures can be detected and handled, it
      * is recommended, but not required, that the inner publisher is cancelled as soon as possible.
      */
-    final class FlatMap implements Inlet, Outlet {
-        private final Function<?, Graph> mapper;
-
-        public FlatMap(Function<?, Graph> mapper) {
-            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
-        }
-
+    interface FlatMap extends Stage {
         /**
          * The mapper function.
          *
          * @return The mapper function.
          */
-        public Function<?, Graph> getMapper() {
-            return mapper;
-        }
+        Function<?, Graph> getMapper();
     }
 
     /**
@@ -539,21 +369,13 @@ public interface Stage {
      * required, that the failure is propagated downstream as soon as possible, and the result of the
      * {@code CompletionStage} ignored.
      */
-    final class FlatMapCompletionStage implements Inlet, Outlet {
-        private final Function<?, CompletionStage<?>> mapper;
-
-        public FlatMapCompletionStage(Function<?, CompletionStage<?>> mapper) {
-            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
-        }
-
+    interface FlatMapCompletionStage extends Stage {
         /**
          * The mapper function.
          *
          * @return The mapper function.
          */
-        public Function<?, CompletionStage<?>> getMapper() {
-            return mapper;
-        }
+        Function<?, CompletionStage<?>> getMapper();
     }
 
     /**
@@ -579,21 +401,13 @@ public interface Stage {
      * it is recommended, but not required, that the failure is propagated downstream as soon as possible, and the
      * iterator not be run through to completion.
      */
-    final class FlatMapIterable implements Inlet, Outlet {
-        private final Function<?, Iterable<?>> mapper;
-
-        public FlatMapIterable(Function<?, Iterable<?>> mapper) {
-            this.mapper = Objects.requireNonNull(mapper, "Mapper function must not be null");
-        }
-
+    interface FlatMapIterable extends Stage {
         /**
          * The mapper function.
          *
          * @return The mapper function.
          */
-        public Function<?, Iterable<?>> getMapper() {
-            return mapper;
-        }
+        Function<?, Iterable<?>> getMapper();
     }
 
     /**
@@ -605,22 +419,13 @@ public interface Stage {
      * Any {@link RuntimeException} thrown by the function must be propagated downstream as an error, replacing the
      * exception that the consumer was handling.
      */
-    final class OnError implements Inlet, Outlet {
-        private final Consumer<Throwable> consumer;
-
-
-        public OnError(Consumer<Throwable> consumer) {
-            this.consumer = Objects.requireNonNull(consumer, "Consumer must not be null");
-        }
-
+    interface OnError extends Stage {
         /**
          * The error handler.
          *
          * @return the error handler.
          */
-        public Consumer<Throwable> getConsumer() {
-            return consumer;
-        }
+        Consumer<Throwable> getConsumer();
     }
 
     /**
@@ -638,21 +443,13 @@ public interface Stage {
      * handling. If the action is invoked as the result of downstream cancellation, then any exceptions thrown by the
      * function must be ignored, and cancellation must be propagated upstream.
      */
-    final class OnTerminate implements Inlet, Outlet {
-        private final Runnable action;
-
-        public OnTerminate(Runnable runnable) {
-            this.action = Objects.requireNonNull(runnable, "Action must not be null");
-        }
-
+    interface OnTerminate extends Stage {
         /**
          * The action to execute.
          *
          * @return the action to execute.
          */
-        public Runnable getAction() {
-            return action;
-        }
+        Runnable getAction();
     }
 
     /**
@@ -664,21 +461,13 @@ public interface Stage {
      * <p>
      * Any {@link RuntimeException} thrown by this function must be propagated downstream as an error.
      */
-    final class OnComplete implements Inlet, Outlet {
-        private final Runnable action;
-
-        public OnComplete(Runnable runnable) {
-            this.action = Objects.requireNonNull(runnable, "Action must not be null");
-        }
-
+    interface OnComplete extends Stage {
         /**
          * The action to execute.
          *
          * @return the action to execute.
          */
-        public Runnable getAction() {
-            return action;
-        }
+        Runnable getAction();
     }
 
     /**
@@ -696,22 +485,13 @@ public interface Stage {
      * Any {@link RuntimeException} thrown by the function must be propagated downstream as an error, replacing the
      * exception that the function was handling.
      */
-    final class OnErrorResume implements Inlet, Outlet {
-        private final Function<Throwable, ?> function;
-
-
-        public OnErrorResume(Function<Throwable, ?>  function) {
-            this.function = Objects.requireNonNull(function, "Resume function must not be null");
-        }
-
+    interface OnErrorResume extends Stage {
         /**
          * The error handler.
          *
          * @return  the error handler.
          */
-        public Function<Throwable, ?> getFunction() {
-            return function;
-        }
+        Function<Throwable, ?> getFunction();
     }
 
     /**
@@ -723,7 +503,7 @@ public interface Stage {
      * subscriber, the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminates
      * without invoking any more of its subscriber's methods. This operator changes this behavior. If the current
      * stream encounters an error, instead of invoking its subscriber's <code>onError</code> method, it will instead
-     * relinquish control to the {@link org.eclipse.microprofile.reactive.streams.PublisherBuilder} returned from
+     * relinquish control to the {@code PublisherBuilder} returned from
      * given function. In such a case, because no publisher necessarily invokes <code>onError</code>, the subscriber
      * may never know that an error happened.
      * <p>
@@ -734,22 +514,13 @@ public interface Stage {
      * Any {@link RuntimeException} thrown by the function must be propagated downstream as an error, replacing the
      * exception that the function was handling.
      */
-    final class OnErrorResumeWith implements Inlet, Outlet {
-        private final Function<Throwable, Graph> function;
-
-
-        public OnErrorResumeWith(Function<Throwable, Graph> function) {
-            this.function = Objects.requireNonNull(function, "Resume with function must be empty");
-        }
-
+    interface OnErrorResumeWith extends Stage {
         /**
          * The error handler.
          *
          * @return  the error handler.
          */
-        public Function<Throwable, Graph> getFunction() {
-            return function;
-        }
+        Function<Throwable, Graph> getFunction();
     }
 
     /**
@@ -757,16 +528,12 @@ public interface Stage {
      * <p>
      * When built, this must produce a publisher that immediately fails the stream with the passed in error.
      */
-    final class Failed implements Outlet {
-        private final Throwable error;
-
-        public Failed(Throwable error) {
-            this.error = Objects.requireNonNull(error, "Exception must not be null");
-        }
-
-        public Throwable getError() {
-            return error;
-        }
+    interface Failed extends Stage {
+        /**
+         * The error.
+         * @return the error.
+         */
+        Throwable getError();
     }
 
     /**
@@ -782,30 +549,20 @@ public interface Stage {
      * error, or due to a cancellation signal from downstream, then the second graph must be subscribed to and cancelled.
      * This is to ensure that any hot publishers holding onto resources that may be backing the graphs are cleaned up.
      */
-    final class Concat implements Outlet {
-        private final Graph first;
-        private final Graph second;
+    interface Concat extends Stage {
+        /**
+         * The first graph in the stream.
+         *
+         * @return The first graph.
+         */
+        Graph getFirst();
 
-        public Concat(Graph first, Graph second) {
-            this.first = validate(first);
-            this.second = validate(second);
-        }
-
-        private static Graph validate(Graph graph) {
-            if (graph.hasInlet() || !graph.hasOutlet()) {
-                throw new IllegalArgumentException(
-                    "Concatenated graphs must have an outlet, but no inlet, but this graph does not: " + graph);
-            }
-            return graph;
-        }
-
-        public Graph getFirst() {
-            return first;
-        }
-
-        public Graph getSecond() {
-            return second;
-        }
+        /**
+         * The second graph in the stream.
+         *
+         * @return The second graph.
+         */
+        Graph getSecond();
     }
 
     /**
@@ -815,16 +572,7 @@ public interface Stage {
      * <p>
      * The {@link CompletionStage} produced by this stage must also be redeemed immediately with {@code null}.
      */
-    final class Cancel implements Inlet {
-
-        /**
-         * The singleton instance of the cancel stage. Implementations may use reference equality to test for this
-         * stage.
-         */
-        public static final Cancel INSTANCE = new Cancel();
-
-        private Cancel() {
-        }
+    interface Cancel extends Stage {
     }
 
     /**
@@ -839,16 +587,13 @@ public interface Stage {
      * must do nothing. It must not cancel the {@code CompletionStage} (since {@code CompletionStage} offers no API
      * for cancellation), and it must not emit any further signals when the {@code CompletionStage} is redeemed.
      */
-    final class FromCompletionStage implements Outlet {
-        private final CompletionStage<?> completionStage;
-
-        public FromCompletionStage(CompletionStage<?> completionStage) {
-            this.completionStage = Objects.requireNonNull(completionStage, "CompletionStage must not be null");
-        }
-
-        public CompletionStage<?> getCompletionStage() {
-            return completionStage;
-        }
+    interface FromCompletionStage extends Stage {
+        /**
+         * Get the {@link CompletionStage}.
+         *
+         * @return The completion stage.
+         */
+        CompletionStage<?> getCompletionStage();
     }
 
     /**
@@ -862,16 +607,13 @@ public interface Stage {
      * must do nothing. It must not cancel the {@code CompletionStage} (since {@code CompletionStage} offers no API
      * for cancellation), and it must not emit any further signals when the {@code CompletionStage} is redeemed.
      */
-    final class FromCompletionStageNullable implements Outlet {
-        private final CompletionStage<?> completionStage;
-
-        public FromCompletionStageNullable(CompletionStage<?> completionStage) {
-            this.completionStage = Objects.requireNonNull(completionStage, "CompletionStage must not be null");
-        }
-
-        public CompletionStage<?> getCompletionStage() {
-            return completionStage;
-        }
+    interface FromCompletionStageNullable extends Stage {
+        /**
+         * Get the {@link CompletionStage}.
+         *
+         * @return The completion stage.
+         */
+        CompletionStage<?> getCompletionStage();
     }
 
 }

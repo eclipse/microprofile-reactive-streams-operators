@@ -31,31 +31,12 @@ import java.util.concurrent.CompletionStage;
  * The result is provided through a {@link CompletionStage}, which is redeemed when the subscriber receives a
  * completion or error signal, or otherwise cancels the stream.
  * <p>
- * The way to instantiate one of these is using the {@link CompletionSubscriber#of} factory method.
+ * The best way to instantiate one of these is using the {@link CompletionSubscriber#of} factory method.
  *
  * @param <T> The type of the elements that the subscriber consumes.
  * @param <R> The type of the result that the subscriber emits.
  */
-public final class CompletionSubscriber<T, R> implements Subscriber<T> {
-
-    private final Subscriber<T> subscriber;
-    private final CompletionStage<R> completion;
-
-    private CompletionSubscriber(Subscriber<T> subscriber, CompletionStage<R> completion) {
-        this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
-        this.completion = Objects.requireNonNull(completion, "CompletionStage must not be null");
-    }
-
-    /**
-     * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
-     *
-     * @param subscriber The subscriber.
-     * @param completion The completion stage.
-     * @return A completion subscriber.
-     */
-    public static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
-        return new CompletionSubscriber<>(subscriber, completion);
-    }
+public interface CompletionSubscriber<T, R> extends Subscriber<T> {
 
     /**
      * Get the completion stage.
@@ -66,50 +47,79 @@ public final class CompletionSubscriber<T, R> implements Subscriber<T> {
      *
      * @return The completion stage.
      */
-    public CompletionStage<R> getCompletion() {
-        return completion;
-    }
+    CompletionStage<R> getCompletion();
 
-    @Override
-    public void onSubscribe(Subscription subscription) {
-        subscriber.onSubscribe(subscription);
-    }
+    /**
+     * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
+     *
+     * @param subscriber The subscriber.
+     * @param completion The completion stage.
+     * @return A completion subscriber.
+     */
+    static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
 
-    @Override
-    public void onNext(T t) {
-        subscriber.onNext(t);
-    }
+        // Use a named local class rather than anonymous class for better debugging/stack traces etc
+        class DefaultCompletionSubscriber implements CompletionSubscriber<T, R>,
+            org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber<T, R> {
 
-    @Override
-    public void onError(Throwable throwable) {
-        subscriber.onError(throwable);
-    }
+            private final Subscriber<T> subscriber;
+            private final CompletionStage<R> completion;
 
-    @Override
-    public void onComplete() {
-        subscriber.onComplete();
-    }
+            private DefaultCompletionSubscriber(Subscriber<T> subscriber, CompletionStage<R> completion) {
+                this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
+                this.completion = Objects.requireNonNull(completion, "CompletionStage must not be null");
+            }
 
-    @Override
-    public String toString() {
-        return "CompletionSubscriber(" + subscriber + ", " + completion + ")";
-    }
+            @Override
+            public CompletionStage<R> getCompletion() {
+                return completion;
+            }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+            @Override
+            public void onSubscribe(Subscription subscription) {
+                subscriber.onSubscribe(subscription);
+            }
+
+            @Override
+            public void onNext(T t) {
+                subscriber.onNext(t);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                subscriber.onError(throwable);
+            }
+
+            @Override
+            public void onComplete() {
+                subscriber.onComplete();
+            }
+
+            @Override
+            public String toString() {
+                return "CompletionSubscriber(" + subscriber + ", " + completion + ")";
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
+                DefaultCompletionSubscriber that = (DefaultCompletionSubscriber) o;
+                return Objects.equals(subscriber, that.subscriber) &&
+                    Objects.equals(completion, that.completion);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(subscriber, completion);
+            }
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CompletionSubscriber<?, ?> that = (CompletionSubscriber<?, ?>) o;
-        return Objects.equals(subscriber, that.subscriber) &&
-            Objects.equals(completion, that.completion);
+
+        return new DefaultCompletionSubscriber(subscriber, completion);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(subscriber, completion);
-    }
 }

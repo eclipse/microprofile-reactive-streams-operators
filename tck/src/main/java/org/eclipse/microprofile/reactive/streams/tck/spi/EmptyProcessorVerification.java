@@ -19,14 +19,14 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Verification for an empty processor, ie, the processor returned from ReactiveStreams.builder().buildRs().
+ * Verification for an empty processor, ie, the processor returned from rs.builder().buildRs().
  */
 public class EmptyProcessorVerification extends AbstractStageVerification {
 
@@ -42,7 +42,7 @@ public class EmptyProcessorVerification extends AbstractStageVerification {
     public class ProcessorVerification extends StageProcessorVerification<Integer> {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().buildRs(getEngine());
+            return rs.<Integer>builder().buildRs(getEngine());
         }
 
         @Override

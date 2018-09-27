@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.tck;
 
+import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.tck.api.ReactiveStreamsApiVerification;
 import org.eclipse.microprofile.reactive.streams.tck.spi.ReactiveStreamsSpiVerification;
@@ -45,6 +46,7 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
 
     private final TestEnvironment testEnvironment;
     private E engine;
+    private ReactiveStreamsFactory rs;
     private ScheduledExecutorService executorService;
 
     public ReactiveStreamsTck(TestEnvironment testEnvironment) {
@@ -55,6 +57,14 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
      * Override to provide the reactive streams engine.
      */
     protected abstract E createEngine();
+
+    /**
+     * Create the reactive streams factory to use. By default, will use one backed by the ReactiveStreams static
+     * factory methods, that is, using the ServiceLoader to locate one.
+     */
+    protected ReactiveStreamsFactory createFactory() {
+        return new DefaultReactiveStreamsFactory();
+    }
 
     /**
      * Override to implement custom shutdown logic for the Reactive Streams engine.
@@ -81,10 +91,11 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
     @Factory
     public Object[] allTests() {
         engine = createEngine();
+        rs = createFactory();
         executorService = Executors.newScheduledThreadPool(4);
 
-        ReactiveStreamsApiVerification apiVerification = new ReactiveStreamsApiVerification();
-        ReactiveStreamsSpiVerification spiVerification = new ReactiveStreamsSpiVerification(testEnvironment, engine, executorService);
+        ReactiveStreamsApiVerification apiVerification = new ReactiveStreamsApiVerification(rs);
+        ReactiveStreamsSpiVerification spiVerification = new ReactiveStreamsSpiVerification(testEnvironment, rs, engine, executorService);
 
         // Add tests that aren't dependent on the dependencies.
         List<Object> allTests = new ArrayList<>();

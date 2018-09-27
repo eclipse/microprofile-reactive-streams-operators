@@ -17,17 +17,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.spi;
+package org.eclipse.microprofile.reactive.streams.core;
+
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.spi.Stage;
 
 import java.util.Collection;
 
-/**
- * A graph.
- * <p>
- * Reactive Streams engines are required to convert the stages of this graph into a stream with interfaces according
- * to the shape. The shape is governed by whether the graph has an inlet, an outlet, neither or both.
- */
-public class Graph {
+final class GraphImpl implements Graph {
     private final Collection<Stage> stages;
     private final boolean hasInlet;
     private final boolean hasOutlet;
@@ -45,7 +42,7 @@ public class Graph {
      *
      * @param stages The stages.
      */
-    public Graph(Collection<Stage> stages) {
+    GraphImpl(Collection<Stage> stages) {
 
         boolean hasInlet = true;
         Stage lastStage = null;
@@ -72,25 +69,17 @@ public class Graph {
         this.stages = stages;
     }
 
-    /**
-     * Get the stages of this graph.
-     */
+    @Override
     public Collection<Stage> getStages() {
         return stages;
     }
 
-    /**
-     * Returns true if this graph has an inlet, ie, if this graph can be turned into a
-     * {@link org.reactivestreams.Subscriber}.
-     */
+    @Override
     public boolean hasInlet() {
         return hasInlet;
     }
 
-    /**
-     * Returns true if this graph has an outlet, ie, if this graph can be turned into a
-     * {@link org.reactivestreams.Publisher}.
-     */
+    @Override
     public boolean hasOutlet() {
         return hasOutlet;
     }

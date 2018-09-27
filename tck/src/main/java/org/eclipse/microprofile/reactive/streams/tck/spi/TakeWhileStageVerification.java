@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -41,7 +41,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void takeWhileStageShouldTakeWhileConditionIsTrue() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6, 1, 2)
+        assertEquals(await(rs.of(1, 2, 3, 4, 5, 6, 1, 2)
             .takeWhile(i -> i < 5)
             .toList()
             .run(getEngine())), Arrays.asList(1, 2, 3, 4));
@@ -49,7 +49,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void takeWhileStageShouldEmitEmpty() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
+        assertEquals(await(rs.of(1, 2, 3, 4, 5, 6)
             .takeWhile(i -> false)
             .toList()
             .run(getEngine())), Collections.emptyList());
@@ -69,13 +69,13 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     @Test
     public void takeWhileShouldIgnoreSubsequentErrorsWhenDone() {
         assertEquals(await(
-            ReactiveStreams.of(1, 2, 3, 4)
+            rs.of(1, 2, 3, 4)
                 .flatMap(i -> {
                     if (i == 4) {
-                        return ReactiveStreams.failed(new QuietRuntimeException("failed"));
+                        return rs.failed(new QuietRuntimeException("failed"));
                     }
                     else {
-                        return ReactiveStreams.of(i);
+                        return rs.of(i);
                     }
                 })
                 .takeWhile(t -> t < 3)
@@ -100,9 +100,9 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void takeWhileStageShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> takeWhile = ReactiveStreams.<Integer>builder().takeWhile(i -> i < 3);
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4).via(takeWhile).toList().run(getEngine())), Arrays.asList(1, 2));
-        assertEquals(await(ReactiveStreams.of(2, 1, 5, 6).via(takeWhile).toList().run(getEngine())), Arrays.asList(2, 1));
+        ProcessorBuilder<Integer, Integer> takeWhile = rs.<Integer>builder().takeWhile(i -> i < 3);
+        assertEquals(await(rs.of(1, 2, 3, 4).via(takeWhile).toList().run(getEngine())), Arrays.asList(1, 2));
+        assertEquals(await(rs.of(2, 1, 5, 6).via(takeWhile).toList().run(getEngine())), Arrays.asList(2, 1));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     public class ProcessorVerification extends StageProcessorVerification<Integer> {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder()
+            return rs.<Integer>builder()
                 .takeWhile(t -> true)
                 .buildRs(getEngine());
         }
@@ -125,7 +125,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .takeWhile(t -> true)
                 .buildRs(getEngine());
         }

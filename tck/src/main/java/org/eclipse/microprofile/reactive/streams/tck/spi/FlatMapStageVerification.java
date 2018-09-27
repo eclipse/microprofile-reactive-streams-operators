@@ -21,7 +21,7 @@ package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -45,15 +45,15 @@ public class FlatMapStageVerification extends AbstractStageVerification {
 
     @Test
     public void flatMapStageShouldMapElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
-            .flatMap(n -> ReactiveStreams.of(n, n, n))
+        assertEquals(await(rs.of(1, 2, 3)
+            .flatMap(n -> rs.of(n, n, n))
             .toList()
             .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
 
     @Test
     public void flatMapStageShouldAllowEmptySubStreams() {
-        assertEquals(await(ReactiveStreams.of(ReactiveStreams.empty(), ReactiveStreams.of(1, 2))
+        assertEquals(await(rs.of(rs.empty(), rs.of(1, 2))
             .flatMap(Function.identity())
             .toList()
             .run(getEngine())), Arrays.asList(1, 2));
@@ -75,8 +75,8 @@ public class FlatMapStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void flatMapStageShouldPropagateUpstreamExceptions() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
-            .flatMap(ReactiveStreams::of)
+        await(rs.failed(new QuietRuntimeException("failed"))
+            .flatMap(rs::of)
             .toList()
             .run(getEngine()));
     }
@@ -86,7 +86,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
             .onTerminate(() -> cancelled.complete(null))
-            .flatMap(f -> ReactiveStreams.failed(new QuietRuntimeException("failed")))
+            .flatMap(f -> rs.failed(new QuietRuntimeException("failed")))
             .toList()
             .run(getEngine());
         await(cancelled);
@@ -97,8 +97,8 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     public void flatMapStageShouldOnlySubscribeToOnePublisherAtATime() throws Exception {
         AtomicInteger activePublishers = new AtomicInteger();
 
-        CompletionStage<List<Integer>> result = ReactiveStreams.of(1, 2, 3, 4, 5)
-            .flatMap(id -> ReactiveStreams.fromPublisher(new ScheduledPublisher(id, activePublishers, this::getExecutorService)))
+        CompletionStage<List<Integer>> result = rs.of(1, 2, 3, 4, 5)
+            .flatMap(id -> rs.fromPublisher(new ScheduledPublisher(id, activePublishers, this::getExecutorService)))
             .toList()
             .run(getEngine());
 
@@ -124,10 +124,10 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     @Test
     public void flatMapStageBuilderShouldBeReusable() {
         ProcessorBuilder<PublisherBuilder<Integer>, Integer> flatMap =
-            ReactiveStreams.<PublisherBuilder<Integer>>builder().flatMap(Function.identity());
+            rs.<PublisherBuilder<Integer>>builder().flatMap(Function.identity());
 
-        assertEquals(await(ReactiveStreams.of(ReactiveStreams.of(1, 2)).via(flatMap).toList().run(getEngine())), Arrays.asList(1, 2));
-        assertEquals(await(ReactiveStreams.of(ReactiveStreams.of(3, 4)).via(flatMap).toList().run(getEngine())), Arrays.asList(3, 4));
+        assertEquals(await(rs.of(rs.of(1, 2)).via(flatMap).toList().run(getEngine())), Arrays.asList(1, 2));
+        assertEquals(await(rs.of(rs.of(3, 4)).via(flatMap).toList().run(getEngine())), Arrays.asList(3, 4));
     }
 
     @Override
@@ -142,13 +142,13 @@ public class FlatMapStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().flatMap(ReactiveStreams::of).buildRs(getEngine());
+            return rs.<Integer>builder().flatMap(rs::of).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
-                .flatMap(ReactiveStreams::of).buildRs(getEngine());
+            return rs.<Integer>failed(new RuntimeException("failed"))
+                .flatMap(rs::of).buildRs(getEngine());
         }
 
         @Override
@@ -165,7 +165,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         @Override
         public Subscriber<Integer> createSubscriber(WhiteboxSubscriberProbe<Integer> probe) {
             CompletableFuture<Subscriber<? super Integer>> subscriber = new CompletableFuture<>();
-            ReactiveStreams.of(ReactiveStreams.<Integer>fromPublisher(subscriber::complete))
+            rs.of(rs.<Integer>fromPublisher(subscriber::complete))
                 .flatMap(Function.identity())
                 .to(new Subscriber<Integer>() {
                     @Override

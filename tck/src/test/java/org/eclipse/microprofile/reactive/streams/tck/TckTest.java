@@ -29,6 +29,6 @@ public class TckTest {
 
     @Factory
     public Object[] allTests() {
-        return new ReactiveStreamsApiVerification().allTests().toArray();
+        return new ReactiveStreamsApiVerification(new DefaultReactiveStreamsFactory()).allTests().toArray();
     }
 }

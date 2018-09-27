@@ -19,7 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Subscriber;
 import org.testng.annotations.Test;
 
@@ -41,19 +41,19 @@ public class FindFirstStageVerification extends AbstractStageVerification {
 
     @Test
     public void findFirstStageShouldFindTheFirstElement() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .findFirst().run(getEngine())), Optional.of(1));
     }
 
     @Test
     public void findFirstStageShouldFindTheFirstElementInSingleElementStream() {
-        assertEquals(await(ReactiveStreams.of(1)
+        assertEquals(await(rs.of(1)
             .findFirst().run(getEngine())), Optional.of(1));
     }
 
     @Test
     public void findFirstStageShouldReturnEmptyForEmptyStream() {
-        assertEquals(await(ReactiveStreams.of()
+        assertEquals(await(rs.of()
             .findFirst().run(getEngine())), Optional.empty());
     }
 
@@ -67,13 +67,13 @@ public class FindFirstStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void findFirstStageShouldPropagateErrors() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+        await(rs.failed(new QuietRuntimeException("failed"))
             .findFirst().run(getEngine()));
     }
 
     @Test
     public void findFirstStageShouldBeReusable() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .findFirst().run(getEngine())), Optional.of(1));
     }
 
@@ -85,7 +85,7 @@ public class FindFirstStageVerification extends AbstractStageVerification {
     class SubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
         @Override
         public Subscriber<Integer> createSubscriber() {
-            return ReactiveStreams.<Integer>builder().findFirst().build(getEngine());
+            return rs.<Integer>builder().findFirst().build(getEngine());
         }
 
         @Override

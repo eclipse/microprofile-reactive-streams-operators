@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams.spi;
 
 
-import org.eclipse.microprofile.reactive.streams.CompletionSubscriber;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 

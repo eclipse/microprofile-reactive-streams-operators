@@ -19,15 +19,12 @@
 
 package org.eclipse.microprofile.reactive.streams;
 
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
@@ -37,7 +34,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * A builder for a {@link Processor}.
@@ -55,18 +51,7 @@ import java.util.stream.Collectors;
  * @param <R> The type of the elements that the processor emits.
  * @see ReactiveStreams
  */
-public final class ProcessorBuilder<T, R> {
-
-    private final ReactiveStreamsGraphBuilder graphBuilder;
-
-    ProcessorBuilder(ReactiveStreamsGraphBuilder graphBuilder) {
-        this.graphBuilder = graphBuilder;
-    }
-
-    ProcessorBuilder(Stage stage) {
-        this.graphBuilder = new ReactiveStreamsGraphBuilder(stage);
-    }
-
+public interface ProcessorBuilder<T, R> {
     /**
      * Map the elements emitted by this processor using the <code>mapper</code> function.
      * <p>
@@ -76,9 +61,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>    The type of elements that the <code>mapper</code> function emits.
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the mapped elements.
      */
-    public <S> ProcessorBuilder<T, S> map(Function<? super R, ? extends S> mapper) {
-        return addStage(new Stage.Map(mapper));
-    }
+    <S> ProcessorBuilder<T, S> map(Function<? super R, ? extends S> mapper);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
@@ -90,9 +73,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
      * the given function is called for each element.
      */
-    public ProcessorBuilder<T, R> peek(Consumer<? super R> consumer) {
-        return addStage(new Stage.Peek(consumer));
-    }
+    ProcessorBuilder<T, R> peek(Consumer<? super R> consumer);
 
     /**
      * Filter elements emitted by this processor using the given {@link Predicate}.
@@ -105,9 +86,7 @@ public final class ProcessorBuilder<T, R> {
      * @param predicate The predicate to apply to each element.
      * @return A new processor builder.
      */
-    public ProcessorBuilder<T, R> filter(Predicate<? super R> predicate) {
-        return addStage(new Stage.Filter(predicate));
-    }
+    ProcessorBuilder<T, R> filter(Predicate<? super R> predicate);
 
     /**
      * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
@@ -116,9 +95,7 @@ public final class ProcessorBuilder<T, R> {
      *
      * @return A new publisher builder emitting the distinct elements from this stream.
      */
-    public ProcessorBuilder<T, T> distinct() {
-        return addStage(Stage.Distinct.INSTANCE);
-    }
+    ProcessorBuilder<T, T> distinct();
 
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
@@ -136,9 +113,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>    The type of the elements emitted from the new processor.
      * @return A new processor builder.
      */
-    public <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper) {
-        return addStage(new Stage.FlatMap(mapper.andThen(PublisherBuilder::toGraph)));
-    }
+    <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper);
 
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
@@ -155,11 +130,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>    The type of the elements emitted from the new processor.
      * @return A new processor builder.
      */
-    public <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, Publisher<? extends S>> mapper) {
-        return addStage(new Stage.FlatMap(mapper
-            .andThen(ReactiveStreams::fromPublisher)
-            .andThen(PublisherBuilder::toGraph)));
-    }
+    <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, Publisher<? extends S>> mapper);
 
     /**
      * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
@@ -175,9 +146,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>    The type of the elements emitted from the new processor.
      * @return A new processor builder.
      */
-    public <S> ProcessorBuilder<T, S> flatMapCompletionStage(Function<? super R, ? extends CompletionStage<? extends S>> mapper) {
-        return addStage(new Stage.FlatMapCompletionStage((Function) mapper));
-    }
+    <S> ProcessorBuilder<T, S> flatMapCompletionStage(Function<? super R, ? extends CompletionStage<? extends S>> mapper);
 
     /**
      * Map the elements to {@link Iterable}'s, and flatten so that the elements contained in each iterable are
@@ -192,9 +161,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>    The type of the elements emitted from the new processor.
      * @return A new processor builder.
      */
-    public <S> ProcessorBuilder<T, S> flatMapIterable(Function<? super R, ? extends Iterable<? extends S>> mapper) {
-        return addStage(new Stage.FlatMapIterable((Function) mapper));
-    }
+    <S> ProcessorBuilder<T, S> flatMapIterable(Function<? super R, ? extends Iterable<? extends S>> mapper);
 
     /**
      * Truncate this stream, ensuring the stream is no longer than {@code maxSize} elements in length.
@@ -208,9 +175,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new processor builder.
      * @throws IllegalArgumentException If {@code maxSize} is less than zero.
      */
-    public ProcessorBuilder<T, R> limit(long maxSize) {
-        return addStage(new Stage.Limit(maxSize));
-    }
+    ProcessorBuilder<T, R> limit(long maxSize);
 
     /**
      * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
@@ -222,9 +187,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new processor builder.
      * @throws IllegalArgumentException If {@code n} is less than zero.
      */
-    public ProcessorBuilder<T, R> skip(long n) {
-        return addStage(new Stage.Skip(n));
-    }
+    ProcessorBuilder<T, R> skip(long n);
 
     /**
      * Take the longest prefix of elements from this stream that satisfy the given {@code predicate}.
@@ -236,9 +199,7 @@ public final class ProcessorBuilder<T, R> {
      * @param predicate The predicate.
      * @return A new publisher builder.
      */
-    public ProcessorBuilder<T, R> takeWhile(Predicate<? super R> predicate) {
-        return addStage(new Stage.TakeWhile(predicate));
-    }
+    ProcessorBuilder<T, R> takeWhile(Predicate<? super R> predicate);
 
     /**
      * Drop the longest prefix of elements from this stream that satisfy the given {@code predicate}.
@@ -252,9 +213,7 @@ public final class ProcessorBuilder<T, R> {
      * @param predicate The predicate.
      * @return A new processor builder.
      */
-    public ProcessorBuilder<T, R> dropWhile(Predicate<? super R> predicate) {
-        return addStage(new Stage.DropWhile(predicate));
-    }
+    ProcessorBuilder<T, R> dropWhile(Predicate<? super R> predicate);
 
     /**
      * Performs an action for each element on this stream.
@@ -268,15 +227,7 @@ public final class ProcessorBuilder<T, R> {
      * @param action The action.
      * @return A new subscriber builder.
      */
-    public SubscriberBuilder<T, Void> forEach(Consumer<? super R> action) {
-        Objects.requireNonNull(action, "Action must not be null");
-        return collect(Collector.<R, Void, Void>of(
-            () -> null,
-            (n, r) -> action.accept(r),
-            (v1, v2) -> null,
-            v -> null
-        ));
-    }
+    SubscriberBuilder<T, Void> forEach(Consumer<? super R> action);
 
     /**
      * Ignores each element of this stream.
@@ -289,10 +240,7 @@ public final class ProcessorBuilder<T, R> {
      *
      * @return A new subscriber builder.
      */
-    public SubscriberBuilder<T, Void> ignore() {
-        return forEach(r -> {
-        });
-    }
+    SubscriberBuilder<T, Void> ignore();
 
     /**
      * Cancels the stream as soon as it starts.
@@ -302,9 +250,7 @@ public final class ProcessorBuilder<T, R> {
      *
      * @return A new subscriber builder.
      */
-    public SubscriberBuilder<T, Void> cancel() {
-        return addTerminalStage(Stage.Cancel.INSTANCE);
-    }
+    SubscriberBuilder<T, Void> cancel();
 
     /**
      * Perform a reduction on the elements of this stream, using the provided identity value and the accumulation
@@ -318,9 +264,7 @@ public final class ProcessorBuilder<T, R> {
      * @param accumulator The accumulator function.
      * @return A new subscriber builder.
      */
-    public SubscriberBuilder<T, R> reduce(R identity, BinaryOperator<R> accumulator) {
-        return addTerminalStage(new Stage.Collect(Reductions.reduce(identity, accumulator)));
-    }
+    SubscriberBuilder<T, R> reduce(R identity, BinaryOperator<R> accumulator);
 
     /**
      * Perform a reduction on the elements of this stream, using provided the accumulation function.
@@ -333,9 +277,7 @@ public final class ProcessorBuilder<T, R> {
      * @param accumulator The accumulator function.
      * @return A new subscriber builder.
      */
-    public SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator) {
-        return addTerminalStage(new Stage.Collect(Reductions.reduce(accumulator)));
-    }
+    SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator);
 
     /**
      * Collect the elements emitted by this processor builder using the given {@link Collector}.
@@ -348,9 +290,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <A>       The accumulator type.
      * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
      */
-    public <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector) {
-        return addTerminalStage(new Stage.Collect(collector));
-    }
+    <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector);
 
     /**
      * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
@@ -367,10 +307,7 @@ public final class ProcessorBuilder<T, R> {
      * @param <S>         The accumulator type.
      * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
      */
-    public <S> SubscriberBuilder<T, S> collect(Supplier<S> supplier, BiConsumer<S, ? super R> accumulator) {
-        // The combiner is not used, so the used, but should not be null
-        return addTerminalStage(new Stage.Collect(Collector.of(supplier, accumulator, (a, b) -> a)));
-    }
+    <S> SubscriberBuilder<T, S> collect(Supplier<S> supplier, BiConsumer<S, ? super R> accumulator);
 
     /**
      * Collect the elements emitted by this processor builder into a {@link List}
@@ -379,9 +316,7 @@ public final class ProcessorBuilder<T, R> {
      *
      * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
      */
-    public SubscriberBuilder<T, List<R>> toList() {
-        return collect(Collectors.toList());
-    }
+    SubscriberBuilder<T, List<R>> toList();
 
     /**
      * Find the first element emitted by the {@link Processor}, and return it in a
@@ -393,9 +328,7 @@ public final class ProcessorBuilder<T, R> {
      *
      * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
      */
-    public SubscriberBuilder<T, Optional<R>> findFirst() {
-        return addTerminalStage(Stage.FindFirst.INSTANCE);
-    }
+    SubscriberBuilder<T, Optional<R>> findFirst();
 
     /**
      * Connect the outlet of the {@link Processor} built by this builder to the given {@link Subscriber}.
@@ -403,9 +336,7 @@ public final class ProcessorBuilder<T, R> {
      * @param subscriber The subscriber to connect.
      * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
      */
-    public SubscriberBuilder<T, Void> to(Subscriber<R> subscriber) {
-        return addTerminalStage(new Stage.SubscriberStage(subscriber));
-    }
+    SubscriberBuilder<T, Void> to(Subscriber<R> subscriber);
 
     /**
      * Connect the outlet of this processor builder to the given {@link SubscriberBuilder} graph.
@@ -413,9 +344,7 @@ public final class ProcessorBuilder<T, R> {
      * @param subscriber The subscriber builder to connect.
      * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
      */
-    public <S> SubscriberBuilder<T, S> to(SubscriberBuilder<R, S> subscriber) {
-        return addTerminalStage(new InternalStages.Nested(subscriber.getGraphBuilder()));
-    }
+    <S> SubscriberBuilder<T, S> to(SubscriberBuilder<R, S> subscriber);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action if this
@@ -427,9 +356,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. If the
      * stream conveys a failure, the given error handler is called.
      */
-    public ProcessorBuilder<T, R> onError(Consumer<Throwable> errorHandler) {
-        return addStage(new Stage.OnError(errorHandler));
-    }
+    ProcessorBuilder<T, R> onError(Consumer<Throwable> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
@@ -448,9 +375,7 @@ public final class ProcessorBuilder<T, R> {
      *                     The function must not return {@code null}.
      * @return The new processor
      */
-    public ProcessorBuilder<T, R> onErrorResume(Function<Throwable, R> errorHandler) {
-        return addStage(new Stage.OnErrorResume(errorHandler));
-    }
+    ProcessorBuilder<T, R> onErrorResume(Function<Throwable, R> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
@@ -471,9 +396,7 @@ public final class ProcessorBuilder<T, R> {
      *                     The function must not return {@code null}.
      * @return The new processor
      */
-    public ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, PublisherBuilder<R>> errorHandler) {
-        return addStage(new Stage.OnErrorResumeWith(errorHandler.andThen(PublisherBuilder::toGraph)));
-    }
+    ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, PublisherBuilder<R>> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
@@ -494,13 +417,7 @@ public final class ProcessorBuilder<T, R> {
      *                     The function must not return {@code null}.
      * @return The new processor
      */
-    public ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<R>> errorHandler) {
-        return addStage(new Stage.OnErrorResumeWith(
-            errorHandler
-                .andThen(ReactiveStreams::fromPublisher)
-                .andThen(PublisherBuilder::toGraph))
-        );
-    }
+    ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<R>> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
@@ -514,9 +431,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
      * action is called when the stream completes or fails.
      */
-    public ProcessorBuilder<T, R> onTerminate(Runnable action) {
-        return addStage(new Stage.OnTerminate(action));
-    }
+    ProcessorBuilder<T, R> onTerminate(Runnable action);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
@@ -528,9 +443,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
      * action is called when the stream completes.
      */
-    public ProcessorBuilder<T, R> onComplete(Runnable action) {
-        return addStage(new Stage.OnComplete(action));
-    }
+    ProcessorBuilder<T, R> onComplete(Runnable action);
 
     /**
      * Connect the outlet of the {@link Processor} built by this builder to the given {@link Processor}.
@@ -539,9 +452,7 @@ public final class ProcessorBuilder<T, R> {
      * @return A {@link ProcessorBuilder} that represents this processor builders inlet, and the passed in processors
      * outlet.
      */
-    public <S> ProcessorBuilder<T, S> via(ProcessorBuilder<R, S> processor) {
-        return addStage(new InternalStages.Nested(processor.graphBuilder));
-    }
+    <S> ProcessorBuilder<T, S> via(ProcessorBuilder<R, S> processor);
 
     /**
      * Connect the outlet of this processor builder to the given {@link ProcessorBuilder} graph.
@@ -550,18 +461,14 @@ public final class ProcessorBuilder<T, R> {
      * @return A {@link ProcessorBuilder} that represents this processor builders inlet, and the passed in
      * processor builders outlet.
      */
-    public <S> ProcessorBuilder<T, S> via(Processor<R, S> processor) {
-        return addStage(new Stage.ProcessorStage(processor));
-    }
+    <S> ProcessorBuilder<T, S> via(Processor<R, S> processor);
 
     /**
      * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
      *
      * @return A {@link Processor} that will run this stream.
      */
-    public Processor<T, R> buildRs() {
-        return buildRs(ReactiveStreamsGraphBuilder.defaultEngine());
-    }
+    Processor<T, R> buildRs();
 
     /**
      * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
@@ -569,24 +476,5 @@ public final class ProcessorBuilder<T, R> {
      * @param engine The engine to run the stream with.
      * @return A {@link Processor} that will run this stream.
      */
-    public Processor<T, R> buildRs(ReactiveStreamsEngine engine) {
-        Objects.requireNonNull(engine, "Engine must not be null");
-        return engine.buildProcessor(toGraph());
-    }
-
-    private <S> ProcessorBuilder<T, S> addStage(Stage stage) {
-        return new ProcessorBuilder<>(graphBuilder.addStage(stage));
-    }
-
-    private <S> SubscriberBuilder<T, S> addTerminalStage(Stage stage) {
-        return new SubscriberBuilder<>(graphBuilder.addStage(stage));
-    }
-
-    ReactiveStreamsGraphBuilder getGraphBuilder() {
-        return graphBuilder;
-    }
-
-    Graph toGraph() {
-        return graphBuilder.build(true, true);
-    }
+    Processor<T, R> buildRs(ReactiveStreamsEngine engine);
 }

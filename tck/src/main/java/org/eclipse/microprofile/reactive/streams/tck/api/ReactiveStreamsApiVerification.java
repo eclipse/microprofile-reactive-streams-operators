@@ -19,6 +19,8 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.api;
 
+import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,14 +32,19 @@ import java.util.List;
  */
 public class ReactiveStreamsApiVerification {
 
+    private final ReactiveStreamsFactory rs;
+
+    public ReactiveStreamsApiVerification(ReactiveStreamsFactory rs) {
+        this.rs = rs;
+    }
+
     public List<Object> allTests() {
         return Arrays.asList(
-            new ReactiveStreamsVerification(),
-            new GraphAccessorVerification(),
-            new PublisherBuilderVerification(),
-            new ProcessorBuilderVerification(),
-            new SubscriberBuilderVerification(),
-            new CompletionRunnerVerification(),
+            new ReactiveStreamsVerification(rs),
+            new PublisherBuilderVerification(rs),
+            new ProcessorBuilderVerification(rs),
+            new SubscriberBuilderVerification(rs),
+            new CompletionRunnerVerification(rs),
             new CompletionSubscriberVerification()
         );
     }

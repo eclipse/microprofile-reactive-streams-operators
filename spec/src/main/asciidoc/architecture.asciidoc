@@ -17,13 +17,13 @@
 [[reactivestreamsarchitecture]]
 == Introduction
 
-This specification defines an API for manipulating Reactive Streams, providing operators such as `map`, `filter`, `flatMap`, in a similar fashion to the `java.util.streams` API introduced in Java 8.
+This specification defines an API for manipulating Reactive Streams, providing operators such as `map`, `filter`, `flatMap`, in a similar fashion to the `java.util.stream` API introduced in Java 8.
 It also provides an SPI for implementing and providing custom Reactive Streams engines, allowing application developers to use whichever engine they see fit.
 
 === Rationale
 
-The `java.util.streams` API provides functionality necessary for manipulating streams in memory introducing functional programming into the Java language.
-However, manipulating potentially infinite asynchronous streams has some very different requirements which the `java.util.streams` API is not suitable for.
+The `java.util.stream` API provides functionality necessary for manipulating streams in memory introducing functional programming into the Java language.
+However, manipulating potentially infinite asynchronous streams has some very different requirements which the `java.util.stream` API is not suitable for.
 
 Reactive Streams is a specification for asynchronous streaming between different libraries and/or technologies, which is included in JDK9 as the `java.util.concurrent.Flow` spec.
 Reactive Streams itself however is an SPI for library and technology vendors to implement, it is not intended that application developers implement it as the semantics are very complex.
@@ -46,7 +46,7 @@ It is the intention that once incubated in MicroProfile, this specification will
 
 === Scope
 
-This specification aims to define a set of operators to manipulate Reactive Streams. The proposed API is voluntarily close to the `java.utils.Stream` API.
+This specification aims to define a set of operators to manipulate Reactive Streams. The proposed API is voluntarily close to the `java.util.stream` API.
 
 === Reactive Streams API dependency
 

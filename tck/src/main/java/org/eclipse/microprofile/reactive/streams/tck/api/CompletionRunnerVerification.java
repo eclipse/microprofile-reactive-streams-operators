@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.api;
 
 import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber;
+import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionStage;
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
@@ -35,7 +35,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -59,7 +58,7 @@ public class CompletionRunnerVerification extends AbstractReactiveStreamsApiVeri
             }
 
             @Override
-            public <T, R> CompletionSubscriber<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
+            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
                 throw new RuntimeException("Wrong method invoked");
             }
 
@@ -76,8 +75,6 @@ public class CompletionRunnerVerification extends AbstractReactiveStreamsApiVeri
         });
 
         assertSame(returned, expected);
-        assertFalse(builtGraph.get().hasInlet());
-        assertFalse(builtGraph.get().hasOutlet());
         assertEquals(builtGraph.get().getStages().size(), 2);
         Iterator<Stage> stages = builtGraph.get().getStages().iterator();
         assertEmptyStage(stages.next());

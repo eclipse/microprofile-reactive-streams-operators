@@ -39,26 +39,6 @@ import java.util.stream.Collector;
 public interface Stage {
 
     /**
-     * Whether this stage has an inlet - ie, when built, will it implement the {@link Subscriber}
-     * interface?
-     *
-     * @return True if this stage has an inlet.
-     */
-    default boolean hasInlet() {
-        return false;
-    }
-
-    /**
-     * Whether this stage has an outlet - ie, when built, will it implement the {@link Publisher}
-     * interface?
-     *
-     * @return True if this stage has an outlet.
-     */
-    default boolean hasOutlet() {
-        return false;
-    }
-
-    /**
      * A map stage.
      * <p>
      * The given mapper function must be invoked on each element consumed, and the output of the function must be

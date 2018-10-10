@@ -40,28 +40,8 @@ final class Stages {
 
     private Stages() {
     }
-
-    /**
-     * Convenience interface for inlet stages.
-     */
-    interface Inlet extends Stage {
-        @Override
-        default boolean hasInlet() {
-            return true;
-        }
-    }
-
-    /**
-     * Convenience interface for outlet stages.
-     */
-    interface Outlet extends Stage {
-        @Override
-        default boolean hasOutlet() {
-            return true;
-        }
-    }
-
-    final static class Map implements Stage.Map, Inlet, Outlet {
+    
+    final static class Map implements Stage.Map {
         private final Function<?, ?> mapper;
 
         Map(Function<?, ?> mapper) {
@@ -73,7 +53,7 @@ final class Stages {
         }
     }
 
-    final static class Peek implements Stage.Peek, Inlet, Outlet {
+    final static class Peek implements Stage.Peek {
         private final Consumer<?> consumer;
 
         Peek(Consumer<?> consumer) {
@@ -85,7 +65,7 @@ final class Stages {
         }
     }
 
-    final static class Filter implements Stage.Filter, Inlet, Outlet {
+    final static class Filter implements Stage.Filter {
         private final Predicate<?> predicate;
 
         Filter(Predicate<?> predicate) {
@@ -97,7 +77,7 @@ final class Stages {
         }
     }
 
-    final static class DropWhile implements Stage.DropWhile, Inlet, Outlet {
+    final static class DropWhile implements Stage.DropWhile {
         private final Predicate<?> predicate;
 
         DropWhile(Predicate<?> predicate) {
@@ -109,7 +89,7 @@ final class Stages {
         }
     }
 
-    final static class Skip implements Stage.Skip, Inlet, Outlet {
+    final static class Skip implements Stage.Skip {
         private final long skip;
 
         Skip(long skip) {
@@ -124,7 +104,7 @@ final class Stages {
         }
     }
 
-    final static class Limit implements Stage.Limit, Inlet, Outlet {
+    final static class Limit implements Stage.Limit {
         private final long limit;
 
         Limit(long limit) {
@@ -139,7 +119,7 @@ final class Stages {
         }
     }
 
-    final static class Distinct implements Stage.Distinct, Inlet, Outlet {
+    final static class Distinct implements Stage.Distinct {
 
         static final Distinct INSTANCE = new Stages.Distinct();
 
@@ -149,7 +129,7 @@ final class Stages {
     }
 
 
-    final static class TakeWhile implements Stage.TakeWhile, Inlet, Outlet {
+    final static class TakeWhile implements Stage.TakeWhile {
         private final Predicate<?> predicate;
 
         TakeWhile(Predicate<?> predicate) {
@@ -161,7 +141,7 @@ final class Stages {
         }
     }
 
-    final static class PublisherStage implements Stage.PublisherStage, Outlet {
+    final static class PublisherStage implements Stage.PublisherStage {
         private final Publisher<?> publisher;
 
         PublisherStage(Publisher<?> publisher) {
@@ -173,7 +153,7 @@ final class Stages {
         }
     }
 
-    final static class Of implements Stage.Of, Outlet {
+    final static class Of implements Stage.Of {
 
         static final Of EMPTY = new Stages.Of(Collections.emptyList());
 
@@ -188,7 +168,7 @@ final class Stages {
         }
     }
 
-    final static class ProcessorStage implements Stage.ProcessorStage, Inlet, Outlet {
+    final static class ProcessorStage implements Stage.ProcessorStage {
         private final Processor<?, ?> processor;
 
         ProcessorStage(Processor<?, ?> processor) {
@@ -200,7 +180,7 @@ final class Stages {
         }
     }
 
-    final static class FindFirst implements Stage.FindFirst, Inlet {
+    final static class FindFirst implements Stage.FindFirst {
 
         static final FindFirst INSTANCE = new Stages.FindFirst();
 
@@ -208,7 +188,7 @@ final class Stages {
         }
     }
 
-    final static class SubscriberStage implements Stage.SubscriberStage, Inlet {
+    final static class SubscriberStage implements Stage.SubscriberStage {
         private final Subscriber<?> subscriber;
 
         SubscriberStage(Subscriber<?> subscriber) {
@@ -220,7 +200,7 @@ final class Stages {
         }
     }
 
-    final static class Collect implements Stage.Collect, Inlet {
+    final static class Collect implements Stage.Collect {
         private final Collector<?, ?, ?> collector;
 
         Collect(Collector<?, ?, ?> collector) {
@@ -232,7 +212,7 @@ final class Stages {
         }
     }
 
-    final static class FlatMap implements Stage.FlatMap, Inlet, Outlet {
+    final static class FlatMap implements Stage.FlatMap {
         private final Function<?, Graph> mapper;
 
         FlatMap(Function<?, Graph> mapper) {
@@ -244,7 +224,7 @@ final class Stages {
         }
     }
 
-    final static class FlatMapCompletionStage implements Stage.FlatMapCompletionStage, Inlet, Outlet {
+    final static class FlatMapCompletionStage implements Stage.FlatMapCompletionStage {
         private final Function<?, CompletionStage<?>> mapper;
 
         FlatMapCompletionStage(Function<?, CompletionStage<?>> mapper) {
@@ -256,7 +236,7 @@ final class Stages {
         }
     }
 
-    final static class FlatMapIterable implements Stage.FlatMapIterable, Inlet, Outlet {
+    final static class FlatMapIterable implements Stage.FlatMapIterable {
         private final Function<?, Iterable<?>> mapper;
 
         FlatMapIterable(Function<?, Iterable<?>> mapper) {
@@ -268,7 +248,7 @@ final class Stages {
         }
     }
 
-    final static class OnError implements Stage.OnError, Inlet, Outlet {
+    final static class OnError implements Stage.OnError {
         private final Consumer<Throwable> consumer;
 
         OnError(Consumer<Throwable> consumer) {
@@ -280,7 +260,7 @@ final class Stages {
         }
     }
 
-    final static class OnTerminate implements Stage.OnTerminate, Inlet, Outlet {
+    final static class OnTerminate implements Stage.OnTerminate {
         private final Runnable action;
 
         OnTerminate(Runnable runnable) {
@@ -292,7 +272,7 @@ final class Stages {
         }
     }
 
-    final static class OnComplete implements Stage.OnComplete, Inlet, Outlet {
+    final static class OnComplete implements Stage.OnComplete {
         private final Runnable action;
 
         OnComplete(Runnable runnable) {
@@ -304,7 +284,7 @@ final class Stages {
         }
     }
 
-    final static class OnErrorResume implements Stage.OnErrorResume, Inlet, Outlet {
+    final static class OnErrorResume implements Stage.OnErrorResume {
         private final Function<Throwable, ?> function;
 
         OnErrorResume(Function<Throwable, ?>  function) {
@@ -316,7 +296,7 @@ final class Stages {
         }
     }
 
-    final static class OnErrorResumeWith implements Stage.OnErrorResumeWith, Inlet, Outlet {
+    final static class OnErrorResumeWith implements Stage.OnErrorResumeWith {
         private final Function<Throwable, Graph> function;
 
         OnErrorResumeWith(Function<Throwable, Graph> function) {
@@ -328,7 +308,7 @@ final class Stages {
         }
     }
 
-    final static class Failed implements Stage.Failed, Outlet {
+    final static class Failed implements Stage.Failed {
         private final Throwable error;
 
         Failed(Throwable error) {
@@ -340,21 +320,13 @@ final class Stages {
         }
     }
 
-    final static class Concat implements Stage.Concat, Outlet {
+    final static class Concat implements Stage.Concat {
         private final Graph first;
         private final Graph second;
 
         Concat(Graph first, Graph second) {
-            this.first = validate(first);
-            this.second = validate(second);
-        }
-
-        private static Graph validate(Graph graph) {
-            if (graph.hasInlet() || !graph.hasOutlet()) {
-                throw new IllegalArgumentException(
-                    "Concatenated graphs must have an outlet, but no inlet, but this graph does not: " + graph);
-            }
-            return graph;
+            this.first = first;
+            this.second = second;
         }
 
         public Graph getFirst() {
@@ -366,7 +338,7 @@ final class Stages {
         }
     }
 
-    final static class Cancel implements Stage.Cancel, Inlet {
+    final static class Cancel implements Stage.Cancel {
 
         static final Cancel INSTANCE = new Stages.Cancel();
 
@@ -374,7 +346,7 @@ final class Stages {
         }
     }
 
-    final static class FromCompletionStage implements Stage.FromCompletionStage, Outlet {
+    final static class FromCompletionStage implements Stage.FromCompletionStage {
         private final CompletionStage<?> completionStage;
 
         FromCompletionStage(CompletionStage<?> completionStage) {
@@ -387,7 +359,7 @@ final class Stages {
         }
     }
 
-    final static class FromCompletionStageNullable implements Stage.FromCompletionStageNullable, Outlet {
+    final static class FromCompletionStageNullable implements Stage.FromCompletionStageNullable {
         private final CompletionStage<?> completionStage;
 
         FromCompletionStageNullable(CompletionStage<?> completionStage) {

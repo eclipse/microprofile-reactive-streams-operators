@@ -22,7 +22,7 @@ package org.eclipse.microprofile.reactive.streams.tck.api;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber;
+import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionStage;
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
@@ -49,7 +49,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -66,7 +65,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void map() {
         Graph graph = graphFor(builder().map(i -> i + 1));
-        assertTrue(graph.hasOutlet());
         assertEquals(((Function) getAddedStage(Stage.Map.class, graph).getMapper()).apply(1), 2);
     }
 
@@ -79,7 +77,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void peek() {
         AtomicInteger peeked = new AtomicInteger();
         Graph graph = graphFor(builder().peek(peeked::set));
-        assertTrue(graph.hasOutlet());
         ((Consumer) getAddedStage(Stage.Peek.class, graph).getConsumer()).accept(1);
         assertEquals(peeked.get(), 1);
     }
@@ -92,7 +89,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void filter() {
         Graph graph = graphFor(builder().filter(i -> i < 3));
-        assertTrue(graph.hasOutlet());
         assertTrue(((Predicate) getAddedStage(Stage.Filter.class, graph).getPredicate()).test(1));
     }
 
@@ -104,20 +100,16 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void distinct() {
         Graph graph = graphFor(builder().distinct());
-        assertTrue(graph.hasOutlet());
         getAddedStage(Stage.Distinct.class, graph);
     }
 
     @Test
     public void flatMap() {
         Graph graph = graphFor(builder().flatMap(i -> rs.empty()));
-        assertTrue(graph.hasOutlet());
         Function flatMap = getAddedStage(Stage.FlatMap.class, graph).getMapper();
         Object result = flatMap.apply(1);
         assertTrue(result instanceof Graph);
         Graph innerGraph = (Graph) result;
-        assertFalse(innerGraph.hasInlet());
-        assertTrue(innerGraph.hasOutlet());
         assertEquals(innerGraph.getStages().size(), 1);
         assertEmptyStage(innerGraph.getStages().iterator().next());
     }
@@ -125,7 +117,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void flatMapToBuilderFromDifferentReactiveStreamsImplementation() {
         Graph graph = graphFor(builder().flatMap(i -> Mocks.EMPTY_PUBLISHER_BUILDER));
-        assertTrue(graph.hasOutlet());
         Function flatMap = getAddedStage(Stage.FlatMap.class, graph).getMapper();
         Object result = flatMap.apply(1);
         assertTrue(result instanceof Graph);
@@ -140,13 +131,10 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void flatMapRsPublisher() {
         Graph graph = graphFor(builder().flatMapRsPublisher(i -> Mocks.PUBLISHER));
-        assertTrue(graph.hasOutlet());
         Function flatMap = getAddedStage(Stage.FlatMap.class, graph).getMapper();
         Object result = flatMap.apply(1);
         assertTrue(result instanceof Graph);
         Graph innerGraph = (Graph) result;
-        assertFalse(innerGraph.hasInlet());
-        assertTrue(innerGraph.hasOutlet());
         assertEquals(innerGraph.getStages().size(), 1);
         Stage inner = innerGraph.getStages().iterator().next();
         assertTrue(inner instanceof Stage.PublisherStage);
@@ -161,7 +149,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void flatMapCompletionStage() throws Exception {
         Graph graph = graphFor(builder().flatMapCompletionStage(i -> CompletableFuture.completedFuture(i + 1)));
-        assertTrue(graph.hasOutlet());
         CompletionStage result = (CompletionStage) ((Function) getAddedStage(Stage.FlatMapCompletionStage.class, graph).getMapper()).apply(1);
         assertEquals(result.toCompletableFuture().get(1, TimeUnit.SECONDS), 2);
     }
@@ -174,7 +161,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void flatMapIterable() {
         Graph graph = graphFor(builder().flatMapIterable(i -> Arrays.asList(i, i + 1)));
-        assertTrue(graph.hasOutlet());
         assertEquals(((Function) getAddedStage(Stage.FlatMapIterable.class, graph).getMapper()).apply(1), Arrays.asList(1, 2));
     }
 
@@ -186,7 +172,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void limit() {
         Graph graph = graphFor(builder().limit(3));
-        assertTrue(graph.hasOutlet());
         assertEquals(getAddedStage(Stage.Limit.class, graph).getLimit(), 3);
     }
 
@@ -198,7 +183,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void skip() {
         Graph graph = graphFor(builder().skip(3));
-        assertTrue(graph.hasOutlet());
         assertEquals(getAddedStage(Stage.Skip.class, graph).getSkip(), 3);
     }
 
@@ -210,7 +194,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void takeWhile() {
         Graph graph = graphFor(builder().takeWhile(i -> i < 3));
-        assertTrue(graph.hasOutlet());
         assertTrue(((Predicate) getAddedStage(Stage.TakeWhile.class, graph).getPredicate()).test(1));
     }
 
@@ -222,7 +205,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void dropWhile() {
         Graph graph = graphFor(builder().dropWhile(i -> i < 3));
-        assertTrue(graph.hasOutlet());
         assertTrue(((Predicate) getAddedStage(Stage.DropWhile.class, graph).getPredicate()).test(1));
     }
 
@@ -235,7 +217,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void forEach() {
         AtomicInteger received = new AtomicInteger();
         Graph graph = graphFor(builder().forEach(received::set));
-        assertFalse(graph.hasOutlet());
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         Object container = collector.supplier().get();
         collector.accumulator().accept(container, 1);
@@ -251,7 +232,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void ignore() {
         Graph graph = graphFor(builder().ignore());
-        assertFalse(graph.hasOutlet());
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         Object container = collector.supplier().get();
         collector.accumulator().accept(container, 1);
@@ -261,14 +241,12 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void cancel() {
         Graph graph = graphFor(builder().cancel());
-        assertFalse(graph.hasOutlet());
         getAddedStage(Stage.Cancel.class, graph);
     }
 
     @Test
     public void reduceWithIdentity() {
         Graph graph = graphFor(builder().reduce(1, (a, b) -> a - b));
-        assertFalse(graph.hasOutlet());
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         Object container1 = collector.supplier().get();
         assertEquals(collector.finisher().apply(container1), 1);
@@ -292,7 +270,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void reduce() {
         Graph graph = graphFor(builder().reduce((a, b) -> a - b));
-        assertFalse(graph.hasOutlet());
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         Object container1 = collector.supplier().get();
         assertEquals(collector.finisher().apply(container1), Optional.empty());
@@ -313,7 +290,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void findFirst() {
         Graph graph = graphFor(builder().findFirst());
-        assertFalse(graph.hasOutlet());
         getAddedStage(Stage.FindFirst.class, graph);
     }
 
@@ -321,7 +297,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void collect() {
         Collector collector = Collectors.toList();
         Graph graph = graphFor(builder().collect(collector));
-        assertFalse(graph.hasOutlet());
         assertSame(getAddedStage(Stage.Collect.class, graph).getCollector(), collector);
     }
 
@@ -335,7 +310,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
         Supplier supplier = () -> null;
         BiConsumer accumulator = (a, b) -> {};
         Graph graph = graphFor(builder().collect(supplier, accumulator));
-        assertFalse(graph.hasOutlet());
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         assertSame(collector.supplier(), supplier);
         assertSame(collector.accumulator(), accumulator);
@@ -357,7 +331,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void toList() {
         Graph graph = graphFor(builder().toList());
-        assertFalse(graph.hasOutlet());
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         Object container = collector.supplier().get();
         collector.accumulator().accept(container, 1);
@@ -369,7 +342,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void toSubscriber() {
         Graph graph = graphFor(builder().to(Mocks.SUBSCRIBER));
-        assertFalse(graph.hasOutlet());
         assertSame(getAddedStage(Stage.SubscriberStage.class, graph).getRsSubscriber(), Mocks.SUBSCRIBER);
     }
 
@@ -381,15 +353,12 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void to() {
         Graph graph = graphFor(builder().to(rs.fromSubscriber(Mocks.SUBSCRIBER)));
-        assertFalse(graph.hasOutlet());
         assertSame(getAddedStage(Stage.SubscriberStage.class, graph).getRsSubscriber(), Mocks.SUBSCRIBER);
     }
 
     @Test
     public void toBuilderFromDifferentReactiveStreamsImplementation() {
         Graph graph = graphFor(builder().to(Mocks.SUBSCRIBER_BUILDER));
-        assertTrue(graph.hasInlet());
-        assertFalse(graph.hasOutlet());
         assertEquals(graph.getStages().size(), 3);
         Iterator<Stage> stages = graph.getStages().iterator();
         assertTrue(stages.next() instanceof Stage.Map);
@@ -401,8 +370,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void toMultipleStages() {
         Graph graph = graphFor(builder().to(
             rs.<Integer>builder().map(Function.identity()).cancel()));
-        assertTrue(graph.hasInlet());
-        assertFalse(graph.hasOutlet());
         assertEquals(graph.getStages().size(), 3);
         Iterator<Stage> stages = graph.getStages().iterator();
         assertTrue(stages.next() instanceof Stage.Map);
@@ -418,7 +385,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void viaProcessor() {
         Graph graph = graphFor(builder().via(Mocks.PROCESSOR));
-        assertTrue(graph.hasOutlet());
         assertSame(getAddedStage(Stage.ProcessorStage.class, graph).getRsProcessor(), Mocks.PROCESSOR);
     }
 
@@ -430,15 +396,12 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void via() {
         Graph graph = graphFor(builder().via(rs.fromProcessor(Mocks.PROCESSOR)));
-        assertTrue(graph.hasOutlet());
         assertSame(getAddedStage(Stage.ProcessorStage.class, graph).getRsProcessor(), Mocks.PROCESSOR);
     }
 
     @Test
     public void viaBuilderFromDifferentReactiveStreamsImplementation() {
         Graph graph = graphFor(builder().via(Mocks.PROCESSOR_BUILDER));
-        assertTrue(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
         assertEquals(graph.getStages().size(), 3);
         Iterator<Stage> stages = graph.getStages().iterator();
         assertTrue(stages.next() instanceof Stage.Map);
@@ -449,8 +412,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void viaEmpty() {
         Graph graph = graphFor(builder().via(rs.builder()));
-        assertTrue(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
         assertEquals(graph.getStages().size(), 1);
         assertTrue(graph.getStages().iterator().next() instanceof Stage.Map);
     }
@@ -459,8 +420,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void viaMultipleStages() {
         Graph graph = graphFor(builder().via(
             rs.<Integer>builder().map(Function.identity()).filter(t -> true)));
-        assertTrue(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
         assertEquals(graph.getStages().size(), 3);
         Iterator<Stage> stages = graph.getStages().iterator();
         assertTrue(stages.next() instanceof Stage.Map);
@@ -477,7 +436,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void onError() {
         Consumer consumer = t -> {};
         Graph graph = graphFor(builder().onError(consumer));
-        assertTrue(graph.hasOutlet());
         assertSame(getAddedStage(Stage.OnError.class, graph).getConsumer(), consumer);
     }
 
@@ -489,7 +447,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResume() {
         Graph graph = graphFor(builder().onErrorResume(t -> 2));
-        assertTrue(graph.hasOutlet());
         assertEquals(getAddedStage(Stage.OnErrorResume.class, graph).getFunction().apply(new RuntimeException()), 2);
     }
 
@@ -501,7 +458,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResumeWith() {
         Graph graph = graphFor(builder().onErrorResumeWith(t -> rs.empty()));
-        assertTrue(graph.hasOutlet());
         Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertEquals(resumeWith.getStages().size(), 1);
         assertEmptyStage(resumeWith.getStages().iterator().next());
@@ -510,7 +466,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResumeWithToBuilderFromDifferentReactiveStreamsImplementation() {
         Graph graph = graphFor(builder().onErrorResumeWith(t -> Mocks.EMPTY_PUBLISHER_BUILDER));
-        assertTrue(graph.hasOutlet());
         Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertSame(resumeWith, Mocks.EMPTY_PUBLISHER_GRAPH);
     }
@@ -523,7 +478,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResumeWithRsPublisher() {
         Graph graph = graphFor(builder().onErrorResumeWithRsPublisher(t -> Mocks.PUBLISHER));
-        assertTrue(graph.hasOutlet());
         Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertEquals(resumeWith.getStages().size(), 1);
         assertSame(((Stage.PublisherStage) resumeWith.getStages().iterator().next()).getRsPublisher(), Mocks.PUBLISHER);
@@ -538,7 +492,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void onTerminate() {
         Runnable action = () -> {};
         Graph graph = graphFor(builder().onTerminate(action));
-        assertTrue(graph.hasOutlet());
         assertSame(getAddedStage(Stage.OnTerminate.class, graph).getAction(), action);
     }
 
@@ -551,7 +504,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     public void onComplete() {
         Runnable action = () -> {};
         Graph graph = graphFor(builder().onComplete(action));
-        assertTrue(graph.hasOutlet());
         assertSame(getAddedStage(Stage.OnComplete.class, graph).getAction(), action);
     }
 
@@ -569,7 +521,7 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
                 throw new RuntimeException("Wrong method invoked");
             }
             @Override
-            public <T, R> CompletionSubscriber<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
+            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
                 throw new RuntimeException("Wrong method invoked");
             }
 
@@ -610,7 +562,6 @@ public class ProcessorBuilderVerification extends AbstractReactiveStreamsApiVeri
     }
 
     private <S extends Stage> S getAddedStage(Class<S> clazz, Graph graph) {
-        assertTrue(graph.hasInlet(), "Graph doesn't have inlet but should because it's meant to be a processor: " + graph);
         assertEquals(graph.getStages().size(), 2, "Graph does not have two stages");
         Iterator<Stage> stages = graph.getStages().iterator();
         Stage first = stages.next();

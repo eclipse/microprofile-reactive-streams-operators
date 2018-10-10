@@ -23,15 +23,12 @@ import org.reactivestreams.Subscriber;
 import java.util.concurrent.CompletionStage;
 
 /**
- * A subscriber that redeems a completion stage when it completes.
- * <p>
- * The result is provided through a {@link CompletionStage}, which is redeemed when the subscriber receives a
- * completion or error signal, or otherwise cancels the stream.
+ * A subscriber and completion stage pair.
  *
  * @param <T> The type of the elements that the subscriber consumes.
  * @param <R> The type of the result that the subscriber emits.
  */
-public interface CompletionSubscriber<T, R> extends Subscriber<T> {
+public interface SubscriberWithCompletionStage<T, R> {
 
     /**
      * Get the completion stage.
@@ -44,4 +41,10 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
      */
     CompletionStage<R> getCompletion();
 
+    /**
+     * Get the subscriber.
+     *
+     * @return The subscriber.
+     */
+    Subscriber<T> getSubscriber();
 }

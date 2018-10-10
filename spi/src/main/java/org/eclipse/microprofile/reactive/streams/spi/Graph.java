@@ -25,23 +25,11 @@ import java.util.Collection;
  * A graph.
  * <p>
  * Reactive Streams engines are required to convert the stages of this graph into a stream with interfaces according
- * to the shape. The shape is governed by whether the graph has an inlet, an outlet, neither or both.
+ * to the shape, which is determined by which method is invoked on the {@link ReactiveStreamsEngine}.
  */
 public interface Graph {
     /**
      * Get the stages of this graph.
      */
     Collection<Stage> getStages();
-
-    /**
-     * Returns true if this graph has an inlet, ie, if this graph can be turned into a
-     * {@link org.reactivestreams.Subscriber}.
-     */
-    boolean hasInlet();
-
-    /**
-     * Returns true if this graph has an outlet, ie, if this graph can be turned into a
-     * {@link org.reactivestreams.Publisher}.
-     */
-    boolean hasOutlet();
 }

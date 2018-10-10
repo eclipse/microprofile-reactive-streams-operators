@@ -23,7 +23,6 @@ import org.eclipse.microprofile.reactive.streams.CompletionRunner;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
@@ -215,10 +214,6 @@ final class PublisherBuilderImpl<T> extends ReactiveStreamsGraphBuilder implemen
     @Override
     public PublisherBuilder<T> onComplete(Runnable action) {
         return addStage(new Stages.OnComplete(action));
-    }
-
-    public Graph toGraph() {
-        return build(false, true);
     }
 
     @Override

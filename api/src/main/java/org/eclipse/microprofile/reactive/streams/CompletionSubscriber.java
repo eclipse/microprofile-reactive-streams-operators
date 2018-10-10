@@ -59,8 +59,7 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
     static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
 
         // Use a named local class rather than anonymous class for better debugging/stack traces etc
-        class DefaultCompletionSubscriber implements CompletionSubscriber<T, R>,
-            org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber<T, R> {
+        class DefaultCompletionSubscriber implements CompletionSubscriber<T, R> {
 
             private final Subscriber<T> subscriber;
             private final CompletionStage<R> completion;

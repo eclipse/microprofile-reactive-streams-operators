@@ -51,30 +51,11 @@ abstract class ReactiveStreamsGraphBuilder implements ToGraphable {
         }
     }
 
-    Graph build(boolean expectInlet, boolean expectOutlet) {
+    @Override
+    public Graph toGraph() {
         ArrayDeque<Stage> deque = new ArrayDeque<>();
         flatten(deque);
-        Graph graph = new GraphImpl(Collections.unmodifiableCollection(deque));
-
-        if (expectInlet) {
-            if (!graph.hasInlet()) {
-                throw new IllegalStateException("Expected to build a graph with an inlet, but no inlet was found: " + graph);
-            }
-        }
-        else if (graph.hasInlet()) {
-            throw new IllegalStateException("Expected to build a graph with no inlet, but an inlet was found: " + graph);
-        }
-
-        if (expectOutlet) {
-            if (!graph.hasOutlet()) {
-                throw new IllegalStateException("Expected to build a graph with an outlet, but no outlet was found: " + graph);
-            }
-        }
-        else if (graph.hasOutlet()) {
-            throw new IllegalStateException("Expected to build a graph with no outlet, but an outlet was found: " + graph);
-        }
-
-        return graph;
+        return new GraphImpl(Collections.unmodifiableCollection(deque));
     }
 
     private void flatten(Deque<Stage> stages) {

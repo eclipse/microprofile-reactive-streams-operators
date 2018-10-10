@@ -43,117 +43,34 @@ class Mocks {
     private Mocks() {
     }
 
-    static final Graph EMPTY_PUBLISHER_GRAPH = new Graph() {
+    private static final class GraphImpl implements Graph {
+        private final Collection<Stage> stages;
+
+        private GraphImpl(Collection<Stage> stages) {
+            this.stages = stages;
+        }
+
         @Override
         public Collection<Stage> getStages() {
-            return Collections.singleton(new Stage.Of() {
-                @Override
-                public Iterable<?> getElements() {
-                    return Collections.emptyList();
-                }
-
-                @Override
-                public boolean hasOutlet() {
-                    return true;
-                }
-            });
+            return stages;
         }
+    }
 
-        @Override
-        public boolean hasInlet() {
-            return false;
+    static final Graph EMPTY_PUBLISHER_GRAPH =
+        new GraphImpl(Collections.singleton((Stage.Of) Collections::emptyList));
+
+    static final Graph SUBSCRIBER_GRAPH = new GraphImpl(Arrays.asList(
+        new Stage.Distinct() {
+        },
+        new Stage.Cancel() {
         }
+    ));
 
-        @Override
-        public boolean hasOutlet() {
-            return true;
-        }
-    };
-
-    static final Graph SUBSCRIBER_GRAPH = new Graph() {
-        @Override
-        public Collection<Stage> getStages() {
-            return Arrays.asList(
-                new Stage.Distinct() {
-                    @Override
-                    public boolean hasOutlet() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean hasInlet() {
-                        return true;
-                    }
-                },
-                new Stage.Cancel() {
-                    @Override
-                    public boolean hasOutlet() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean hasInlet() {
-                        return true;
-                    }
-                }
-            );
-        }
-
-        @Override
-        public boolean hasInlet() {
-            return true;
-        }
-
-        @Override
-        public boolean hasOutlet() {
-            return false;
-        }
-    };
-
-    static final Graph PROCESSOR_GRAPH = new Graph() {
-        @Override
-        public Collection<Stage> getStages() {
-            return Arrays.asList(
-                new Stage.Distinct() {
-                    @Override
-                    public boolean hasOutlet() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean hasInlet() {
-                        return true;
-                    }
-                },
-                new Stage.Limit() {
-                    @Override
-                    public long getLimit() {
-                        return 5;
-                    }
-
-                    @Override
-                    public boolean hasOutlet() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean hasInlet() {
-                        return true;
-                    }
-                }
-            );
-        }
-
-        @Override
-        public boolean hasInlet() {
-            return true;
-        }
-
-        @Override
-        public boolean hasOutlet() {
-            return true;
-        }
-    };
+    static final Graph PROCESSOR_GRAPH = new GraphImpl(Arrays.asList(
+        new Stage.Distinct() {
+        },
+        (Stage.Limit) () -> 5
+    ));
 
     static final Subscriber SUBSCRIBER = new Subscriber() {
         @Override

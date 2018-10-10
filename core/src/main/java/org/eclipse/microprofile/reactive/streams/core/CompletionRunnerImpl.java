@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams.core;
 
 import org.eclipse.microprofile.reactive.streams.CompletionRunner;
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 
@@ -29,7 +28,7 @@ import java.util.concurrent.CompletionStage;
 
 final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implements CompletionRunner<T> {
 
-    public CompletionRunnerImpl(Stage stage, ReactiveStreamsGraphBuilder previous) {
+    CompletionRunnerImpl(Stage stage, ReactiveStreamsGraphBuilder previous) {
         super(stage, previous);
     }
 
@@ -42,9 +41,5 @@ final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implemen
     public CompletionStage<T> run(ReactiveStreamsEngine engine) {
         Objects.requireNonNull(engine, "Engine must not be null");
         return engine.buildCompletion(toGraph());
-    }
-
-    public Graph toGraph() {
-        return build(false, false);
     }
 }

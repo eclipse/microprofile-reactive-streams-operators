@@ -21,9 +21,9 @@ package org.eclipse.microprofile.reactive.streams.core;
 
 import org.eclipse.microprofile.reactive.streams.CompletionSubscriber;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionStage;
 
 import java.util.Objects;
 
@@ -41,16 +41,7 @@ public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuild
     @Override
     public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
         Objects.requireNonNull(engine, "Engine must not be null");
-        org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber<T, R> spiCs = engine.buildSubscriber(toGraph());
-        if (spiCs instanceof CompletionSubscriber) {
-            return (CompletionSubscriber) spiCs;
-        }
-        else {
-            return CompletionSubscriber.of(spiCs, spiCs.getCompletion());
-        }
-    }
-
-    public Graph toGraph() {
-        return build(true, false);
+        SubscriberWithCompletionStage<T, R> subscriberWithCompletionStage = engine.buildSubscriber(toGraph());
+        return CompletionSubscriber.of(subscriberWithCompletionStage.getSubscriber(), subscriberWithCompletionStage.getCompletion());
     }
 }

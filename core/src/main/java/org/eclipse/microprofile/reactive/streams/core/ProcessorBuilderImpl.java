@@ -22,7 +22,6 @@ package org.eclipse.microprofile.reactive.streams.core;
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.reactivestreams.Processor;
@@ -228,9 +227,5 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
 
     private <S> SubscriberBuilder<T, S> addTerminalStage(Stage stage) {
         return new SubscriberBuilderImpl<>(stage, this);
-    }
-
-    public Graph toGraph() {
-        return build(true, true);
     }
 }

@@ -24,9 +24,11 @@ import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionStage;
 import org.eclipse.microprofile.reactive.streams.spi.UnsupportedStageException;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.CompletableFuture;
@@ -34,8 +36,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -50,7 +50,7 @@ public class SubscriberBuilderVerification extends AbstractReactiveStreamsApiVer
     @Test
     public void build() {
         AtomicReference<Graph> builtGraph = new AtomicReference<>();
-        CompletionSubscriber expected = CompletionSubscriber.of(Mocks.SUBSCRIBER, new CompletableFuture());
+        CompletionStage expectedCs = new CompletableFuture();
         CompletionSubscriber returned = rs.builder().cancel().build(new ReactiveStreamsEngine() {
             @Override
             public <T> Publisher<T> buildPublisher(Graph graph) throws UnsupportedStageException {
@@ -58,10 +58,20 @@ public class SubscriberBuilderVerification extends AbstractReactiveStreamsApiVer
             }
 
             @Override
-            public <T, R> org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber<T, R>
+            public <T, R> SubscriberWithCompletionStage<T, R>
             buildSubscriber(Graph graph) throws UnsupportedStageException {
                 builtGraph.set(graph);
-                return (org.eclipse.microprofile.reactive.streams.spi.CompletionSubscriber) expected;
+                return new SubscriberWithCompletionStage<T, R>() {
+                    @Override
+                    public CompletionStage<R> getCompletion() {
+                        return expectedCs;
+                    }
+
+                    @Override
+                    public Subscriber<T> getSubscriber() {
+                        return Mocks.SUBSCRIBER;
+                    }
+                };
             }
 
             @Override
@@ -75,9 +85,7 @@ public class SubscriberBuilderVerification extends AbstractReactiveStreamsApiVer
             }
         });
 
-        assertSame(returned, expected);
-        assertTrue(builtGraph.get().hasInlet());
-        assertFalse(builtGraph.get().hasOutlet());
+        assertEquals(returned, CompletionSubscriber.of(Mocks.SUBSCRIBER, expectedCs));
         assertEquals(builtGraph.get().getStages().size(), 1);
         assertTrue(builtGraph.get().getStages().iterator().next() instanceof Stage.Cancel);
     }

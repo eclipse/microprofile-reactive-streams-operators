@@ -19,8 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.api;
 
-import org.eclipse.microprofile.reactive.streams.GraphAccessor;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.testng.annotations.Test;
@@ -31,138 +30,117 @@ import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Verification for the {@link ReactiveStreams} class.
+ * Verification for the {@link ReactiveStreamsFactory} class.
  */
-public class ReactiveStreamsVerification {
+public class ReactiveStreamsVerification extends AbstractReactiveStreamsApiVerification {
+
+    public ReactiveStreamsVerification(ReactiveStreamsFactory rs) {
+        super(rs);
+    }
 
     @Test
     public void fromPublisher() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromPublisher(Mocks.PUBLISHER));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.fromPublisher(Mocks.PUBLISHER));
         assertSame(getStage(Stage.PublisherStage.class, graph).getRsPublisher(), Mocks.PUBLISHER);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromPublisherNull() {
-        ReactiveStreams.fromPublisher(null);
+        rs.fromPublisher(null);
     }
 
     @Test
     public void ofSingle() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.of("foo"));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.of("foo"));
         assertEquals(getStage(Stage.Of.class, graph).getElements(), Collections.singletonList("foo"));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void ofSingleNull() {
-        ReactiveStreams.of((Object) null);
+        rs.of((Object) null);
     }
 
     @Test
     public void ofVarArgs() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.of("a", "b", "c"));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.of("a", "b", "c"));
         assertEquals(getStage(Stage.Of.class, graph).getElements(), Arrays.asList("a", "b", "c"));
     }
 
     @Test
     public void empty() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.empty());
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
-        assertSame(getStage(Stage.Of.class, graph), Stage.Of.EMPTY, "Empty stage is not Stage.Of.EMPTY");
+        Graph graph = graphFor(rs.empty());
+        assertEmptyStage(getStage(Stage.Of.class, graph));
     }
 
     @Test
     public void ofNullableNull() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.ofNullable(null));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
-        assertSame(getStage(Stage.Of.class, graph), Stage.Of.EMPTY, "ofNullable(null) stage is not Stage.Of.EMPTY");
+        Graph graph = graphFor(rs.ofNullable(null));
+        assertEmptyStage(getStage(Stage.Of.class, graph));
     }
 
     @Test
     public void ofNullableNonNull() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.ofNullable("foo"));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.ofNullable("foo"));
         assertEquals(getStage(Stage.Of.class, graph).getElements(), Collections.singletonList("foo"));
     }
 
     @Test
     public void fromIterable() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromIterable(Arrays.asList("a", "b", "c")));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.fromIterable(Arrays.asList("a", "b", "c")));
         assertEquals(getStage(Stage.Of.class, graph).getElements(), Arrays.asList("a", "b", "c"));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromIterableNull() {
-        ReactiveStreams.fromIterable(null);
+        rs.fromIterable(null);
     }
 
     @Test
     public void failed() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.failed(new Exception("failed")));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.failed(new Exception("failed")));
         assertEquals(getStage(Stage.Failed.class, graph).getError().getMessage(), "failed");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void failedNull() {
-        ReactiveStreams.failed(null);
+        rs.failed(null);
     }
 
     @Test
     public void builder() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.builder());
-        assertTrue(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.builder());
         assertEquals(graph.getStages(), Collections.emptyList(), "Identity builder should have an empty list of stages");
     }
 
     @Test
     public void fromProcessor() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromProcessor(Mocks.PROCESSOR));
-        assertTrue(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.fromProcessor(Mocks.PROCESSOR));
         assertSame(getStage(Stage.ProcessorStage.class, graph).getRsProcessor(), Mocks.PROCESSOR);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromProcessorNull() {
-        ReactiveStreams.fromProcessor(null);
+        rs.fromProcessor(null);
     }
 
     @Test
     public void fromSubscriber() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromSubscriber(Mocks.SUBSCRIBER));
-        assertTrue(graph.hasInlet());
-        assertFalse(graph.hasOutlet());
+        Graph graph = graphFor(rs.fromSubscriber(Mocks.SUBSCRIBER));
         assertSame(getStage(Stage.SubscriberStage.class, graph).getRsSubscriber(), Mocks.SUBSCRIBER);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromSubscriberNull() {
-        ReactiveStreams.fromSubscriber(null);
+        rs.fromSubscriber(null);
     }
 
     @Test
     public void iterate() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.iterate(1, i -> i + 1));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.iterate(1, i -> i + 1));
         Iterator iter = getStage(Stage.Of.class, graph).getElements().iterator();
         assertTrue(iter.hasNext());
         assertEquals(iter.next(), 1);
@@ -174,14 +152,12 @@ public class ReactiveStreamsVerification {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void iterateNullOperator() {
-        ReactiveStreams.iterate(1, null);
+        rs.iterate(1, null);
     }
 
     @Test
     public void generate() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.generate(() -> 1));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.generate(() -> 1));
         Iterator iter = getStage(Stage.Of.class, graph).getElements().iterator();
         assertTrue(iter.hasNext());
         assertEquals(iter.next(), 1);
@@ -193,57 +169,51 @@ public class ReactiveStreamsVerification {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void generateNullSupplier() {
-        ReactiveStreams.generate(null);
+        rs.generate(null);
     }
 
     @Test
     public void concat() {
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.concat(ReactiveStreams.empty(), ReactiveStreams.of(1)));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.concat(rs.empty(), rs.of(1)));
         Stage.Concat concat = getStage(Stage.Concat.class, graph);
-        assertSame(getStage(Stage.Of.class, concat.getFirst()), Stage.Of.EMPTY);
+        assertEmptyStage(getStage(Stage.Of.class, concat.getFirst()));
         assertEquals(getStage(Stage.Of.class, concat.getSecond()).getElements(), Collections.singletonList(1));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void concatFirstNull() {
-        ReactiveStreams.concat(null, ReactiveStreams.empty());
+        rs.concat(null, rs.empty());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void concatSecondNull() {
-        ReactiveStreams.concat(ReactiveStreams.empty(), null);
+        rs.concat(rs.empty(), null);
     }
 
     @Test
     public void fromCompletionStage() {
         CompletableFuture<Integer> future = CompletableFuture.completedFuture(1);
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromCompletionStage(future));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.fromCompletionStage(future));
         Stage.FromCompletionStage fromCompletionStage = getStage(Stage.FromCompletionStage.class, graph);
         assertSame(fromCompletionStage.getCompletionStage(), future);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromCompletionStageNull() {
-        ReactiveStreams.fromCompletionStage(null);
+        rs.fromCompletionStage(null);
     }
 
     @Test
     public void fromCompletionStageNullable() {
         CompletableFuture<Integer> future = CompletableFuture.completedFuture(1);
-        Graph graph = GraphAccessor.buildGraphFor(ReactiveStreams.fromCompletionStageNullable(future));
-        assertFalse(graph.hasInlet());
-        assertTrue(graph.hasOutlet());
+        Graph graph = graphFor(rs.fromCompletionStageNullable(future));
         Stage.FromCompletionStageNullable fromCompletionStage = getStage(Stage.FromCompletionStageNullable.class, graph);
         assertSame(fromCompletionStage.getCompletionStage(), future);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromCompletionStageNullableNull() {
-        ReactiveStreams.fromCompletionStageNullable(null);
+        rs.fromCompletionStageNullable(null);
     }
 
     private <S extends Stage> S getStage(Class<S> clazz, Graph graph) {

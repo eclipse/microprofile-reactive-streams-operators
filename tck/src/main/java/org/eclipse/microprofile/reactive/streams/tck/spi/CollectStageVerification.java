@@ -19,7 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
 import org.reactivestreams.Subscriber;
 import org.testng.annotations.Test;
@@ -48,19 +47,19 @@ public class CollectStageVerification extends AbstractStageVerification {
 
     @Test
     public void toListStageShouldReturnAList() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .toList().run(getEngine())), Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void toListStageShouldReturnEmpty() {
-        assertEquals(await(ReactiveStreams.of()
+        assertEquals(await(rs.of()
             .toList().run(getEngine())), Collections.emptyList());
     }
 
     @Test
     public void collectShouldAccumulateResult() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .collect(
                 () -> new AtomicInteger(0),
                 AtomicInteger::addAndGet
@@ -69,7 +68,7 @@ public class CollectStageVerification extends AbstractStageVerification {
 
     @Test
     public void collectShouldSupportEmptyStreams() {
-        assertEquals(await(ReactiveStreams.<Integer>empty()
+        assertEquals(await(rs.<Integer>empty()
             .collect(
                 () -> new AtomicInteger(42),
                 AtomicInteger::addAndGet
@@ -78,7 +77,7 @@ public class CollectStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void collectShouldPropagateUpstreamErrors() {
-        await(ReactiveStreams.<Integer>failed(new QuietRuntimeException("failed"))
+        await(rs.<Integer>failed(new QuietRuntimeException("failed"))
             .collect(
                 () -> new AtomicInteger(0),
                 AtomicInteger::addAndGet
@@ -88,13 +87,13 @@ public class CollectStageVerification extends AbstractStageVerification {
 
     @Test
     public void finisherFunctionShouldBeInvoked() {
-        assertEquals(await(ReactiveStreams.of("1", "2", "3")
+        assertEquals(await(rs.of("1", "2", "3")
             .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void toListStageShouldPropagateUpstreamErrors() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+        await(rs.failed(new QuietRuntimeException("failed"))
             .toList().run(getEngine()));
     }
 
@@ -133,7 +132,7 @@ public class CollectStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void collectStageShouldPropagateErrorsFromFinisher() {
-        CompletionStage<Integer> result = ReactiveStreams.of(1, 2, 3)
+        CompletionStage<Integer> result = rs.of(1, 2, 3)
             .collect(Collector.<Integer, Integer, Integer>of(() -> 0, (a, b) -> {
                 },
                 (a, b) -> a + b,
@@ -146,9 +145,9 @@ public class CollectStageVerification extends AbstractStageVerification {
 
     @Test
     public void collectStageBuilderShouldBeReusable() {
-        SubscriberBuilder<Integer, List<Integer>> toList = ReactiveStreams.<Integer>builder().toList();
-        assertEquals(await(ReactiveStreams.of(1, 2, 3).to(toList).run(getEngine())), Arrays.asList(1, 2, 3));
-        assertEquals(await(ReactiveStreams.of(4, 5, 6).to(toList).run(getEngine())), Arrays.asList(4, 5, 6));
+        SubscriberBuilder<Integer, List<Integer>> toList = rs.<Integer>builder().toList();
+        assertEquals(await(rs.of(1, 2, 3).to(toList).run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(await(rs.of(4, 5, 6).to(toList).run(getEngine())), Arrays.asList(4, 5, 6));
     }
 
 
@@ -160,7 +159,7 @@ public class CollectStageVerification extends AbstractStageVerification {
     class ToListSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
         @Override
         public Subscriber<Integer> createSubscriber() {
-            return ReactiveStreams.<Integer>builder().toList().build(getEngine());
+            return rs.<Integer>builder().toList().build(getEngine());
         }
 
         @Override
@@ -172,7 +171,7 @@ public class CollectStageVerification extends AbstractStageVerification {
     class CollectSubscriberVerification extends StageSubscriberBlackboxVerification<Integer> {
         @Override
         public Subscriber<Integer> createSubscriber() {
-            return ReactiveStreams.<Integer>builder()
+            return rs.<Integer>builder()
                 .collect(
                     () -> new AtomicInteger(0),
                     AtomicInteger::addAndGet)

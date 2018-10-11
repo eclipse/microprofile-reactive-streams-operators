@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -46,7 +46,7 @@ public class PeekStageVerification extends AbstractStageVerification {
     @Test
     public void peekStageShouldNotModifyElements() {
         AtomicInteger count = new AtomicInteger();
-        assertEquals(await(ReactiveStreams.of(1, 2, 3)
+        assertEquals(await(rs.of(1, 2, 3)
             .peek(i -> count.incrementAndGet())
             .toList()
             .run(getEngine())), Arrays.asList(1, 2, 3));
@@ -69,7 +69,7 @@ public class PeekStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void peekStageShouldPropagateUpstreamExceptions() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+        await(rs.failed(new QuietRuntimeException("failed"))
             .peek(x -> {})
             .toList()
             .run(getEngine()));
@@ -77,7 +77,7 @@ public class PeekStageVerification extends AbstractStageVerification {
 
     public void peekStageShouldNotBeExecutedForEmptyStreams() {
         AtomicBoolean invoked = new AtomicBoolean();
-        await(ReactiveStreams.empty()
+        await(rs.empty()
             .peek(x -> invoked.set(true))
             .toList()
             .run(getEngine()));
@@ -86,10 +86,10 @@ public class PeekStageVerification extends AbstractStageVerification {
 
     @Test
     public void peekStageShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> peek = ReactiveStreams.<Integer>builder().peek(t -> {});
+        ProcessorBuilder<Integer, Integer> peek = rs.<Integer>builder().peek(t -> {});
 
-        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(peek).toList().run(getEngine())), Arrays.asList(1, 2, 3));
-        assertEquals(await(ReactiveStreams.of(4, 5, 6).via(peek).toList().run(getEngine())), Arrays.asList(4, 5, 6));
+        assertEquals(await(rs.of(1, 2, 3).via(peek).toList().run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(await(rs.of(4, 5, 6).via(peek).toList().run(getEngine())), Arrays.asList(4, 5, 6));
     }
 
     @Override
@@ -106,12 +106,12 @@ public class PeekStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().peek(noop).buildRs(getEngine());
+            return rs.<Integer>builder().peek(noop).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .peek(noop).buildRs(getEngine());
         }
 

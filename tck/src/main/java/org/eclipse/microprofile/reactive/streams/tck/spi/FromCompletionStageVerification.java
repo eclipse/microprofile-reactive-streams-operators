@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
@@ -41,7 +40,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test
     public void fromCsStageShouldEmitAnElementWhenAlreadyRedeemed() {
         assertEquals(await(
-            ReactiveStreams.fromCompletionStage(CompletableFuture.completedFuture(10))
+            rs.fromCompletionStage(CompletableFuture.completedFuture(10))
                 .toList()
                 .run(getEngine())
         ), Collections.singletonList(10));
@@ -50,7 +49,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test
     public void fromCsStageShouldEmitAnElementWhenRedeemedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStage(future)
+        CompletionStage<List<Integer>> result = rs.fromCompletionStage(future)
             .toList()
             .run(getEngine());
         // Give it some time to not complete
@@ -63,7 +62,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = NullPointerException.class)
     public void fromCsStageShouldFailWhenAlreadyRedeemedWithNull() {
         await(
-            ReactiveStreams.fromCompletionStage(CompletableFuture.completedFuture(null))
+            rs.fromCompletionStage(CompletableFuture.completedFuture(null))
                 .toList()
                 .run(getEngine())
         );
@@ -72,7 +71,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = NullPointerException.class)
     public void fromCsStageShouldFailWhenRedeemedWithNullLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStage(future)
+        CompletionStage<List<Integer>> result = rs.fromCompletionStage(future)
             .toList()
             .run(getEngine());
         // Give it some time to not complete
@@ -87,7 +86,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         future.completeExceptionally(new QuietRuntimeException("failed"));
         await(
-            ReactiveStreams.fromCompletionStage(future)
+            rs.fromCompletionStage(future)
                 .toList()
                 .run(getEngine())
         );
@@ -96,7 +95,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void fromCsStageShouldPropagateExceptionsWhenFailedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = ReactiveStreams.fromCompletionStage(future)
+        CompletionStage<List<Integer>> result = rs.fromCompletionStage(future)
             .toList()
             .run(getEngine());
         // Give it some time to not complete
@@ -109,7 +108,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test
     public void fromCsStageShouldBeReusable() {
         PublisherBuilder<Integer> publisher =
-            ReactiveStreams.fromCompletionStage(CompletableFuture.completedFuture(10));
+            rs.fromCompletionStage(CompletableFuture.completedFuture(10));
 
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
@@ -124,10 +123,10 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<String> createPublisher(long elements) {
             if (elements == 0) {
-                return ReactiveStreams.<String>empty().buildRs(getEngine());
+                return rs.<String>empty().buildRs(getEngine());
             }
             else {
-                return ReactiveStreams.fromCompletionStage(
+                return rs.fromCompletionStage(
                     CompletableFuture.completedFuture("value")
                 ).buildRs(getEngine());
             }

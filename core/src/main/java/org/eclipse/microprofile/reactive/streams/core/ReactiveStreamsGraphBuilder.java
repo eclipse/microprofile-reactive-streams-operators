@@ -17,34 +17,30 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams;
+package org.eclipse.microprofile.reactive.streams.core;
 
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.spi.ToGraphable;
+import org.reactivestreams.Publisher;
 
 import java.util.*;
 
 /**
  * Builds graphs of reactive streams.
- *
- * @see ReactiveStreams
  */
-final class ReactiveStreamsGraphBuilder {
+abstract class ReactiveStreamsGraphBuilder implements ToGraphable {
 
     private final Stage stage;
     private final ReactiveStreamsGraphBuilder previous;
 
-    private ReactiveStreamsGraphBuilder(Stage stage, ReactiveStreamsGraphBuilder previous) {
+    ReactiveStreamsGraphBuilder(Stage stage, ReactiveStreamsGraphBuilder previous) {
         this.stage = stage;
         this.previous = previous;
     }
 
-    ReactiveStreamsGraphBuilder(Stage stage) {
-        this(stage, null);
-    }
-
-    static ReactiveStreamsEngine defaultEngine() {
+    ReactiveStreamsEngine defaultEngine() {
         Iterator<ReactiveStreamsEngine> engines = ServiceLoader.load(ReactiveStreamsEngine.class).iterator();
 
         if (engines.hasNext()) {
@@ -55,34 +51,11 @@ final class ReactiveStreamsGraphBuilder {
         }
     }
 
-    ReactiveStreamsGraphBuilder addStage(Stage stage) {
-        return new ReactiveStreamsGraphBuilder(stage, this);
-    }
-
-    Graph build(boolean expectInlet, boolean expectOutlet) {
+    @Override
+    public Graph toGraph() {
         ArrayDeque<Stage> deque = new ArrayDeque<>();
         flatten(deque);
-        Graph graph = new Graph(Collections.unmodifiableCollection(deque));
-
-        if (expectInlet) {
-            if (!graph.hasInlet()) {
-                throw new IllegalStateException("Expected to build a graph with an inlet, but no inlet was found: " + graph);
-            }
-        }
-        else if (graph.hasInlet()) {
-            throw new IllegalStateException("Expected to build a graph with no inlet, but an inlet was found: " + graph);
-        }
-
-        if (expectOutlet) {
-            if (!graph.hasOutlet()) {
-                throw new IllegalStateException("Expected to build a graph with an outlet, but no outlet was found: " + graph);
-            }
-        }
-        else if (graph.hasOutlet()) {
-            throw new IllegalStateException("Expected to build a graph with no outlet, but an outlet was found: " + graph);
-        }
-
-        return graph;
+        return new GraphImpl(Collections.unmodifiableCollection(deque));
     }
 
     private void flatten(Deque<Stage> stages) {
@@ -94,11 +67,40 @@ final class ReactiveStreamsGraphBuilder {
             else if (thisStage.stage instanceof InternalStages.Nested) {
                 ((InternalStages.Nested) thisStage.stage).getBuilder().flatten(stages);
             }
+            else if (thisStage.stage instanceof InternalStages.NestedGraph) {
+                // need to prepend to front in reverse order
+                Collection<Stage> nestedStages = ((InternalStages.NestedGraph) thisStage.stage).getGraph().getStages();
+                ListIterator<Stage> iter;
+                if (nestedStages instanceof List) {
+                    iter = ((List<Stage>) nestedStages).listIterator(nestedStages.size());
+                }
+                else {
+                    iter = new ArrayList<>(nestedStages).listIterator(nestedStages.size());
+                }
+                while (iter.hasPrevious()) {
+                    stages.addFirst(iter.previous());
+                }
+            }
             else {
                 stages.addFirst(thisStage.stage);
             }
             thisStage = thisStage.previous;
         }
+    }
+
+    static Graph rsBuilderToGraph(Object obj) {
+        Objects.requireNonNull(obj);
+        if (obj instanceof ToGraphable) {
+            return (((ToGraphable) obj).toGraph());
+        }
+        else {
+            throw new IllegalArgumentException(obj + " is not an instance of ToGraphable and so can't participate " +
+                "in this graph");
+        }
+    }
+
+    static Graph publisherToGraph(Publisher<?> publisher) {
+        return new GraphImpl(Collections.singleton(new Stages.PublisherStage(publisher)));
     }
 
 }

@@ -53,6 +53,18 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.microprofile.reactive.streams</groupId>
+            <artifactId>microprofile-reactive-streams-operators-spi</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.reactive.streams</groupId>
+            <artifactId>microprofile-reactive-streams-operators-core</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.reactivestreams</groupId>
             <artifactId>reactive-streams-tck</artifactId>
         </dependency>

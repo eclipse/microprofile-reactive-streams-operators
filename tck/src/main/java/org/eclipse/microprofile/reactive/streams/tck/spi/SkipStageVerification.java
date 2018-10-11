@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -39,7 +39,7 @@ public class SkipStageVerification extends AbstractStageVerification {
 
     @Test
     public void skipStageShouldSkipElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+        assertEquals(await(rs.of(1, 2, 3, 4)
             .skip(2)
             .toList()
             .run(getEngine())), Arrays.asList(3, 4));
@@ -47,7 +47,7 @@ public class SkipStageVerification extends AbstractStageVerification {
 
     @Test
     public void skipStageShouldSupportSkippingNoElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+        assertEquals(await(rs.of(1, 2, 3, 4)
             .skip(0)
             .toList()
             .run(getEngine())), Arrays.asList(1, 2, 3, 4));
@@ -55,10 +55,10 @@ public class SkipStageVerification extends AbstractStageVerification {
 
     @Test
     public void skipStageShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> skip = ReactiveStreams.<Integer>builder().skip(2);
+        ProcessorBuilder<Integer, Integer> skip = rs.<Integer>builder().skip(2);
 
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4).via(skip).toList().run(getEngine())), Arrays.asList(3, 4));
-        assertEquals(await(ReactiveStreams.of(5, 6, 7, 8).via(skip).toList().run(getEngine())), Arrays.asList(7, 8));
+        assertEquals(await(rs.of(1, 2, 3, 4).via(skip).toList().run(getEngine())), Arrays.asList(3, 4));
+        assertEquals(await(rs.of(5, 6, 7, 8).via(skip).toList().run(getEngine())), Arrays.asList(7, 8));
     }
 
     @Override
@@ -72,12 +72,12 @@ public class SkipStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().skip(0).buildRs(getEngine());
+            return rs.<Integer>builder().skip(0).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .skip(1).buildRs(getEngine());
         }
 

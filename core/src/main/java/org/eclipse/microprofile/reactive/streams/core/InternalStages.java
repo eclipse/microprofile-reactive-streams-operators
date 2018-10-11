@@ -17,9 +17,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams;
+package org.eclipse.microprofile.reactive.streams.core;
 
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.spi.ToGraphable;
+
+import java.util.Objects;
 
 /**
  * Internal stages, used to capture the graph while being built, but never passed to a
@@ -29,6 +33,9 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
  * flattened out to an array, removing any of the internal stages that held nested stages, etc.
  */
 class InternalStages {
+
+    private InternalStages() {
+    }
 
     interface InternalStage extends Stage {
     }
@@ -61,6 +68,35 @@ class InternalStages {
 
         ReactiveStreamsGraphBuilder getBuilder() {
             return graphBuilder;
+        }
+    }
+
+    /**
+     * A nested stage, holding a graph. This is used when nesting a builder that has come from another implementation.
+     */
+    static final class NestedGraph implements InternalStage {
+        private final Graph graph;
+
+        NestedGraph(Graph graph) {
+            this.graph = graph;
+        }
+
+        public Graph getGraph() {
+            return graph;
+        }
+    }
+
+    static InternalStage nested(Object object) {
+        Objects.requireNonNull(object);
+        if (object instanceof ReactiveStreamsGraphBuilder) {
+            return new Nested((ReactiveStreamsGraphBuilder) object);
+        }
+        else if (object instanceof ToGraphable) {
+            return new NestedGraph(((ToGraphable) object).toGraph());
+        }
+        else {
+            throw new IllegalArgumentException("The passed in builder does not implement " + ToGraphable.class +
+                " and so can't be added to this graph");
         }
     }
 }

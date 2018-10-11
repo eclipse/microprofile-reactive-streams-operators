@@ -20,7 +20,8 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
+import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.IdentityProcessorVerification;
@@ -45,11 +46,13 @@ import java.util.stream.IntStream;
  */
 abstract class AbstractStageVerification {
 
+    protected final ReactiveStreamsFactory rs;
     private final ReactiveStreamsEngine engine;
     private final TestEnvironment environment;
     private final ScheduledExecutorService executorService;
 
     AbstractStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
+        this.rs = deps.rs();
         this.engine = deps.engine();
         this.environment = deps.testEnvironment();
         this.executorService = deps.executorService();
@@ -95,7 +98,7 @@ abstract class AbstractStageVerification {
      * An infinite stream of integers starting from one.
      */
     PublisherBuilder<Integer> infiniteStream() {
-        return ReactiveStreams.fromIterable(() -> {
+        return rs.fromIterable(() -> {
             AtomicInteger value = new AtomicInteger();
             return IntStream.generate(value::incrementAndGet).boxed().iterator();
         });
@@ -109,7 +112,7 @@ abstract class AbstractStageVerification {
 
         @Override
         public Publisher<T> createFailedPublisher() {
-            return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
+            return rs.<T>failed(new RuntimeException("failed")).buildRs(engine);
         }
     }
 
@@ -125,7 +128,7 @@ abstract class AbstractStageVerification {
 
         @Override
         public Publisher<T> createFailedPublisher() {
-            return ReactiveStreams.<T>failed(new RuntimeException("failed")).buildRs(engine);
+            return rs.<T>failed(new RuntimeException("failed")).buildRs(engine);
         }
 
         @Override

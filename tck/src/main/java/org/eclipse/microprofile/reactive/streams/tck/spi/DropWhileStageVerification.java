@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -44,7 +43,7 @@ public class DropWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void dropWhileStageShouldSupportDroppingElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 0)
+        assertEquals(await(rs.of(1, 2, 3, 4, 0)
             .dropWhile(i -> i < 3)
             .toList()
             .run(getEngine())), Arrays.asList(3, 4, 0));
@@ -66,7 +65,7 @@ public class DropWhileStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void dropWhileStageShouldPropagateUpstreamErrorsWhileDropping() {
-        await(ReactiveStreams.<Integer>failed(new QuietRuntimeException("failed"))
+        await(rs.<Integer>failed(new QuietRuntimeException("failed"))
             .dropWhile(i -> i < 3)
             .toList()
             .run(getEngine()));
@@ -87,7 +86,7 @@ public class DropWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void dropWhileStageShouldNotRunPredicateOnceItsFinishedDropping() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+        assertEquals(await(rs.of(1, 2, 3, 4)
             .dropWhile(i -> {
                 if (i < 3) {
                     return true;
@@ -105,7 +104,7 @@ public class DropWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void dropWhileStageShouldAllowCompletionWhileDropping() {
-        assertEquals(await(ReactiveStreams.of(1, 1, 1, 1)
+        assertEquals(await(rs.of(1, 1, 1, 1)
             .dropWhile(i -> i < 3)
             .toList()
             .run(getEngine())), Collections.emptyList());
@@ -120,15 +119,15 @@ public class DropWhileStageVerification extends AbstractStageVerification {
 
     @Test
     public void dropWhileStageBuilderShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> dropWhile = ReactiveStreams.<Integer>builder()
+        ProcessorBuilder<Integer, Integer> dropWhile = rs.<Integer>builder()
             .dropWhile(i -> i < 3);
 
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4)
+        assertEquals(await(rs.of(1, 2, 3, 4)
             .via(dropWhile)
             .toList()
             .run(getEngine())), Arrays.asList(3, 4));
 
-        assertEquals(await(ReactiveStreams.of(0, 1, 6, 7)
+        assertEquals(await(rs.of(0, 1, 6, 7)
             .via(dropWhile)
             .toList()
             .run(getEngine())), Arrays.asList(6, 7));
@@ -146,12 +145,12 @@ public class DropWhileStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().dropWhile(i -> false).buildRs(getEngine());
+            return rs.<Integer>builder().dropWhile(i -> false).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .dropWhile(i -> false).buildRs(getEngine());
         }
 

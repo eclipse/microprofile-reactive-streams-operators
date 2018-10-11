@@ -19,7 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -43,7 +42,7 @@ public class CancelStageVerification extends AbstractStageVerification {
     @Test
     public void cancelStageShouldCancelTheStage() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> s.onSubscribe(new Subscription() {
+        CompletionStage<Void> result = rs.fromPublisher(s -> s.onSubscribe(new Subscription() {
             @Override
             public void request(long n) {
             }
@@ -59,15 +58,15 @@ public class CancelStageVerification extends AbstractStageVerification {
 
     @Test
     public void cancelStageShouldIgnoreAnyUpstreamFailures() {
-        await(ReactiveStreams.failed(new QuietRuntimeException())
+        await(rs.failed(new QuietRuntimeException())
             .cancel().run(getEngine()));
     }
 
     @Test
     public void cancelSubscriberBuilderShouldBeReusable() {
-        SubscriberBuilder<String, Void> cancel = ReactiveStreams.<String>builder().cancel();
-        await(ReactiveStreams.of("a").to(cancel).run(getEngine()));
-        await(ReactiveStreams.of("b").to(cancel).run(getEngine()));
+        SubscriberBuilder<String, Void> cancel = rs.<String>builder().cancel();
+        await(rs.of("a").to(cancel).run(getEngine()));
+        await(rs.of("b").to(cancel).run(getEngine()));
     }
 
     @Override
@@ -78,7 +77,7 @@ public class CancelStageVerification extends AbstractStageVerification {
     public class SubscriberVerification extends StageSubscriberBlackboxVerification {
         @Override
         public Subscriber createSubscriber() {
-            return ReactiveStreams.builder().cancel().build(getEngine());
+            return rs.builder().cancel().build(getEngine());
         }
 
         @Override

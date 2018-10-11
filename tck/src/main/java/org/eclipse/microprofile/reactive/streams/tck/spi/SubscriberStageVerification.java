@@ -19,7 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Subscription;
 import org.testng.annotations.Test;
 
@@ -35,23 +35,23 @@ public class SubscriberStageVerification extends AbstractStageVerification {
 
     @Test
     public void subscriberStageShouldRedeemCompletionStageWhenCompleted() {
-        CompletionStage<Void> result = ReactiveStreams.of().to(
-            ReactiveStreams.builder().ignore().build(getEngine())
+        CompletionStage<Void> result = rs.of().to(
+            rs.builder().ignore().build(getEngine())
         ).run(getEngine());
         await(result);
     }
 
     @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void subscriberStageShouldRedeemCompletionStageWhenFailed() {
-        CompletionStage<Void> result = ReactiveStreams.failed(new RuntimeException("failed")).to(
-            ReactiveStreams.builder().ignore().build(getEngine())
+        CompletionStage<Void> result = rs.failed(new RuntimeException("failed")).to(
+            rs.builder().ignore().build(getEngine())
         ).run(getEngine());
         await(result);
     }
 
     @Test(expectedExceptions = CancellationException.class)
     public void subscriberStageShouldRedeemCompletionStageWithCancellationExceptionWhenCancelled() {
-        CompletionStage<Void> result = ReactiveStreams.fromPublisher(subscriber -> subscriber.onSubscribe(new Subscription() {
+        CompletionStage<Void> result = rs.fromPublisher(subscriber -> subscriber.onSubscribe(new Subscription() {
             @Override
             public void request(long n) {
             }
@@ -60,7 +60,7 @@ public class SubscriberStageVerification extends AbstractStageVerification {
             public void cancel() {
             }
         })).to(
-            ReactiveStreams.builder().cancel().build(getEngine())
+            rs.builder().cancel().build(getEngine())
         ).run(getEngine());
         await(result);
     }

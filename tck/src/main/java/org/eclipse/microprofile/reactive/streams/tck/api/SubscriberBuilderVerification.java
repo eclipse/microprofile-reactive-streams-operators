@@ -20,13 +20,15 @@
 package org.eclipse.microprofile.reactive.streams.tck.api;
 
 import org.eclipse.microprofile.reactive.streams.CompletionSubscriber;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionStage;
 import org.eclipse.microprofile.reactive.streams.spi.UnsupportedStageException;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.CompletableFuture;
@@ -34,29 +36,44 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 /**
  * Verification for the {@link org.eclipse.microprofile.reactive.streams.SubscriberBuilder} class.
  */
-public class SubscriberBuilderVerification {
+public class SubscriberBuilderVerification extends AbstractReactiveStreamsApiVerification {
+
+    public SubscriberBuilderVerification(ReactiveStreamsFactory rs) {
+        super(rs);
+    }
 
     @Test
     public void build() {
         AtomicReference<Graph> builtGraph = new AtomicReference<>();
-        CompletionSubscriber expected = CompletionSubscriber.of(Mocks.SUBSCRIBER, new CompletableFuture());
-        CompletionSubscriber returned = ReactiveStreams.builder().cancel().build(new ReactiveStreamsEngine() {
+        CompletionStage expectedCs = new CompletableFuture();
+        CompletionSubscriber returned = rs.builder().cancel().build(new ReactiveStreamsEngine() {
             @Override
             public <T> Publisher<T> buildPublisher(Graph graph) throws UnsupportedStageException {
                 throw new RuntimeException("Wrong method invoked");
             }
+
             @Override
-            public <T, R> CompletionSubscriber<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
+            public <T, R> SubscriberWithCompletionStage<T, R>
+            buildSubscriber(Graph graph) throws UnsupportedStageException {
                 builtGraph.set(graph);
-                return expected;
+                return new SubscriberWithCompletionStage<T, R>() {
+                    @Override
+                    public CompletionStage<R> getCompletion() {
+                        return expectedCs;
+                    }
+
+                    @Override
+                    public Subscriber<T> getSubscriber() {
+                        return Mocks.SUBSCRIBER;
+                    }
+                };
             }
+
             @Override
             public <T, R> Processor<T, R> buildProcessor(Graph graph) throws UnsupportedStageException {
                 throw new RuntimeException("Wrong method invoked");
@@ -68,15 +85,13 @@ public class SubscriberBuilderVerification {
             }
         });
 
-        assertSame(returned, expected);
-        assertTrue(builtGraph.get().hasInlet());
-        assertFalse(builtGraph.get().hasOutlet());
+        assertEquals(returned, CompletionSubscriber.of(Mocks.SUBSCRIBER, expectedCs));
         assertEquals(builtGraph.get().getStages().size(), 1);
-        assertSame(builtGraph.get().getStages().iterator().next(), Stage.Cancel.INSTANCE);
+        assertTrue(builtGraph.get().getStages().iterator().next() instanceof Stage.Cancel);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void buildNull() {
-        ReactiveStreams.builder().cancel().build(null);
+        rs.builder().cancel().build(null);
     }
 }

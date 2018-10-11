@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -57,7 +57,7 @@ public class LimitStageVerification extends AbstractStageVerification {
 
     @Test
     public void limitStageToZeroShouldCompleteStreamEvenWhenNoElementsAreReceived() {
-        assertEquals(await(ReactiveStreams.fromPublisher(subscriber ->
+        assertEquals(await(rs.fromPublisher(subscriber ->
             subscriber.onSubscribe(new Subscription() {
                 @Override
                 public void request(long n) {
@@ -89,10 +89,10 @@ public class LimitStageVerification extends AbstractStageVerification {
             infiniteStream()
                 .flatMap(i -> {
                     if (i == 4) {
-                        return ReactiveStreams.failed(new RuntimeException("failed"));
+                        return rs.failed(new RuntimeException("failed"));
                     }
                     else {
-                        return ReactiveStreams.of(i);
+                        return rs.of(i);
                     }
                 })
                 .limit(3)
@@ -122,7 +122,7 @@ public class LimitStageVerification extends AbstractStageVerification {
 
     @Test
     public void limitStageBuilderShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> limit = ReactiveStreams.<Integer>builder().limit(3);
+        ProcessorBuilder<Integer, Integer> limit = rs.<Integer>builder().limit(3);
         assertEquals(await(infiniteStream().via(limit).toList().run(getEngine())), Arrays.asList(1, 2, 3));
         assertEquals(await(infiniteStream().map(i -> i + 1).via(limit).toList().run(getEngine())), Arrays.asList(2, 3, 4));
     }
@@ -135,7 +135,7 @@ public class LimitStageVerification extends AbstractStageVerification {
     public class ProcessorVerification extends StageProcessorVerification<Integer> {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder()
+            return rs.<Integer>builder()
                 .limit(Long.MAX_VALUE)
                 .buildRs(getEngine());
         }
@@ -147,7 +147,7 @@ public class LimitStageVerification extends AbstractStageVerification {
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .limit(Long.MAX_VALUE)
                 .buildRs(getEngine());
         }

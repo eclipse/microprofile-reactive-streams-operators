@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
@@ -44,7 +44,7 @@ public class FilterStageVerification extends AbstractStageVerification {
 
     @Test
     public void filterStageShouldFilterElements() {
-        assertEquals(await(ReactiveStreams.of(1, 2, 3, 4, 5, 6)
+        assertEquals(await(rs.of(1, 2, 3, 4, 5, 6)
             .filter(i -> (i & 1) == 1)
             .toList()
             .run(getEngine())), Arrays.asList(1, 3, 5));
@@ -66,7 +66,7 @@ public class FilterStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void filterStageShouldPropagateUpstreamExceptions() {
-        await(ReactiveStreams.failed(new QuietRuntimeException("failed"))
+        await(rs.failed(new QuietRuntimeException("failed"))
             .filter(foo -> true)
             .toList()
             .run(getEngine()));
@@ -81,9 +81,9 @@ public class FilterStageVerification extends AbstractStageVerification {
 
     @Test
     public void filterStageBuilderShouldBeReusable() {
-        ProcessorBuilder<Integer, Integer> filter = ReactiveStreams.<Integer>builder().filter(i -> i < 3);
-        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(filter).toList().run(getEngine())), Arrays.asList(1, 2));
-        assertEquals(await(ReactiveStreams.of(1, 2, 3).via(filter).toList().run(getEngine())), Arrays.asList(1, 2));
+        ProcessorBuilder<Integer, Integer> filter = rs.<Integer>builder().filter(i -> i < 3);
+        assertEquals(await(rs.of(1, 2, 3).via(filter).toList().run(getEngine())), Arrays.asList(1, 2));
+        assertEquals(await(rs.of(1, 2, 3).via(filter).toList().run(getEngine())), Arrays.asList(1, 2));
     }
 
     @Override
@@ -97,12 +97,12 @@ public class FilterStageVerification extends AbstractStageVerification {
 
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-            return ReactiveStreams.<Integer>builder().filter(i -> true).buildRs(getEngine());
+            return rs.<Integer>builder().filter(i -> true).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
-            return ReactiveStreams.<Integer>failed(new RuntimeException("failed"))
+            return rs.<Integer>failed(new RuntimeException("failed"))
                 .filter(i -> true).buildRs(getEngine());
         }
 

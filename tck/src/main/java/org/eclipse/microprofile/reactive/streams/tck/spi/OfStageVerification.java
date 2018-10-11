@@ -20,7 +20,7 @@
 package org.eclipse.microprofile.reactive.streams.tck.spi;
 
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
+
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
@@ -42,7 +42,7 @@ public class OfStageVerification extends AbstractStageVerification {
     @Test
     public void iterableStageShouldEmitManyElements() {
         assertEquals(await(
-            ReactiveStreams.of("a", "b", "c")
+            rs.of("a", "b", "c")
                 .toList()
                 .run(getEngine())
         ), Arrays.asList("a", "b", "c"));
@@ -51,7 +51,7 @@ public class OfStageVerification extends AbstractStageVerification {
     @Test
     public void emptyIterableStageShouldEmitNoElements() {
         assertEquals(await(
-            ReactiveStreams.empty()
+            rs.empty()
                 .toList()
                 .run(getEngine())
         ), Collections.emptyList());
@@ -60,7 +60,7 @@ public class OfStageVerification extends AbstractStageVerification {
     @Test
     public void singleIterableStageShouldEmitOneElement() {
         assertEquals(await(
-            ReactiveStreams.of("a")
+            rs.of("a")
                 .toList()
                 .run(getEngine())
         ), Collections.singletonList("a"));
@@ -70,7 +70,7 @@ public class OfStageVerification extends AbstractStageVerification {
     public void ofStageShouldHandleExceptionsInIterableIterateMethod() {
         CompletionStage<List<Object>> result;
         try {
-            result = ReactiveStreams.fromIterable(() -> {
+            result = rs.fromIterable(() -> {
                 throw new QuietRuntimeException("failed");
             })
                 .toList()
@@ -84,7 +84,7 @@ public class OfStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void ofStageShouldHandleExceptionsInIteratorHasNextMethod() {
-        await(ReactiveStreams.fromIterable(() -> new Iterator<Object>() {
+        await(rs.fromIterable(() -> new Iterator<Object>() {
             @Override
             public boolean hasNext() {
                 throw new QuietRuntimeException("failed");
@@ -101,7 +101,7 @@ public class OfStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void ofStageShouldHandleExceptionsInIteratorNextMethod() {
-        await(ReactiveStreams.fromIterable(() -> new Iterator<Object>() {
+        await(rs.fromIterable(() -> new Iterator<Object>() {
             @Override
             public boolean hasNext() {
                 return true;
@@ -118,12 +118,12 @@ public class OfStageVerification extends AbstractStageVerification {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void ofStageShouldFailIfNullProduced() {
-        await(ReactiveStreams.fromIterable(Arrays.asList(null, null)).toList().run(getEngine()));
+        await(rs.fromIterable(Arrays.asList(null, null)).toList().run(getEngine()));
     }
 
     @Test
     public void ofStageShouldBeReusable() {
-        PublisherBuilder<Integer> publisher = ReactiveStreams.of(1, 2, 3);
+        PublisherBuilder<Integer> publisher = rs.of(1, 2, 3);
 
         assertEquals(await(publisher.toList().run(getEngine())), Arrays.asList(1, 2, 3));
         assertEquals(await(publisher.toList().run(getEngine())), Arrays.asList(1, 2, 3));
@@ -137,7 +137,7 @@ public class OfStageVerification extends AbstractStageVerification {
     public class PublisherVerification extends StagePublisherVerification<Long> {
         @Override
         public Publisher<Long> createPublisher(long elements) {
-            return ReactiveStreams.fromIterable(
+            return rs.fromIterable(
                 () -> LongStream.rangeClosed(1, elements).boxed().iterator()
             ).buildRs(getEngine());
         }

@@ -33,7 +33,7 @@ import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
  * @param <R> The type of the result that this subscriber emits.
  * @see ReactiveStreams
  */
-public interface SubscriberBuilder<T, R> {
+public interface SubscriberBuilder<T, R> extends Completion<R> {
     /**
      * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
      *

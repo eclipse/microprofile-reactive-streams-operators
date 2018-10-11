@@ -63,17 +63,17 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     }
 
     @Override
-    public ProcessorBuilder<T, T> distinct() {
+    public ProcessorBuilder<T, R> distinct() {
         return addStage(Stages.Distinct.INSTANCE);
     }
 
     @Override
-    public <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper) {
+    public <S> ProcessorBuilder<T, S> flatMap(Function<? super R, ? extends PublisherBuilder<? extends S>> mapper) {
         return addStage(new Stages.FlatMap(mapper.andThen(ReactiveStreamsGraphBuilder::rsBuilderToGraph)));
     }
 
     @Override
-    public <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, Publisher<? extends S>> mapper) {
+    public <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, ? extends Publisher<? extends S>> mapper) {
         return addStage(new Stages.FlatMap(mapper.andThen(ReactiveStreamsGraphBuilder::publisherToGraph)));
     }
 
@@ -161,12 +161,12 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     }
 
     @Override
-    public SubscriberBuilder<T, Void> to(Subscriber<R> subscriber) {
+    public SubscriberBuilder<T, Void> to(Subscriber<? super R> subscriber) {
         return addTerminalStage(new Stages.SubscriberStage(subscriber));
     }
 
     @Override
-    public <S> SubscriberBuilder<T, S> to(SubscriberBuilder<R, S> subscriber) {
+    public <S> SubscriberBuilder<T, S> to(SubscriberBuilder<? super R, ? extends S> subscriber) {
         return addTerminalStage(InternalStages.nested(subscriber));
     }
 
@@ -176,17 +176,17 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     }
 
     @Override
-    public ProcessorBuilder<T, R> onErrorResume(Function<Throwable, R> errorHandler) {
+    public ProcessorBuilder<T, R> onErrorResume(Function<Throwable, ? extends R> errorHandler) {
         return addStage(new Stages.OnErrorResume(errorHandler));
     }
 
     @Override
-    public ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, PublisherBuilder<R>> errorHandler) {
+    public ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, ? extends PublisherBuilder<? extends R>> errorHandler) {
         return addStage(new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::rsBuilderToGraph)));
     }
 
     @Override
-    public ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<R>> errorHandler) {
+    public ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, ? extends Publisher<? extends R>> errorHandler) {
         return addStage(new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::publisherToGraph)));
     }
 
@@ -201,12 +201,12 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     }
 
     @Override
-    public <S> ProcessorBuilder<T, S> via(ProcessorBuilder<R, S> processor) {
+    public <S> ProcessorBuilder<T, S> via(ProcessorBuilder<? super R, ? extends S> processor) {
         return addStage(InternalStages.nested(processor));
     }
 
     @Override
-    public <S> ProcessorBuilder<T, S> via(Processor<R, S> processor) {
+    public <S> ProcessorBuilder<T, S> via(Processor<? super R, ? extends S> processor) {
         return addStage(new Stages.ProcessorStage(processor));
     }
 

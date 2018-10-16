@@ -25,6 +25,7 @@ import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.reactivestreams.example.unicast.AsyncIterablePublisher;
 import org.reactivestreams.tck.TestEnvironment;
 import org.testng.IClassListener;
 import org.testng.IMethodInstance;
@@ -62,6 +63,7 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
             .addPackages(true, ReactiveStreamsTck.class.getPackage())
             // And add the reactive streams TCK
             .addPackages(true, TestEnvironment.class.getPackage())
+            .addPackages(true, AsyncIterablePublisher.class.getPackage())
             // And we need a CDI descriptor
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 

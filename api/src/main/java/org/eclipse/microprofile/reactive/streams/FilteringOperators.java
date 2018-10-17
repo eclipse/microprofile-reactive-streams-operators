@@ -35,7 +35,7 @@ import java.util.function.Predicate;
  *
  * @param <T> The type of the elements that the stream emits.
  */
-public interface FilterOperators<T> {
+public interface FilteringOperators<T> {
 
     /**
      * Filter elements emitted by this publisher using the given {@link Predicate}.
@@ -48,7 +48,7 @@ public interface FilterOperators<T> {
      * @param predicate The predicate to apply to each element.
      * @return A new stream builder.
      */
-    FilterOperators<T> filter(Predicate<? super T> predicate);
+    FilteringOperators<T> filter(Predicate<? super T> predicate);
 
     /**
      * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
@@ -57,7 +57,7 @@ public interface FilterOperators<T> {
      *
      * @return A new stream builder emitting the distinct elements from this stream.
      */
-    FilterOperators<T> distinct();
+    FilteringOperators<T> distinct();
 
     /**
      * Truncate this stream, ensuring the stream is no longer than {@code maxSize} elements in length.
@@ -71,7 +71,7 @@ public interface FilterOperators<T> {
      * @return A new stream builder.
      * @throws IllegalArgumentException If {@code maxSize} is less than zero.
      */
-    FilterOperators<T> limit(long maxSize);
+    FilteringOperators<T> limit(long maxSize);
 
     /**
      * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
@@ -83,7 +83,7 @@ public interface FilterOperators<T> {
      * @return A new stream builder.
      * @throws IllegalArgumentException If {@code n} is less than zero.
      */
-    FilterOperators<T> skip(long n);
+    FilteringOperators<T> skip(long n);
 
     /**
      * Take the longest prefix of elements from this stream that satisfy the given {@code predicate}.
@@ -95,7 +95,7 @@ public interface FilterOperators<T> {
      * @param predicate The predicate.
      * @return A new stream builder.
      */
-    FilterOperators<T> takeWhile(Predicate<? super T> predicate);
+    FilteringOperators<T> takeWhile(Predicate<? super T> predicate);
 
     /**
      * Drop the longest prefix of elements from this stream that satisfy the given {@code predicate}.
@@ -109,5 +109,5 @@ public interface FilterOperators<T> {
      * @param predicate The predicate.
      * @return A new stream builder.
      */
-    FilterOperators<T> dropWhile(Predicate<? super T> predicate);
+    FilteringOperators<T> dropWhile(Predicate<? super T> predicate);
 }

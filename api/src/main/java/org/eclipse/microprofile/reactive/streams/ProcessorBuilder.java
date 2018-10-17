@@ -51,8 +51,8 @@ import java.util.stream.Collector;
  * @param <R> The type of the elements that the processor emits.
  * @see ReactiveStreams
  */
-public interface ProcessorBuilder<T, R> extends TransformOperators<R>, FilterOperators<R>, PeekOperators<R>, CompletionOperators<R>,
-    ErrorHandlingOperators<R>, ConnectionOperators<R> {
+public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, FilteringOperators<R>, PeekingOperators<R>, ConsumingOperators<R>,
+    ErrorHandlingOperators<R>, ConnectingOperators<R> {
 
     /**
      * {@inheritDoc}

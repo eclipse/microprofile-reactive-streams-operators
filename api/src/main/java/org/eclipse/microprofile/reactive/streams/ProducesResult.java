@@ -29,5 +29,5 @@ package org.eclipse.microprofile.reactive.streams;
  * @see SubscriberBuilder
  * @see CompletionRunner
  */
-public interface Completion<T> {
+public interface ProducesResult<T> {
 }

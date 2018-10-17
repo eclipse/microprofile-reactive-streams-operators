@@ -44,7 +44,7 @@ import java.util.stream.Collector;
  *
  * @param <T> The type of the elements that the stream emits.
  */
-public interface CompletionOperators<T> {
+public interface ConsumingOperators<T> {
 
     /**
      * Performs an action for each element on this stream.
@@ -57,7 +57,7 @@ public interface CompletionOperators<T> {
      * @param action The action.
      * @return A new completion builder.
      */
-    Completion<Void> forEach(Consumer<? super T> action);
+    ProducesResult<Void> forEach(Consumer<? super T> action);
 
     /**
      * Ignores each element of this stream.
@@ -70,7 +70,7 @@ public interface CompletionOperators<T> {
      *
      * @return A new completion builder.
      */
-    Completion<Void> ignore();
+    ProducesResult<Void> ignore();
 
     /**
      * Cancels the stream as soon as it starts.
@@ -79,7 +79,7 @@ public interface CompletionOperators<T> {
      *
      * @return A new completion builder.
      */
-    Completion<Void> cancel();
+    ProducesResult<Void> cancel();
 
     /**
      * Perform a reduction on the elements of this stream, using the provided identity value and the accumulation
@@ -93,7 +93,7 @@ public interface CompletionOperators<T> {
      * @param accumulator The accumulator function.
      * @return A new completion builder.
      */
-    Completion<T> reduce(T identity, BinaryOperator<T> accumulator);
+    ProducesResult<T> reduce(T identity, BinaryOperator<T> accumulator);
 
     /**
      * Perform a reduction on the elements of this stream, using provided the accumulation function.
@@ -106,7 +106,7 @@ public interface CompletionOperators<T> {
      * @param accumulator The accumulator function.
      * @return A new completion builder.
      */
-    Completion<Optional<T>> reduce(BinaryOperator<T> accumulator);
+    ProducesResult<Optional<T>> reduce(BinaryOperator<T> accumulator);
 
     /**
      * Find the first element emitted by the {@link Publisher}, and return it in a
@@ -118,7 +118,7 @@ public interface CompletionOperators<T> {
      *
      * @return A new completion builder.
      */
-    Completion<Optional<T>> findFirst();
+    ProducesResult<Optional<T>> findFirst();
 
     /**
      * Collect the elements emitted by this stream using the given {@link Collector}.
@@ -131,7 +131,7 @@ public interface CompletionOperators<T> {
      * @param <A>       The accumulator type.
      * @return A new completion builder that emits the collected result.
      */
-    <R, A> Completion<R> collect(Collector<? super T, A, R> collector);
+    <R, A> ProducesResult<R> collect(Collector<? super T, A, R> collector);
 
     /**
      * Collect the elements emitted by this stream using a {@link Collector} built from the given
@@ -148,7 +148,7 @@ public interface CompletionOperators<T> {
      * @param <R>         The result of the collector.
      * @return A new completion builder that emits the collected result.
      */
-    <R> Completion<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator);
+    <R> ProducesResult<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator);
 
     /**
      * Collect the elements emitted by this stream into a {@link List}.
@@ -157,6 +157,6 @@ public interface CompletionOperators<T> {
      *
      * @return A new completion builder that emits the list.
      */
-    Completion<List<T>> toList();
+    ProducesResult<List<T>> toList();
 
 }

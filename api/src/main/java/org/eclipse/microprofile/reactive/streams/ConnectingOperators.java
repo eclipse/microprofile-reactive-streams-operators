@@ -28,7 +28,7 @@ import org.reactivestreams.Subscriber;
  *
  * @param <T> The type of the elements that the stream emits.
  */
-public interface ConnectionOperators<T> {
+public interface ConnectingOperators<T> {
 
     /**
      * Connect the outlet of the {@link Publisher} built by this builder to the given {@link Subscriber}.
@@ -36,7 +36,7 @@ public interface ConnectionOperators<T> {
      * @param subscriber The subscriber to connect.
      * @return A completion builder that completes when the stream completes.
      */
-    Completion<Void> to(Subscriber<? super T> subscriber);
+    ProducesResult<Void> to(Subscriber<? super T> subscriber);
 
     /**
      * Connect the outlet of this stream to the given {@link SubscriberBuilder} graph.
@@ -44,7 +44,7 @@ public interface ConnectionOperators<T> {
      * @param subscriber The subscriber builder to connect.
      * @return A completion builder that completes when the stream completes.
      */
-    <R> Completion<R> to(SubscriberBuilder<? super T, ? extends R> subscriber);
+    <R> ProducesResult<R> to(SubscriberBuilder<? super T, ? extends R> subscriber);
 
     /**
      * Connect the outlet of the {@link Publisher} built by this builder to the given {@link ProcessorBuilder}.
@@ -52,7 +52,7 @@ public interface ConnectionOperators<T> {
      * @param processor The processor to connect.
      * @return A stream builder that represents the passed in processors outlet.
      */
-    <R> ConnectionOperators<R> via(ProcessorBuilder<? super T, ? extends R> processor);
+    <R> ConnectingOperators<R> via(ProcessorBuilder<? super T, ? extends R> processor);
 
     /**
      * Connect the outlet of this stream to the given {@link Processor} graph.
@@ -60,5 +60,5 @@ public interface ConnectionOperators<T> {
      * @param processor The processor builder to connect.
      * @return A stream builder that represents the passed in processor builders outlet.
      */
-    <R> ConnectionOperators<R> via(Processor<? super T, ? extends R> processor);
+    <R> ConnectingOperators<R> via(Processor<? super T, ? extends R> processor);
 }

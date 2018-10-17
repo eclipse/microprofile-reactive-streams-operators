@@ -38,7 +38,7 @@ import java.util.function.Function;
  *
  * @param <T> The type of the elements that this stream emits.
  */
-public interface TransformOperators<T> {
+public interface TransformingOperators<T> {
 
     /**
      * Map the elements emitted by this stream using the {@code mapper} function.
@@ -49,7 +49,7 @@ public interface TransformOperators<T> {
      * @param <R>    The type of elements that the {@code mapper} function emits.
      * @return A new stream builder that emits the mapped elements.
      */
-    <R> TransformOperators<R> map(Function<? super T, ? extends R> mapper);
+    <R> TransformingOperators<R> map(Function<? super T, ? extends R> mapper);
 
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
@@ -67,7 +67,7 @@ public interface TransformOperators<T> {
      * @param <S>    The type of the elements emitted from the new stream.
      * @return A new stream builder.
      */
-    <S> TransformOperators<S> flatMap(Function<? super T, ? extends PublisherBuilder<? extends S>> mapper);
+    <S> TransformingOperators<S> flatMap(Function<? super T, ? extends PublisherBuilder<? extends S>> mapper);
 
     /**
      * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
@@ -85,7 +85,7 @@ public interface TransformOperators<T> {
      * @param <S>    The type of the elements emitted from the new stream.
      * @return A new stream builder.
      */
-    <S> TransformOperators<S> flatMapRsPublisher(Function<? super T, ? extends Publisher<? extends S>> mapper);
+    <S> TransformingOperators<S> flatMapRsPublisher(Function<? super T, ? extends Publisher<? extends S>> mapper);
 
     /**
      * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
@@ -101,7 +101,7 @@ public interface TransformOperators<T> {
      * @param <S>    The type of the elements emitted from the new stream.
      * @return A new stream builder.
      */
-    <S> TransformOperators<S> flatMapCompletionStage(Function<? super T, ? extends CompletionStage<? extends S>> mapper);
+    <S> TransformingOperators<S> flatMapCompletionStage(Function<? super T, ? extends CompletionStage<? extends S>> mapper);
 
     /**
      * Map the elements to {@link Iterable}'s, and flatten so that the elements contained in each iterable are
@@ -116,5 +116,5 @@ public interface TransformOperators<T> {
      * @param <S>    The type of the elements emitted from the new stream.
      * @return A new stream builder.
      */
-    <S> TransformOperators<S> flatMapIterable(Function<? super T, ? extends Iterable<? extends S>> mapper);
+    <S> TransformingOperators<S> flatMapIterable(Function<? super T, ? extends Iterable<? extends S>> mapper);
 }

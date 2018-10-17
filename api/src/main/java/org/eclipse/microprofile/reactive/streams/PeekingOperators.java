@@ -35,7 +35,7 @@ import java.util.function.Consumer;
  *
  * @param <T> The type of the elements that the stream emits.
  */
-public interface PeekOperators<T> {
+public interface PeekingOperators<T> {
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
@@ -47,7 +47,7 @@ public interface PeekOperators<T> {
      * @return A new stream builder that consumes elements of type <code>T</code> and emits the same elements. In between,
      * the given function is called for each element.
      */
-    PeekOperators<T> peek(Consumer<? super T> consumer);
+    PeekingOperators<T> peek(Consumer<? super T> consumer);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action if this
@@ -59,7 +59,7 @@ public interface PeekOperators<T> {
      * @return A new stream that consumes elements of type <code>T</code> and emits the same elements. If the
      * stream conveys a failure, the given error handler is called.
      */
-    PeekOperators<T> onError(Consumer<Throwable> errorHandler);
+    PeekingOperators<T> onError(Consumer<Throwable> errorHandler);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
@@ -73,7 +73,7 @@ public interface PeekOperators<T> {
      * @return A new stream builder that consumes elements of type <code>T</code> and emits the same elements. The given
      * action is called when the stream completes or fails.
      */
-    PeekOperators<T> onTerminate(Runnable action);
+    PeekingOperators<T> onTerminate(Runnable action);
 
     /**
      * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
@@ -85,5 +85,5 @@ public interface PeekOperators<T> {
      * @return A new stream builder that consumes elements of type <code>T</code> and emits the same elements. The given
      * action is called when the stream completes.
      */
-    PeekOperators<T> onComplete(Runnable action);
+    PeekingOperators<T> onComplete(Runnable action);
 }

@@ -50,8 +50,8 @@ import java.util.stream.Collector;
  * @param <T> The type of the elements that the publisher emits.
  * @see ReactiveStreams
  */
-public interface PublisherBuilder<T> extends TransformOperators<T>, FilterOperators<T>, PeekOperators<T>, CompletionOperators<T>,
-    ErrorHandlingOperators<T>, ConnectionOperators<T> {
+public interface PublisherBuilder<T> extends TransformingOperators<T>, FilteringOperators<T>, PeekingOperators<T>, ConsumingOperators<T>,
+    ErrorHandlingOperators<T>, ConnectingOperators<T> {
 
     /**
      * {@inheritDoc}

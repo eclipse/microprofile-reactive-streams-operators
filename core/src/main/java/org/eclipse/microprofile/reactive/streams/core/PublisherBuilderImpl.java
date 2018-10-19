@@ -73,12 +73,12 @@ final class PublisherBuilderImpl<T> extends ReactiveStreamsGraphBuilder implemen
     }
 
     @Override
-    public <S> PublisherBuilder<S> flatMap(Function<? super T, PublisherBuilder<? extends S>> mapper) {
+    public <S> PublisherBuilder<S> flatMap(Function<? super T, ? extends PublisherBuilder<? extends S>> mapper) {
         return addStage(new Stages.FlatMap(mapper.andThen(ReactiveStreamsGraphBuilder::rsBuilderToGraph)));
     }
 
     @Override
-    public <S> PublisherBuilder<S> flatMapRsPublisher(Function<? super T, Publisher<? extends S>> mapper) {
+    public <S> PublisherBuilder<S> flatMapRsPublisher(Function<? super T, ? extends Publisher<? extends S>> mapper) {
         return addStage(new Stages.FlatMap(mapper.andThen(ReactiveStreamsGraphBuilder::publisherToGraph)));
     }
 
@@ -166,23 +166,23 @@ final class PublisherBuilderImpl<T> extends ReactiveStreamsGraphBuilder implemen
     }
 
     @Override
-    public CompletionRunner<Void> to(Subscriber<T> subscriber) {
+    public CompletionRunner<Void> to(Subscriber<? super T> subscriber) {
         return addTerminalStage(new Stages.SubscriberStage(subscriber));
     }
 
     @Override
-    public <R> CompletionRunner<R> to(SubscriberBuilder<T, R> subscriber) {
+    public <R> CompletionRunner<R> to(SubscriberBuilder<? super T, ? extends R> subscriber) {
         Objects.requireNonNull(subscriber, "Subscriber must not be null");
         return addTerminalStage(InternalStages.nested(subscriber));
     }
 
     @Override
-    public <R> PublisherBuilder<R> via(ProcessorBuilder<T, R> processor) {
+    public <R> PublisherBuilder<R> via(ProcessorBuilder<? super T, ? extends R> processor) {
         return addStage(InternalStages.nested(processor));
     }
 
     @Override
-    public <R> PublisherBuilder<R> via(Processor<T, R> processor) {
+    public <R> PublisherBuilder<R> via(Processor<? super T, ? extends R> processor) {
         return addStage(new Stages.ProcessorStage(processor));
     }
 
@@ -192,17 +192,17 @@ final class PublisherBuilderImpl<T> extends ReactiveStreamsGraphBuilder implemen
     }
 
     @Override
-    public PublisherBuilder<T> onErrorResume(Function<Throwable, T> errorHandler) {
+    public PublisherBuilder<T> onErrorResume(Function<Throwable, ? extends T> errorHandler) {
         return addStage(new Stages.OnErrorResume(errorHandler));
     }
 
     @Override
-    public PublisherBuilder<T> onErrorResumeWith(Function<Throwable, PublisherBuilder<T>> errorHandler) {
+    public PublisherBuilder<T> onErrorResumeWith(Function<Throwable, ? extends PublisherBuilder<? extends T>> errorHandler) {
         return addStage(new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::rsBuilderToGraph)));
     }
 
     @Override
-    public <S> PublisherBuilder<S> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<? extends S>> errorHandler) {
+    public PublisherBuilder<T> onErrorResumeWithRsPublisher(Function<Throwable, ? extends Publisher<? extends T>> errorHandler) {
         return addStage(new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::publisherToGraph)));
     }
 

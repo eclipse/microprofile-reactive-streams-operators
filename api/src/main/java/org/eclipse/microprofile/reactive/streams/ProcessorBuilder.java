@@ -51,417 +51,194 @@ import java.util.stream.Collector;
  * @param <R> The type of the elements that the processor emits.
  * @see ReactiveStreams
  */
-public interface ProcessorBuilder<T, R> {
+public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, FilteringOperators<R>, PeekingOperators<R>, ConsumingOperators<R>,
+    ErrorHandlingOperators<R>, ConnectingOperators<R> {
+
     /**
-     * Map the elements emitted by this processor using the <code>mapper</code> function.
-     * <p>
-     * <img src="doc-files/map.png" alt="map marble diagram">
-     *
-     * @param mapper The function to use to map the elements.
-     * @param <S>    The type of elements that the <code>mapper</code> function emits.
-     * @return A new processor builder that consumes elements of type <code>T</code> and emits the mapped elements.
+     * {@inheritDoc}
      */
+    @Override
     <S> ProcessorBuilder<T, S> map(Function<? super R, ? extends S> mapper);
 
     /**
-     * Returns a stream containing all the elements from this stream, additionally performing the provided action on each
-     * element.
-     * <p>
-     * <img src="doc-files/peek.png" alt="peek marble diagram">
-     *
-     * @param consumer The function called for every element.
-     * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. In between,
-     * the given function is called for each element.
+     * {@inheritDoc}
      */
-    ProcessorBuilder<T, R> peek(Consumer<? super R> consumer);
+    @Override
+    <S> ProcessorBuilder<T, S> flatMap(Function<? super R, ? extends PublisherBuilder<? extends S>> mapper);
 
     /**
-     * Filter elements emitted by this processor using the given {@link Predicate}.
-     * <p>
-     * Any elements that return <code>true</code> when passed to the {@link Predicate} will be emitted, all other
-     * elements will be dropped.
-     * <p>
-     * <img src="doc-files/filter.png" alt="filter marble diagram">
-     *
-     * @param predicate The predicate to apply to each element.
-     * @return A new processor builder.
+     * {@inheritDoc}
      */
-    ProcessorBuilder<T, R> filter(Predicate<? super R> predicate);
+    @Override
+    <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, ? extends Publisher<? extends S>> mapper);
 
     /**
-     * Creates a stream consisting of the distinct elements (according to {@link Object#equals(Object)}) of this stream.
-     * <p>
-     * <img src="doc-files/distinct.png" alt="distinct marble diagram">
-     *
-     * @return A new publisher builder emitting the distinct elements from this stream.
+     * {@inheritDoc}
      */
-    ProcessorBuilder<T, T> distinct();
-
-    /**
-     * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
-     * {@code mapper} function are emitted from this stream.
-     * <p>
-     * <img src="doc-files/flatMap.png" alt="flatMap marble diagram">
-     * <p>
-     * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
-     * publishers produced by the mapper function.
-     * <p>
-     * Unlike {@link #flatMapRsPublisher(Function)}, the mapper function returns a {@link PublisherBuilder} and not a
-     * {@link Publisher}.
-     *
-     * @param mapper The mapper function.
-     * @param <S>    The type of the elements emitted from the new processor.
-     * @return A new processor builder.
-     */
-    <S> ProcessorBuilder<T, S> flatMap(Function<? super R, PublisherBuilder<? extends S>> mapper);
-
-    /**
-     * Map the elements to publishers, and flatten so that the elements emitted by publishers produced by the
-     * {@code mapper} function are emitted from this stream.
-     * <p>
-     * <img src="doc-files/flatMapRsPublisher.png" alt="flatMapRsPublisher marble diagram">
-     * <p>
-     * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
-     * publishers produced by the mapper function.
-     * <p>
-     * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link Publisher} and not a {@link PublisherBuilder}.
-     *
-     * @param mapper The mapper function.
-     * @param <S>    The type of the elements emitted from the new processor.
-     * @return A new processor builder.
-     */
-    <S> ProcessorBuilder<T, S> flatMapRsPublisher(Function<? super R, Publisher<? extends S>> mapper);
-
-    /**
-     * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
-     * {@link CompletionStage} are emitted from this processor.
-     * <p>
-     * <img src="doc-files/flatMapCompletionStage.png" alt="flatMapCompletionStage marble diagram">
-     * <p>
-     * This method only works with one element at a time. When an element is received, the {@code mapper} function is
-     * executed, and the next element is not consumed or passed to the {@code mapper} function until the previous
-     * {@link CompletionStage} is redeemed. Hence this method also guarantees that ordering of the stream is maintained.
-     *
-     * @param mapper The mapper function.
-     * @param <S>    The type of the elements emitted from the new processor.
-     * @return A new processor builder.
-     */
+    @Override
     <S> ProcessorBuilder<T, S> flatMapCompletionStage(Function<? super R, ? extends CompletionStage<? extends S>> mapper);
 
     /**
-     * Map the elements to {@link Iterable}'s, and flatten so that the elements contained in each iterable are
-     * emitted by this stream.
-     * <p>
-     * <img src="doc-files/flatMapIterable.png" alt="flatMapIterable marble diagram">
-     * <p>
-     * This method operates on one iterable at a time. The result is a concatenation of elements contain in all the
-     * iterables returned by the {@code mapper} function.
-     *
-     * @param mapper The mapper function.
-     * @param <S>    The type of the elements emitted from the new processor.
-     * @return A new processor builder.
+     * {@inheritDoc}
      */
+    @Override
     <S> ProcessorBuilder<T, S> flatMapIterable(Function<? super R, ? extends Iterable<? extends S>> mapper);
 
     /**
-     * Truncate this stream, ensuring the stream is no longer than {@code maxSize} elements in length.
-     * <p>
-     * <img src="doc-files/limit.png" alt="limit marble diagram">
-     * <p>
-     * If {@code maxSize} is reached, the stream will be completed, and upstream will be cancelled. Completion of the
-     * stream will occur immediately when the element that satisfies the {@code maxSize} is received.
-     *
-     * @param maxSize The maximum size of the returned stream.
-     * @return A new processor builder.
-     * @throws IllegalArgumentException If {@code maxSize} is less than zero.
+     * {@inheritDoc}
      */
+    @Override
+    ProcessorBuilder<T, R> filter(Predicate<? super R> predicate);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ProcessorBuilder<T, R> distinct();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     ProcessorBuilder<T, R> limit(long maxSize);
 
     /**
-     * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
-     * effectively be an empty stream.
-     * <p>
-     * <img src="doc-files/skip.png" alt="skip marble diagram">
-     *
-     * @param n The number of elements to discard.
-     * @return A new processor builder.
-     * @throws IllegalArgumentException If {@code n} is less than zero.
+     * {@inheritDoc}
      */
+    @Override
     ProcessorBuilder<T, R> skip(long n);
 
     /**
-     * Take the longest prefix of elements from this stream that satisfy the given {@code predicate}.
-     * <p>
-     * <img src="doc-files/takeWhile.png" alt="takeWhile marble diagram">
-     * <p>
-     * When the {@code predicate} returns false, the stream will be completed, and upstream will be cancelled.
-     *
-     * @param predicate The predicate.
-     * @return A new publisher builder.
+     * {@inheritDoc}
      */
+    @Override
     ProcessorBuilder<T, R> takeWhile(Predicate<? super R> predicate);
 
     /**
-     * Drop the longest prefix of elements from this stream that satisfy the given {@code predicate}.
-     * <p>
-     * <img src="doc-files/dropWhile.png" alt="dropWhile marble diagram">
-     * <p>
-     * As long as the {@code predicate} returns true, no elements will be emitted from this stream. Once the first element
-     * is encountered for which the {@code predicate} returns false, all subsequent elements will be emitted, and the
-     * {@code predicate} will no longer be invoked.
-     *
-     * @param predicate The predicate.
-     * @return A new processor builder.
+     * {@inheritDoc}
      */
+    @Override
     ProcessorBuilder<T, R> dropWhile(Predicate<? super R> predicate);
 
     /**
-     * Performs an action for each element on this stream.
-     * <p>
-     * <img src="doc-files/forEach.png" alt="forEach marble diagram">
-     * <p>
-     * The returned {@link CompletionStage} from the {@link CompletionSubscriber} will be redeemed when the stream
-     * completes, either successfully if the stream completes normally, or with an error if the stream completes with an
-     * error or if the action throws an exception.
-     *
-     * @param action The action.
-     * @return A new subscriber builder.
+     * {@inheritDoc}
      */
-    SubscriberBuilder<T, Void> forEach(Consumer<? super R> action);
+    @Override
+    ProcessorBuilder<T, R> peek(Consumer<? super R> consumer);
 
     /**
-     * Ignores each element of this stream.
-     * <p>
-     * <img src="doc-files/ignore.png" alt="ignore marble diagram">
-     * <p>
-     * The returned {@link CompletionStage} from the {@link CompletionSubscriber} will be redeemed when the stream
-     * completes, either successfully if the stream completes normally, or with an error if the stream completes with an
-     * error or if the action throws an exception.
-     *
-     * @return A new subscriber builder.
+     * {@inheritDoc}
      */
-    SubscriberBuilder<T, Void> ignore();
-
-    /**
-     * Cancels the stream as soon as it starts.
-     * <p>
-     * The returned {@link CompletionStage} from the {@link CompletionSubscriber} will be immediately redeemed as soon
-     * as the stream starts.
-     *
-     * @return A new subscriber builder.
-     */
-    SubscriberBuilder<T, Void> cancel();
-
-    /**
-     * Perform a reduction on the elements of this stream, using the provided identity value and the accumulation
-     * function.
-     * <p>
-     * <img src="doc-files/reduce-identity.png" alt="reduce marble diagram">
-     * <p>
-     * The result of the reduction is returned in the {@link CompletionSubscriber}.
-     *
-     * @param identity    The identity value.
-     * @param accumulator The accumulator function.
-     * @return A new subscriber builder.
-     */
-    SubscriberBuilder<T, R> reduce(R identity, BinaryOperator<R> accumulator);
-
-    /**
-     * Perform a reduction on the elements of this stream, using provided the accumulation function.
-     * <p>
-     * <img src="doc-files/reduce.png" alt="reduce marble diagram">
-     * <p>
-     * The result of the reduction is returned in the {@link CompletionSubscriber}. If there are no elements in this stream,
-     * empty will be returned.
-     *
-     * @param accumulator The accumulator function.
-     * @return A new subscriber builder.
-     */
-    SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator);
-
-    /**
-     * Collect the elements emitted by this processor builder using the given {@link Collector}.
-     * <p>
-     * Since Reactive Streams are intrinsically sequential, only the accumulator of the collector will be used, the
-     * combiner will not be used.
-     *
-     * @param collector The collector to collect the elements.
-     * @param <S>       The result of the collector.
-     * @param <A>       The accumulator type.
-     * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
-     */
-    <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector);
-
-    /**
-     * Collect the elements emitted by this processor builder using a {@link Collector} built from the given
-     * {@link Supplier supplier} and {@link BiConsumer accumulator}.
-     * <p>
-     * <img src="doc-files/collect.png" alt="collect marble diagram">
-     * <p>
-     * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does not
-     * accept a <em>combiner</em> method.
-     *
-     * @param supplier    a function that creates a new result container. It creates objects of type {@code <S>}.
-     * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
-     *                    result
-     * @param <S>         The accumulator type.
-     * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
-     */
-    <S> SubscriberBuilder<T, S> collect(Supplier<S> supplier, BiConsumer<S, ? super R> accumulator);
-
-    /**
-     * Collect the elements emitted by this processor builder into a {@link List}
-     * <p>
-     * <img src="doc-files/toList.png" alt="toList marble diagram">
-     *
-     * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
-     */
-    SubscriberBuilder<T, List<R>> toList();
-
-    /**
-     * Find the first element emitted by the {@link Processor}, and return it in a
-     * {@link CompletionStage}.
-     * <p>
-     * <img src="doc-files/findFirst.png" alt="findFirst marble diagram">
-     * <p>
-     * If the stream is completed before a single element is emitted, then {@link Optional#empty()} will be emitted.
-     *
-     * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
-     */
-    SubscriberBuilder<T, Optional<R>> findFirst();
-
-    /**
-     * Connect the outlet of the {@link Processor} built by this builder to the given {@link Subscriber}.
-     *
-     * @param subscriber The subscriber to connect.
-     * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
-     */
-    SubscriberBuilder<T, Void> to(Subscriber<R> subscriber);
-
-    /**
-     * Connect the outlet of this processor builder to the given {@link SubscriberBuilder} graph.
-     *
-     * @param subscriber The subscriber builder to connect.
-     * @return A {@link SubscriberBuilder} that represents this processor builders inlet.
-     */
-    <S> SubscriberBuilder<T, S> to(SubscriberBuilder<R, S> subscriber);
-
-    /**
-     * Returns a stream containing all the elements from this stream, additionally performing the provided action if this
-     * stream conveys an error. The given consumer is called with the failure.
-     * <p>
-     * <img src="doc-files/onError.png" alt="onError marble diagram">
-     *
-     * @param errorHandler The function called with the failure.
-     * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. If the
-     * stream conveys a failure, the given error handler is called.
-     */
+    @Override
     ProcessorBuilder<T, R> onError(Consumer<Throwable> errorHandler);
 
     /**
-     * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
-     * invoking {@link #onError(Consumer)}, it invokes the given method and emits the result as final event of the stream.
-     * <p>
-     * <img src="doc-files/onErrorResume.png" alt="onErrorResume marble diagram">
-     * <p>
-     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
-     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
-     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
-     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead emit the return value of
-     * the passed function. This operator prevents errors from propagating or to supply fallback data should errors be
-     * encountered.
-     *
-     * @param errorHandler the function returning the value that need to be emitting instead of the error.
-     *                     The function must not return {@code null}.
-     * @return The new processor
+     * {@inheritDoc}
      */
-    ProcessorBuilder<T, R> onErrorResume(Function<Throwable, R> errorHandler);
-
-    /**
-     * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
-     * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
-     * instead.
-     * <p>
-     * <img src="doc-files/onErrorResumeWith.png" alt="onErrorResumeWith marble diagram">
-     * <p>
-     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
-     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
-     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
-     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
-     * {@link PublisherBuilder} returned from given function, which invoke the subscriber's <code>onNext</code> method if
-     * it is able to do so. In such a case, because no publisher necessarily invokes <code>onError</code>, the subscriber
-     * may never know that an error happened.
-     *
-     * @param errorHandler the function returning the stream that need to be emitting instead of the error.
-     *                     The function must not return {@code null}.
-     * @return The new processor
-     */
-    ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, PublisherBuilder<R>> errorHandler);
-
-    /**
-     * Returns a stream containing all the elements from this stream. Additionally, in the case of failure, rather than
-     * invoking {@link #onError(Consumer)}, it invokes the given method and emits the returned {@link PublisherBuilder}
-     * instead.
-     * <p>
-     * <img src="doc-files/onErrorResumeWithRsPublisher.png" alt="onErrorResumeWithRsPublisher marble diagram">
-     * <p>
-     * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
-     * the stream (publisher) invokes its subscriber's <code>onError</code> method, and then terminate without invoking
-     * any more of its subscriber's methods. This operator changes this behavior. If the current stream encounters an
-     * error, instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
-     * {@link PublisherBuilder} returned from given function, which invoke the subscriber's <code>onNext</code> method if
-     * it is able to do so. In such a case, because no publisher necessarily invokes <code>onError</code>, the subscriber
-     * may never know that an error happened.
-     *
-     * @param errorHandler the function returning the stream that need to be emitting instead of the error.
-     *                     The function must not return {@code null}.
-     * @return The new processor
-     */
-    ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, Publisher<R>> errorHandler);
-
-    /**
-     * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
-     * stream completes or failed. The given action does not know if the stream failed or completed. If you need to
-     * distinguish use {@link #onError(Consumer)} and {@link #onComplete(Runnable)}. In addition, the action is called if
-     * the stream is cancelled downstream.
-     * <p>
-     * <img src="doc-files/onTerminate.png" alt="onTerminate marble diagram">
-     *
-     * @param action The function called when the stream completes or failed.
-     * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
-     * action is called when the stream completes or fails.
-     */
+    @Override
     ProcessorBuilder<T, R> onTerminate(Runnable action);
 
     /**
-     * Returns a stream containing all the elements from this stream, additionally performing the provided action when this
-     * stream completes.
-     * <p>
-     * <img src="doc-files/onComplete.png" alt="onComplete marble diagram">
-     *
-     * @param action The function called when the stream completes.
-     * @return A new processor builder that consumes elements of type <code>T</code> and emits the same elements. The given
-     * action is called when the stream completes.
+     * {@inheritDoc}
      */
+    @Override
     ProcessorBuilder<T, R> onComplete(Runnable action);
 
     /**
-     * Connect the outlet of the {@link Processor} built by this builder to the given {@link Processor}.
-     *
-     * @param processor The processor to connect.
-     * @return A {@link ProcessorBuilder} that represents this processor builders inlet, and the passed in processors
-     * outlet.
+     * {@inheritDoc}
      */
-    <S> ProcessorBuilder<T, S> via(ProcessorBuilder<R, S> processor);
+    @Override
+    SubscriberBuilder<T, Void> forEach(Consumer<? super R> action);
 
     /**
-     * Connect the outlet of this processor builder to the given {@link ProcessorBuilder} graph.
-     *
-     * @param processor The processor builder to connect.
-     * @return A {@link ProcessorBuilder} that represents this processor builders inlet, and the passed in
-     * processor builders outlet.
+     * {@inheritDoc}
      */
-    <S> ProcessorBuilder<T, S> via(Processor<R, S> processor);
+    @Override
+    SubscriberBuilder<T, Void> ignore();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SubscriberBuilder<T, Void> cancel();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SubscriberBuilder<T, R> reduce(R identity, BinaryOperator<R> accumulator);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <S> SubscriberBuilder<T, S> collect(Supplier<S> supplier, BiConsumer<S, ? super R> accumulator);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SubscriberBuilder<T, List<R>> toList();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SubscriberBuilder<T, Optional<R>> findFirst();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ProcessorBuilder<T, R> onErrorResume(Function<Throwable, ? extends R> errorHandler);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, ? extends PublisherBuilder<? extends R>> errorHandler);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, ? extends Publisher<? extends R>> errorHandler);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    SubscriberBuilder<T, Void> to(Subscriber<? super R> subscriber);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <S> SubscriberBuilder<T, S> to(SubscriberBuilder<? super R, ? extends S> subscriber);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <S> ProcessorBuilder<T, S> via(ProcessorBuilder<? super R, ? extends S> processor);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    <S> ProcessorBuilder<T, S> via(Processor<? super R, ? extends S> processor);
 
     /**
      * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.

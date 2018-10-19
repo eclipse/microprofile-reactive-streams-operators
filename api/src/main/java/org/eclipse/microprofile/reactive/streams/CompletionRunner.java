@@ -33,7 +33,7 @@ import java.util.concurrent.CompletionStage;
  * @param <T> The result of the stream.
  * @see ReactiveStreams
  */
-public interface CompletionRunner<T> {
+public interface CompletionRunner<T> extends ProducesResult<T> {
     /**
      * Run this stream, using the first {@code ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
      *

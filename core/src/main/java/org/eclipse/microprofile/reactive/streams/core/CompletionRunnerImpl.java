@@ -26,6 +26,8 @@ import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
+import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
+
 final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implements CompletionRunner<T> {
 
     CompletionRunnerImpl(Stage stage, ReactiveStreamsGraphBuilder previous) {
@@ -34,7 +36,7 @@ final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implemen
 
     @Override
     public CompletionStage<T> run() {
-        return run(defaultEngine());
+        return run(instance());
     }
 
     @Override

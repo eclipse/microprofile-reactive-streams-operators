@@ -24,10 +24,10 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.concurrent.CompletionStage;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+
+import static org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactoryResolver.instance;
 
 /**
  * Primary entry point into the Reactive Streams utility API.
@@ -49,17 +49,6 @@ public class ReactiveStreams {
     private ReactiveStreams() {
     }
 
-    private static ReactiveStreamsFactory factory() {
-        Iterator<ReactiveStreamsFactory> factories = ServiceLoader.load(ReactiveStreamsFactory.class).iterator();
-
-        if (factories.hasNext()) {
-            return factories.next();
-        }
-        else {
-            throw new IllegalStateException("No implementation of ReactiveStreamsFactory service could be found.");
-        }
-    }
-
     /**
      * Create a {@link PublisherBuilder} from the given {@link Publisher}.
      *
@@ -68,7 +57,7 @@ public class ReactiveStreams {
      * @return A publisher builder that wraps the given publisher.
      */
     public static <T> PublisherBuilder<T> fromPublisher(Publisher<? extends T> publisher) {
-        return factory().fromPublisher(publisher);
+        return instance().fromPublisher(publisher);
     }
 
     /**
@@ -81,7 +70,7 @@ public class ReactiveStreams {
      * @return A publisher builder that will emit the element.
      */
     public static <T> PublisherBuilder<T> of(T t) {
-        return factory().of(t);
+        return instance().of(t);
     }
 
     /**
@@ -94,7 +83,7 @@ public class ReactiveStreams {
      * @return A publisher builder that will emit the elements.
      */
     public static <T> PublisherBuilder<T> of(T... ts) {
-        return factory().of(ts);
+        return instance().of(ts);
     }
 
     /**
@@ -106,7 +95,7 @@ public class ReactiveStreams {
      * @return A publisher builder that will just emit a completion signal.
      */
     public static <T> PublisherBuilder<T> empty() {
-        return factory().empty();
+        return instance().empty();
     }
 
     /**
@@ -120,7 +109,7 @@ public class ReactiveStreams {
      * @return A publisher builder that optionally emits a single element.
      */
     public static <T> PublisherBuilder<T> ofNullable(T t) {
-        return factory().ofNullable(t);
+        return instance().ofNullable(t);
     }
 
     /**
@@ -133,7 +122,7 @@ public class ReactiveStreams {
      * @return A publisher builder that emits the elements of the iterable.
      */
     public static <T> PublisherBuilder<T> fromIterable(Iterable<? extends T> ts) {
-        return factory().fromIterable(ts);
+        return instance().fromIterable(ts);
     }
 
     /**
@@ -148,7 +137,7 @@ public class ReactiveStreams {
      * @return A publisher builder that completes the stream with an error.
      */
     public static <T> PublisherBuilder<T> failed(Throwable t) {
-        return factory().failed(t);
+        return instance().failed(t);
     }
 
     /**
@@ -160,7 +149,7 @@ public class ReactiveStreams {
      * @return The identity processor builder.
      */
     public static <T> ProcessorBuilder<T, T> builder() {
-        return factory().builder();
+        return instance().builder();
     }
 
     /**
@@ -172,7 +161,7 @@ public class ReactiveStreams {
      * @return A processor builder that wraps the processor.
      */
     public static <T, R> ProcessorBuilder<T, R> fromProcessor(Processor<? super T, ? extends R> processor) {
-        return factory().fromProcessor(processor);
+        return instance().fromProcessor(processor);
     }
 
     /**
@@ -183,7 +172,7 @@ public class ReactiveStreams {
      * @return A subscriber builder that wraps the subscriber.
      */
     public static <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? extends T> subscriber) {
-        return factory().fromSubscriber(subscriber);
+        return instance().fromSubscriber(subscriber);
     }
 
     /**
@@ -198,7 +187,7 @@ public class ReactiveStreams {
      * @return A publisher builder.
      */
     public static <T> PublisherBuilder<T> iterate(T seed, UnaryOperator<T> f) {
-        return factory().iterate(seed, f);
+        return instance().iterate(seed, f);
     }
 
     /**
@@ -211,7 +200,7 @@ public class ReactiveStreams {
      * @return A publisher builder.
      */
     public static <T> PublisherBuilder<T> generate(Supplier<? extends T> s) {
-        return factory().generate(s);
+        return instance().generate(s);
     }
 
     /**
@@ -235,7 +224,7 @@ public class ReactiveStreams {
      */
     public static <T> PublisherBuilder<T> concat(PublisherBuilder<? extends T> a,
                                                  PublisherBuilder<? extends T> b) {
-        return factory().concat(a, b);
+        return instance().concat(a, b);
     }
 
     /**
@@ -250,11 +239,11 @@ public class ReactiveStreams {
      * If the {@code CompletionStage} is completed with a failure, this failure will be propagated through the stream.
      *
      * @param completionStage The {@code CompletionStage} to create the publisher from.
-     * @param <T> The type of the {@code CompletionStage} value.
+     * @param <T>             The type of the {@code CompletionStage} value.
      * @return A {@code PublisherBuilder} representation of this {@code CompletionStage}.
      */
     public static <T> PublisherBuilder<T> fromCompletionStage(CompletionStage<? extends T> completionStage) {
-        return factory().fromCompletionStage(completionStage);
+        return instance().fromCompletionStage(completionStage);
     }
 
     /**
@@ -269,11 +258,11 @@ public class ReactiveStreams {
      * If the {@code CompletionStage} is completed with a failure, this failure will be propagated through the stream.
      *
      * @param completionStage The {@code CompletionStage} to create the publisher from.
-     * @param <T> The type of the {@code CompletionStage} value.
+     * @param <T>             The type of the {@code CompletionStage} value.
      * @return A {@code PublisherBuilder} representation of this {@code CompletionStage}.
      */
     public static <T> PublisherBuilder<T> fromCompletionStageNullable(CompletionStage<? extends T> completionStage) {
-        return factory().fromCompletionStageNullable(completionStage);
+        return instance().fromCompletionStageNullable(completionStage);
     }
 
 }

@@ -41,6 +41,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
+
 final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder implements ProcessorBuilder<T, R> {
 
     ProcessorBuilderImpl(Stage stage, ReactiveStreamsGraphBuilder previous) {
@@ -212,7 +214,7 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
 
     @Override
     public Processor<T, R> buildRs() {
-        return buildRs(defaultEngine());
+        return buildRs(instance());
     }
 
     @Override

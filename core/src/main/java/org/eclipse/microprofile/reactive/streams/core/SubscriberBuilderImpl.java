@@ -27,6 +27,8 @@ import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionSta
 
 import java.util.Objects;
 
+import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
+
 public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder implements SubscriberBuilder<T, R> {
 
     SubscriberBuilderImpl(Stage stage, ReactiveStreamsGraphBuilder previous) {
@@ -35,7 +37,7 @@ public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuild
 
     @Override
     public CompletionSubscriber<T, R> build() {
-        return build(defaultEngine());
+        return build(instance());
     }
 
     @Override

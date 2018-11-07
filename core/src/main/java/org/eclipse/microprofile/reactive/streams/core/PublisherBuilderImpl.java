@@ -42,6 +42,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
+
 final class PublisherBuilderImpl<T> extends ReactiveStreamsGraphBuilder implements PublisherBuilder<T> {
 
     PublisherBuilderImpl(Stage stage, ReactiveStreamsGraphBuilder previous) {
@@ -218,7 +220,7 @@ final class PublisherBuilderImpl<T> extends ReactiveStreamsGraphBuilder implemen
 
     @Override
     public Publisher<T> buildRs() {
-        return buildRs(defaultEngine());
+        return buildRs(instance());
     }
 
     @Override

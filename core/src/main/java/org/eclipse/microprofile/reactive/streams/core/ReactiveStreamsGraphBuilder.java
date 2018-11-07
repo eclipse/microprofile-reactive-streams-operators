@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.reactive.streams.core;
 
 import org.eclipse.microprofile.reactive.streams.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.spi.Stage;
 import org.eclipse.microprofile.reactive.streams.spi.ToGraphable;
 import org.reactivestreams.Publisher;
@@ -38,17 +37,6 @@ abstract class ReactiveStreamsGraphBuilder implements ToGraphable {
     ReactiveStreamsGraphBuilder(Stage stage, ReactiveStreamsGraphBuilder previous) {
         this.stage = stage;
         this.previous = previous;
-    }
-
-    ReactiveStreamsEngine defaultEngine() {
-        Iterator<ReactiveStreamsEngine> engines = ServiceLoader.load(ReactiveStreamsEngine.class).iterator();
-
-        if (engines.hasNext()) {
-            return engines.next();
-        }
-        else {
-            throw new IllegalStateException("No implementation of ReactiveStreamsEngine service could be found.");
-        }
     }
 
     @Override

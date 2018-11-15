@@ -62,7 +62,7 @@ public class ReactiveStreamsEngineResolver {
 
                 if (newInstance == null) {
                     throw new IllegalStateException(
-                        "No ConfigProviderResolver implementation found!");
+                        "No ReactiveStreamsEngine implementation found!");
                 }
 
                 instance = newInstance;

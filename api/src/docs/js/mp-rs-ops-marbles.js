@@ -323,7 +323,7 @@ function createMarbles() {
     },
     fromCompletionStageNullable: {
       op: {
-        fontSize: "12pt"
+        fontSize: "10pt"
       },
       stages: [
         op("ReactiveStreams.fromCompletionStageNullable(asyncEcho(null))"),

@@ -198,6 +198,20 @@ function SvgMarbles() {
     },
 
     /**
+     * A declaration.
+     */
+    decl: function () {
+      const args = argsToArray(arguments);
+      const description = args[0];
+      args.shift();
+      return {
+        type: "decl",
+        description: description,
+        events: args
+      };
+    },
+
+    /**
      * A result stream.
      */
     res: function () {
@@ -237,6 +251,11 @@ function SvgMarbles() {
       height: 40,
       spacing: 80,
       fontSize: "18pt"
+    },
+    decl: {
+      height: 25,
+      spacing: 25,
+      fontSize: "12pt"
     },
     fonts: {
       code: "Source Code Pro"
@@ -449,6 +468,19 @@ function SvgMarbles() {
       .attr({x: graph.width / 2, y: graph.op.height / 2});
   }
 
+  function drawDecl(graph, stage) {
+    stage.box.plain(stage.description)
+      .font({
+        "text-anchor": "left",
+        "dominant-baseline": "central",
+        family: graph.fonts.code,
+        size: graph.decl.fontSize
+      })
+      // svg.js does some magic to work out the height of the text box before moving it, we don't want that since
+      // we've used dominant-baseline central as the center.
+      .attr({x: 0, y: graph.decl.height / 2});
+  }
+
   this.drawSingle = (element, graph) => {
     computeTotalLength(graph);
     computeColors(graph);
@@ -462,7 +494,7 @@ function SvgMarbles() {
 
     let position = graph.margin.yt;
 
-    // First, render the lines and the op stage
+    // First, render the lines and the op and decl stage
     graph.stages.forEach(stage => {
       const box = svg.nested();
       stage.box = box;
@@ -477,6 +509,11 @@ function SvgMarbles() {
         box.move(marginX, boxTop);
         drawOp(graph, stage);
         position += graph.op.spacing;
+      } else if (stage.type === "decl") {
+        const boxTop = position + (graph.decl.spacing - graph.decl.height) / 2;
+        box.move(marginX, boxTop);
+        drawDecl(graph, stage);
+        position += graph.decl.spacing;
       } else if (stage.type === "effect") {
         position += (graph.stream.spacing / 4);
         box.move(marginX, position);

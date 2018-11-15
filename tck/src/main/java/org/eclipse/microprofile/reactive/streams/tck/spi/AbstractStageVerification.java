@@ -31,6 +31,7 @@ import org.reactivestreams.tck.SubscriberWhiteboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -102,6 +103,13 @@ abstract class AbstractStageVerification {
             AtomicInteger value = new AtomicInteger();
             return IntStream.generate(value::incrementAndGet).boxed().iterator();
         });
+    }
+
+    /**
+     * A publisher that never emits anything.
+     */
+    <T> PublisherBuilder<T> idlePublisher() {
+        return rs.fromCompletionStage(new CompletableFuture<>());
     }
 
     abstract class StagePublisherVerification<T> extends PublisherVerification<T> {

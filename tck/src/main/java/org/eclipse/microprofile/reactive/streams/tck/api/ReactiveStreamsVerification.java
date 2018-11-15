@@ -216,6 +216,42 @@ public class ReactiveStreamsVerification extends AbstractReactiveStreamsApiVerif
         rs.fromCompletionStageNullable(null);
     }
 
+    @Test
+    public void coupled() {
+        Graph graph = graphFor(rs.coupled(rs.builder().cancel(), rs.empty()));
+        Stage.Coupled coupled = getStage(Stage.Coupled.class, graph);
+        getStage(Stage.Cancel.class, coupled.getSubscriber());
+        assertEmptyStage(getStage(Stage.Of.class, coupled.getPublisher()));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void coupledSubscriberNull() {
+        rs.coupled(null, rs.empty());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void coupledPubisherNull() {
+        rs.coupled(rs.builder().cancel(), null);
+    }
+
+    @Test
+    public void coupledRs() {
+        Graph graph = graphFor(rs.coupled(Mocks.SUBSCRIBER, Mocks.PUBLISHER));
+        Stage.Coupled coupled = getStage(Stage.Coupled.class, graph);
+        assertSame(getStage(Stage.SubscriberStage.class, coupled.getSubscriber()).getRsSubscriber(), Mocks.SUBSCRIBER);
+        assertSame(getStage(Stage.PublisherStage.class, coupled.getPublisher()).getRsPublisher(), Mocks.PUBLISHER);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void coupledRsSubscriberNull() {
+        rs.coupled(null, Mocks.PUBLISHER);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void coupledRsPubisherNull() {
+        rs.coupled(Mocks.SUBSCRIBER, null);
+    }
+
     private <S extends Stage> S getStage(Class<S> clazz, Graph graph) {
         assertEquals(graph.getStages().size(), 1, "Graph does not have a single stage");
         Stage s = graph.getStages().iterator().next();

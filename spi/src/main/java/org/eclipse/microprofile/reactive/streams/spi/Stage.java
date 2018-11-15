@@ -171,7 +171,7 @@ public interface Stage {
      * A take while stage.
      * <p>
      * The given {@code predicate} must be invoked on each element consumed. While the predicate returns {@code true},
-     * the element must be emitted, when the predicate returns {@code false}, the element must not be emitted, 
+     * the element must be emitted, when the predicate returns {@code false}, the element must not be emitted,
      * downstream must be completed and upstream must be cancelled.
      * <p>
      * The {@code predicate} must not be invoked again once it returns {@code false} for the first time. Any elements
@@ -469,7 +469,7 @@ public interface Stage {
         /**
          * The error handler.
          *
-         * @return  the error handler.
+         * @return the error handler.
          */
         Function<Throwable, ?> getFunction();
     }
@@ -498,7 +498,7 @@ public interface Stage {
         /**
          * The error handler.
          *
-         * @return  the error handler.
+         * @return the error handler.
          */
         Function<Throwable, Graph> getFunction();
     }
@@ -511,6 +511,7 @@ public interface Stage {
     interface Failed extends Stage {
         /**
          * The error.
+         *
          * @return the error.
          */
         Throwable getError();
@@ -594,6 +595,77 @@ public interface Stage {
          * @return The completion stage.
          */
         CompletionStage<?> getCompletionStage();
+    }
+
+    /**
+     * A stage that couples a wrapped subscriber graph to a wrapped publisher graph.
+     * <p>
+     * The resulting stage sends all the elements received to the passed in subscriber, and the emits all the elements
+     * received from the passed in publisher.
+     * <p>
+     * In addition, the lifecycles of the subscriber and publisher are coupled, such that if one terminates or
+     * receives a termination signal, the other will be terminated. Below is a table of what signals are emited when:
+     * <p>
+     * <table border="1">
+     * <caption>Lifecycle signal propagation</caption>
+     * <tr>
+     * <th>Returned ProcessorBuilder inlet</th>
+     * <th>Passed in SubscriberBuilder</th>
+     * <th>Passed in PublisherBuilder</th>
+     * <th>Returned ProcessorBuilder outlet</th>
+     * </tr>
+     * <tr>
+     * <td>Cause: complete from upstream</td>
+     * <td>Effect: complete</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Cause: error from upstream</td>
+     * <td>Effect: error</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: error</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Cause: cancels</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * <td>Cause: completes</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: error</td>
+     * <td>Cause: errors</td>
+     * <td>Effect: error</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * <td>Effect: cancel</td>
+     * <td>Cause: cancel from downstream</td>
+     * </tr>
+     * </table>
+     */
+    interface Coupled extends Stage {
+        /**
+         * Get the subscriber graph.
+         *
+         * @return The subscriber graph.
+         */
+        Graph getSubscriber();
+
+        /**
+         * Get the publisher graph.
+         *
+         * @return The publisher graph.
+         */
+        Graph getPublisher();
     }
 
 }

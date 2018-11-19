@@ -548,7 +548,7 @@ public interface Stage {
     /**
      * A cancelling stage.
      * <p>
-     * This stage immediately cancels upstream when it is started.
+     * This stage immediately cancels upstream when it is run.
      * <p>
      * The {@link CompletionStage} produced by this stage must also be redeemed immediately with {@code null}.
      */

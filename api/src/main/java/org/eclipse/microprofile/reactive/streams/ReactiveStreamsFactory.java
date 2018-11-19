@@ -130,6 +130,7 @@ public interface ReactiveStreamsFactory {
 
     /**
      * Create a {@link SubscriberBuilder} from the given {@link Subscriber}.
+     * The subscriber can only be used to create a single subscriber builder.
      *
      * @param subscriber The subscriber to be wrapped.
      * @param <T>        The type of elements that the subscriber consumes.

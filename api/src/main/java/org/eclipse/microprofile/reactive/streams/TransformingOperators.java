@@ -60,8 +60,9 @@ public interface TransformingOperators<T> {
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
      * <p>
-     * Unlike {@link #flatMapRsPublisher(Function)}}, the mapper function returns a {@link PublisherBuilder} instead of a
-     * {@link Publisher}.
+     * Unlike {@link #flatMapRsPublisher(Function)}}, the mapper function returns a 
+     * {@link org.eclipse.microprofile.reactive.streams} type instead of an 
+     * {@link org.reactivestreams} type.
      *
      * @param mapper The mapper function.
      * @param <S>    The type of the elements emitted from the new stream.
@@ -78,8 +79,8 @@ public interface TransformingOperators<T> {
      * This method operates on one publisher at a time. The result is a concatenation of elements emitted from all the
      * publishers produced by the mapper function.
      * <p>
-     * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link Publisher} instead of a
-     * {@link PublisherBuilder}.
+     * Unlike {@link #flatMap(Function)}, the mapper function returns a {@link org.eclipse.microprofile.reactive.streams} 
+     * builder instead of an {@link org.reactivestreams} type.
      *
      * @param mapper The mapper function.
      * @param <S>    The type of the elements emitted from the new stream.

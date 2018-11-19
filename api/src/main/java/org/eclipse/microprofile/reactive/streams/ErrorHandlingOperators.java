@@ -20,6 +20,8 @@
 package org.eclipse.microprofile.reactive.streams;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
+
 
 import java.util.function.Function;
 
@@ -70,10 +72,12 @@ public interface ErrorHandlingOperators<T> {
      * of its subscriber's methods. This operator changes this behavior. If the current stream encounters an error,
      * instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
      * {@link PublisherBuilder} returned from the given function, which invokes the subscriber's <code>onNext</code>
-     * method if it is able to do so. In such a case, because no publisher necessarily invokes <code>onError</code>,
-     * the subscriber may never know that an error happened.
+     * method if it is able to do so. The subscriber's original {@link Subscription} is used to
+     * control the flow of elements both before and after any error occurring.  
+     * In such a case, because no publisher necessarily invokes <code>onError</code> on the stream's subscriber,
+     * it may never know that an error happened.
      *
-     * @param errorHandler the function returning the stream that need to be emitting instead of the error.
+     * @param errorHandler the function returning the stream that needs to be emitting instead of the error.
      *                     The function must not return {@code null}.
      * @return The new stream builder.
      */
@@ -88,9 +92,11 @@ public interface ErrorHandlingOperators<T> {
      * By default, when a stream encounters an error that prevents it from emitting the expected item to its subscriber,
      * the stream invokes its subscriber's <code>onError</code> method, and then terminates without invoking any more
      * of its subscriber's methods. This operator changes this behavior. If the current stream encounters an error,
-     * instead of invoking its subscriber's <code>onError</code> method, it will instead relinquish control to the
-     * {@link Publisher} returned from the given function, which invokes the subscriber's <code>onNext</code>
-     * method if it is able to do so. In such a case, because no publisher necessarily invokes <code>onError</code>,
+     * instead of invoking its subscriber's <code>onError</code> method, the subscriber will be fed from the
+     * {@link Publisher} returned from the given function, and the subscriber's <code>onNext</code>
+     * method is called as the returned Publisher publishes. The subscriber's original {@link Subscription} is used to
+     * control the flow of both the original and the onError Publishers' elements.  
+     * In such a case, because no publisher necessarily invokes <code>onError</code>,
      * the subscriber may never know that an error happened.
      *
      * @param errorHandler the function returning the stream that need to be emitting instead of the error.

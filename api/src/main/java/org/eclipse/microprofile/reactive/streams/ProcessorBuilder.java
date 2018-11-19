@@ -146,54 +146,63 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * @return A {@link SubscriberBuilder} that will invoke the action for each element of the stream. 
      */
     @Override
     SubscriberBuilder<T, Void> forEach(Consumer<? super R> action);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} for the stream.
      */
     @Override
     SubscriberBuilder<T, Void> ignore();
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} for the stream.
      */
     @Override
     SubscriberBuilder<T, Void> cancel();
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} for the reduction.
      */
     @Override
     SubscriberBuilder<T, R> reduce(R identity, BinaryOperator<R> accumulator);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} for the reduction.
      */
     @Override
     SubscriberBuilder<T, Optional<R>> reduce(BinaryOperator<R> accumulator);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} that will emit the collected result.
      */
     @Override
     <S, A> SubscriberBuilder<T, S> collect(Collector<? super R, A, S> collector);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} that will emit the collected result.
      */
     @Override
     <S> SubscriberBuilder<T, S> collect(Supplier<S> supplier, BiConsumer<S, ? super R> accumulator);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder} that will emit the list.
      */
     @Override
     SubscriberBuilder<T, List<R>> toList();
 
     /**
      * {@inheritDoc}
+     * @return A new {@link SubscriberBuilder}.
      */
     @Override
     SubscriberBuilder<T, Optional<R>> findFirst();

@@ -33,7 +33,7 @@ public interface ConnectingOperators<T> {
     /**
      * Connect the outlet of the {@link Publisher} built by this builder to the given {@link Subscriber}.
      *
-     * @param subscriber The subscriber to connect.
+     * @param subscriber The subscriber to connect, it should not be reused. 
      * @return A completion builder that completes when the stream completes.
      */
     ProducesResult<Void> to(Subscriber<? super T> subscriber);
@@ -41,24 +41,24 @@ public interface ConnectingOperators<T> {
     /**
      * Connect the outlet of this stream to the given {@link SubscriberBuilder} graph.
      *
-     * @param subscriber The subscriber builder to connect.
+     * @param subscriberBuilder The subscriber builder to connect.
      * @return A completion builder that completes when the stream completes.
      */
-    <R> ProducesResult<R> to(SubscriberBuilder<? super T, ? extends R> subscriber);
+    <R> ProducesResult<R> to(SubscriberBuilder<? super T, ? extends R> subscriberBuilder );
 
     /**
      * Connect the outlet of the {@link Publisher} built by this builder to the given {@link ProcessorBuilder}.
      *
-     * @param processor The processor to connect.
-     * @return A stream builder that represents the passed in processors outlet.
+     * @param processorBuilder The processor builder to connect.
+     * @return A stream builder that represents the passed in processor's outlet.
      */
-    <R> ConnectingOperators<R> via(ProcessorBuilder<? super T, ? extends R> processor);
+    <R> ConnectingOperators<R> via(ProcessorBuilder<? super T, ? extends R> processorBuilder );
 
     /**
-     * Connect the outlet of this stream to the given {@link Processor} graph.
+     * Connect the outlet of this stream to the given {@link Processor}.
      *
      * @param processor The processor builder to connect.
-     * @return A stream builder that represents the passed in processor builders outlet.
+     * @return A stream builder that represents the passed in processor builder's outlet.
      */
     <R> ConnectingOperators<R> via(Processor<? super T, ? extends R> processor);
 }

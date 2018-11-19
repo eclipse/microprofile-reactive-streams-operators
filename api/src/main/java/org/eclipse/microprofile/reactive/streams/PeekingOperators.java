@@ -56,7 +56,7 @@ public interface PeekingOperators<T> {
      * <img src="doc-files/onError.png" alt="onError marble diagram">
      *
      * @param errorHandler The function called with the failure.
-     * @return A new stream that consumes elements of type <code>T</code> and emits the same elements. If the
+     * @return A new stream builder that consumes elements of type <code>T</code> and emits the same elements. If the
      * stream conveys a failure, the given error handler is called.
      */
     PeekingOperators<T> onError(Consumer<Throwable> errorHandler);

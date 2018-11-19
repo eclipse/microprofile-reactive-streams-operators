@@ -51,7 +51,8 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
 
     /**
      * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
-     *
+     * The objects passed to this method should not be reused.
+     *  
      * @param subscriber The subscriber.
      * @param completion The completion stage.
      * @return A completion subscriber.

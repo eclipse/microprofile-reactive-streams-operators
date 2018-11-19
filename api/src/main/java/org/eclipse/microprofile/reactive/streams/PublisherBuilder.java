@@ -145,54 +145,63 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
     CompletionRunner<Void> forEach(Consumer<? super T> action);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
     CompletionRunner<Void> ignore();
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
     CompletionRunner<Void> cancel();
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
     CompletionRunner<T> reduce(T identity, BinaryOperator<T> accumulator);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
     CompletionRunner<Optional<T>> reduce(BinaryOperator<T> accumulator);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
     CompletionRunner<Optional<T>> findFirst();
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream,
+     * R is the result type of the collector's reduction operation.
      */
     @Override
     <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector);
-
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream which emits the collected result.
      */
     @Override
     <R> CompletionRunner<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the stream that emits the list.
      */
     @Override
     CompletionRunner<List<T>> toList();
@@ -217,12 +226,14 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the composed stream.
      */
     @Override
     CompletionRunner<Void> to(Subscriber<? super T> subscriber);
 
     /**
      * {@inheritDoc}
+     * @return A new {@link CompletionRunner} that can be used to run the composed stream.
      */
     @Override
     <R> CompletionRunner<R> to(SubscriberBuilder<? super T, ? extends R> subscriber);
@@ -241,7 +252,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
     /**
      * Build this stream, using the first {@link ReactiveStreamsEngine} found by the {@link java.util.ServiceLoader}.
      *
-     * @return A {@link Processor} that will run this stream.
+     * @return A {@link Publisher} that will run this stream.
      */
     Publisher<T> buildRs();
 

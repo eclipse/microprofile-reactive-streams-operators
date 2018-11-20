@@ -17,6 +17,11 @@
 == SPI
 
 The API is responsible for building graphs of stages based on the operators the user invoked.
+This is done using builder classes that implement the fluent API that is used to compose the
+graph. These builders are obtained using the `ReactiveStreamsFactory` interface, a default
+implementation of which exists in the core package.
+The static methods of the `ReactiveStreams` class delegate to a service loaded implementation of `ReactiveStreamsFactory`, enabling the core implementation to be replaced.
+
 The stages form an SPI for `ReactiveStreamsEngine` implementations to build into a running stream.
 Examples of stages include:
 

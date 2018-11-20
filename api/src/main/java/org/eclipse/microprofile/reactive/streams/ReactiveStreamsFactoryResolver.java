@@ -59,7 +59,7 @@ public class ReactiveStreamsFactoryResolver {
 
                 if (newInstance == null) {
                     throw new IllegalStateException(
-                        "No ConfigProviderResolver implementation found!");
+                        "No ReactiveStreamsFactory implementation found!");
                 }
 
                 instance = newInstance;

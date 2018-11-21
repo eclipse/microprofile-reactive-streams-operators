@@ -270,7 +270,7 @@ public class ReactiveStreams {
      * <p>
      * <img src="doc-files/coupled.png" alt="coupled marble diagram">
      * <p>
-     * The resulting processor sends all the elements received to the passed in subscriber, and the emits all the
+     * The resulting processor sends all the elements received to the passed in subscriber, and emits all the
      * elements received from the passed in publisher.
      * <p>
      * In addition, the lifecycles of the subscriber and publisher are coupled, such that if one terminates or
@@ -338,7 +338,7 @@ public class ReactiveStreams {
      * <p>
      * <img src="doc-files/coupled.png" alt="coupled marble diagram">
      * <p>
-     * The resulting processor sends all the elements received to the passed in subscriber, and the emits all the
+     * The resulting processor sends all the elements received to the passed in subscriber, and emits all the
      * elements received from the passed in publisher.
      * <p>
      * In addition, the lifecycles of the subscriber and publisher are coupled, such that if one terminates or

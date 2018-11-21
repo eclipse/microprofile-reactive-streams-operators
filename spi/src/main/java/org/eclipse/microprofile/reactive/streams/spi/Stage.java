@@ -600,7 +600,7 @@ public interface Stage {
     /**
      * A stage that couples a wrapped subscriber graph to a wrapped publisher graph.
      * <p>
-     * The resulting stage sends all the elements received to the passed in subscriber, and the emits all the elements
+     * The resulting stage sends all the elements received to the passed in subscriber, and emits all the elements
      * received from the passed in publisher.
      * <p>
      * In addition, the lifecycles of the subscriber and publisher are coupled, such that if one terminates or

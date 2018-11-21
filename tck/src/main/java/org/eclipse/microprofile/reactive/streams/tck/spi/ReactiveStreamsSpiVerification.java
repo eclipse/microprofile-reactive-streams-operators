@@ -88,7 +88,8 @@ public class ReactiveStreamsSpiVerification {
             DropWhileStageVerification::new,
             OnErrorResumeStageVerification::new,
             FromCompletionStageVerification::new,
-            FromCompletionStageNullableVerification::new
+            FromCompletionStageNullableVerification::new,
+            CoupledStageVerification::new
         );
 
         List<Object> allTests = new ArrayList<>();

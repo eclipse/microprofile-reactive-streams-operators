@@ -112,4 +112,14 @@ public class DefaultReactiveStreamsFactory implements ReactiveStreamsFactory {
     public <T> PublisherBuilder<T> fromCompletionStageNullable(CompletionStage<? extends T> completionStage) {
         return ReactiveStreams.fromCompletionStageNullable(completionStage);
     }
+
+    @Override
+    public <T, R> ProcessorBuilder<T, R> coupled(SubscriberBuilder<? super T, ?> subscriber, PublisherBuilder<? extends R> publisher) {
+        return ReactiveStreams.coupled(subscriber, publisher);
+    }
+
+    @Override
+    public <T, R> ProcessorBuilder<T, R> coupled(Subscriber<? super T> subscriber, Publisher<? extends R> publisher) {
+        return ReactiveStreams.coupled(subscriber, publisher);
+    }
 }

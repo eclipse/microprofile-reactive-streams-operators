@@ -223,7 +223,7 @@ public class ReactiveStreams {
      * @return A publisher builder.
      */
     public static <T> PublisherBuilder<T> concat(PublisherBuilder<? extends T> a,
-                                                 PublisherBuilder<? extends T> b) {
+        PublisherBuilder<? extends T> b) {
         return instance().concat(a, b);
     }
 
@@ -263,6 +263,143 @@ public class ReactiveStreams {
      */
     public static <T> PublisherBuilder<T> fromCompletionStageNullable(CompletionStage<? extends T> completionStage) {
         return instance().fromCompletionStageNullable(completionStage);
+    }
+
+    /**
+     * Creates a {@link ProcessorBuilder} by coupling a {@link SubscriberBuilder} to a {@link PublisherBuilder}.
+     * <p>
+     * <img src="doc-files/coupled.png" alt="coupled marble diagram">
+     * <p>
+     * The resulting processor sends all the elements received to the passed in subscriber, and emits all the
+     * elements received from the passed in publisher.
+     * <p>
+     * In addition, the lifecycles of the subscriber and publisher are coupled, such that if one terminates or
+     * receives a termination signal, the other will be terminated. Below is a table of what signals are emited when.
+     * <p>
+     * <table border="1">
+     * <caption>Lifecycle signal propagation</caption>
+     * <tr>
+     * <th>Returned ProcessorBuilder inlet</th>
+     * <th>Passed in SubscriberBuilder</th>
+     * <th>Passed in PublisherBuilder</th>
+     * <th>Returned ProcessorBuilder outlet</th>
+     * </tr>
+     * <tr>
+     * <td>Cause: complete from upstream</td>
+     * <td>Effect: complete</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Cause: error from upstream</td>
+     * <td>Effect: error</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: error</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Cause: cancels</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * <td>Cause: completes</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: error</td>
+     * <td>Cause: errors</td>
+     * <td>Effect: error</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * <td>Effect: cancel</td>
+     * <td>Cause: cancel from downstream</td>
+     * </tr>
+     * </table>
+     *
+     * @param subscriber The subscriber builder to wrap.
+     * @param publisher  The publisher builder to wrap.
+     * @param <T>        The type of elements received.
+     * @param <R>        The type of elements emitted.
+     * @return The coupled processor builder.
+     */
+    public static <T, R> ProcessorBuilder<T, R> coupled(SubscriberBuilder<? super T, ?> subscriber,
+        PublisherBuilder<? extends R> publisher) {
+        return instance().coupled(subscriber, publisher);
+    }
+
+    /**
+     * Creates a {@link ProcessorBuilder} by coupling a {@link Subscriber} to a {@link Publisher}.
+     * <p>
+     * <img src="doc-files/coupled.png" alt="coupled marble diagram">
+     * <p>
+     * The resulting processor sends all the elements received to the passed in subscriber, and emits all the
+     * elements received from the passed in publisher.
+     * <p>
+     * In addition, the lifecycles of the subscriber and publisher are coupled, such that if one terminates or
+     * receives a termination signal, the other will be terminated. Below is a table of what signals are emited when:
+     * <p>
+     * <table border="1">
+     * <caption>Lifecycle signal propagation</caption>
+     * <tr>
+     * <th>Returned ProcessorBuilder inlet</th>
+     * <th>Passed in SubscriberBuilder</th>
+     * <th>Passed in PublisherBuilder</th>
+     * <th>Returned ProcessorBuilder outlet</th>
+     * </tr>
+     * <tr>
+     * <td>Cause: complete from upstream</td>
+     * <td>Effect: complete</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Cause: error from upstream</td>
+     * <td>Effect: error</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: error</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Cause: cancels</td>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * <td>Cause: completes</td>
+     * <td>Effect: complete</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: error</td>
+     * <td>Cause: errors</td>
+     * <td>Effect: error</td>
+     * </tr>
+     * <tr>
+     * <td>Effect: cancel</td>
+     * <td>Effect: complete</td>
+     * <td>Effect: cancel</td>
+     * <td>Cause: cancel from downstream</td>
+     * </tr>
+     * </table>
+     *
+     * @param subscriber The subscriber builder to wrap.
+     * @param publisher  The publisher builder to wrap.
+     * @param <T>        The type of elements received.
+     * @param <R>        The type of elements emitted.
+     * @return The coupled processor builder.
+     * @see #coupled(SubscriberBuilder, PublisherBuilder)
+     */
+    public static <T, R> ProcessorBuilder<T, R> coupled(Subscriber<? super T> subscriber,
+        Publisher<? extends R> publisher) {
+        return instance().coupled(subscriber, publisher);
     }
 
 }

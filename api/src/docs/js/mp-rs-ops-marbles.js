@@ -26,7 +26,7 @@ function createMarbles() {
   const marbles = new SvgMarbles();
   const dsl = marbles.dsl;
   const n = dsl.n, e = dsl.e, term = dsl.term, none = dsl.none, nterm = dsl.nterm, r = dsl.r, i = dsl.i, err = dsl.err;
-  const ins = dsl.ins, out = dsl.out, op = dsl.op, sub = dsl.sub, eff = dsl.eff, res = dsl.res;
+  const ins = dsl.ins, out = dsl.out, op = dsl.op, decl = dsl.decl, sub = dsl.sub, eff = dsl.eff, res = dsl.res;
 
   // @formatter:off
   marbles.addGraphs({
@@ -323,11 +323,24 @@ function createMarbles() {
     },
     fromCompletionStageNullable: {
       op: {
-        fontSize: "12pt"
+        fontSize: "10pt"
       },
       stages: [
         op("ReactiveStreams.fromCompletionStageNullable(asyncEcho(null))"),
         ins(none, term, none, none, )
+      ]
+    },
+    coupled: {
+      op: {
+        fontSize: "16pt"
+      },
+      stages: [
+        decl("var sub = ReactiveStreams.builder().forEach(f);"),
+        decl("var pub = ReactiveStreams.generate(() -> 4);"),
+        ins(none, n(1),      none, none, none, n(5),      none, none, term ),
+        op("ReactiveStreams.coupled(sub, pub)"),
+        eff(none, e("f(1)"), none, none, none, e("f(5)"), none, none, none ),
+        ins(n(4), none,      none, n(4), n(4), none,      none, n(4), term)
       ]
     },
 

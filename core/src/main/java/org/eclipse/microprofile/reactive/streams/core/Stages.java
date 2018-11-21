@@ -372,4 +372,24 @@ final class Stages {
         }
     }
 
+    final static class Coupled implements Stage.Coupled {
+        private final Graph subscriber;
+        private final Graph publisher;
+
+        Coupled(Graph subscriber, Graph publisher) {
+            this.subscriber = Objects.requireNonNull(subscriber, "Subscriber must not be null");
+            this.publisher = Objects.requireNonNull(publisher, "Publisher must not be null");
+        }
+
+        @Override
+        public Graph getSubscriber() {
+            return subscriber;
+        }
+
+        @Override
+        public Graph getPublisher() {
+            return publisher;
+        }
+    }
+
 }

@@ -23,6 +23,7 @@ import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
+import org.eclipse.microprofile.reactive.streams.spi.Graph;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -117,5 +118,20 @@ public class ReactiveStreamsFactoryImpl implements ReactiveStreamsFactory {
     @Override
     public <T> PublisherBuilder<T> fromCompletionStageNullable(CompletionStage<? extends T> completionStage) {
         return new PublisherBuilderImpl<>(new Stages.FromCompletionStageNullable(completionStage));
+    }
+
+    @Override
+    public <T, R> ProcessorBuilder<T, R> coupled(SubscriberBuilder<? super T, ?> subscriber,
+        PublisherBuilder<? extends R> publisher) {
+        Graph sGraph = ReactiveStreamsGraphBuilder.rsBuilderToGraph(Objects.requireNonNull(subscriber,
+            "Subscriber must not be null"));
+        Graph pGraph = ReactiveStreamsGraphBuilder.rsBuilderToGraph(Objects.requireNonNull(publisher,
+            "Publisher must not be null"));
+        return new ProcessorBuilderImpl<>(new Stages.Coupled(sGraph, pGraph), null);
+    }
+
+    @Override
+    public <T, R> ProcessorBuilder<T, R> coupled(Subscriber<? super T> subscriber, Publisher<? extends R> publisher) {
+        return coupled(fromSubscriber(subscriber), fromPublisher(publisher));
     }
 }

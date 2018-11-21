@@ -51,7 +51,7 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
 
     /**
      * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
-     * The objects passed to this method should not be reused.
+     * The objects passed to this method should not be associated with more than one stream instance.
      *  
      * @param subscriber The subscriber.
      * @param completion The completion stage.

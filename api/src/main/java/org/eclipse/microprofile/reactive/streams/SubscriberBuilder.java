@@ -27,8 +27,11 @@ import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
  * When built, this builder returns a {@link CompletionSubscriber}, which encapsulates both a
  * {@link org.reactivestreams.Subscriber} and a {@link java.util.concurrent.CompletionStage} that will be redeemed
  * with the result produced by the subscriber when the stream completes normally, or will be redeemed with an error
- * if the subscriber receives an error.
- *
+ * if the subscriber receives an error. A {@link SubscriberBuilder} may represent a compound set of 
+ * stream stages and may complete exceptionally without receiving an error externally.
+ * Similarly, {@link SubscriberBuilder}s may encapsulate error handling such as the 
+ * onErrorResume operator and recover from an externally received errors. 
+ * 
  * @param <T> The type of the elements that this subscriber consumes.
  * @param <R> The type of the result that this subscriber emits.
  * @see ReactiveStreams

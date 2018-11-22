@@ -35,7 +35,7 @@ import java.util.stream.Collector;
  * <p>
  * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
  * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
- * applying some transformation or some side effect, termination and error signals potentially being passed, and
+ * applying some transformation or having some side effect, termination and error signals potentially being passed, and
  * for operators that subscribe to the stream, an output value being redeemed at the end.
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
@@ -55,7 +55,7 @@ public interface ConsumingOperators<T> {
      * completes normally, or with an error if the stream completes with an error or if the action throws an exception.
      *
      * @param action The action.
-     * @return A new completion builder.
+     * @return A new completion runner.
      */
     ProducesResult<Void> forEach(Consumer<? super T> action);
 
@@ -73,11 +73,11 @@ public interface ConsumingOperators<T> {
     ProducesResult<Void> ignore();
 
     /**
-     * Cancels the stream as soon as it starts.
+     * Cancels the stream as soon as it is run.
      * <p>
-     * The returned {@link CompletionStage} will be immediately redeemed as soon as the stream starts.
+     * The returned {@link CompletionStage} will be immediately redeemed as soon as the stream is run.
      *
-     * @return A new completion builder.
+     * @return A completion builder for the cancelled stream.
      */
     ProducesResult<Void> cancel();
 
@@ -91,20 +91,21 @@ public interface ConsumingOperators<T> {
      *
      * @param identity    The identity value.
      * @param accumulator The accumulator function.
-     * @return A new completion builder.
+     * @return A completion builder for the reduction.
      */
     ProducesResult<T> reduce(T identity, BinaryOperator<T> accumulator);
 
     /**
-     * Perform a reduction on the elements of this stream, using provided the accumulation function.
+     * Perform a reduction on the elements of this stream, using the provided accumulation function.
      * <p>
      * <img src="doc-files/reduce.png" alt="reduce marble diagram">
      * <p>
-     * The result of the reduction is returned in the {@link CompletionStage}. If there are no elements in this stream,
+     * The result of the reduction is returned as an {@code Optional<T>}
+     * in the {@link CompletionStage}. If there are no elements in this stream,
      * empty will be returned.
      *
      * @param accumulator The accumulator function.
-     * @return A new completion builder.
+     * @return A completion builder for the reduction.
      */
     ProducesResult<Optional<T>> reduce(BinaryOperator<T> accumulator);
 
@@ -129,7 +130,7 @@ public interface ConsumingOperators<T> {
      * @param collector The collector to collect the elements.
      * @param <R>       The result of the collector.
      * @param <A>       The accumulator type.
-     * @return A new completion builder that emits the collected result.
+     * @return A completion builder that emits the collected result.
      */
     <R, A> ProducesResult<R> collect(Collector<? super T, A, R> collector);
 
@@ -146,7 +147,7 @@ public interface ConsumingOperators<T> {
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
      *                    result
      * @param <R>         The result of the collector.
-     * @return A new completion builder that emits the collected result.
+     * @return A completion builder that emits the collected result.
      */
     <R> ProducesResult<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator);
 
@@ -155,7 +156,7 @@ public interface ConsumingOperators<T> {
      * <p>
      * <img src="doc-files/toList.png" alt="toList marble diagram">
      *
-     * @return A new completion builder that emits the list.
+     * @return A completion builder that emits the list.
      */
     ProducesResult<List<T>> toList();
 

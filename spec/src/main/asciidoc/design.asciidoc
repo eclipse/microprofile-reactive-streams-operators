@@ -99,4 +99,4 @@ runs the stream, provides a `run` method that returns a `CompletionStage`.
 
 The `CompletionSubscriber` class is so named because, where a `CompletionStage` is a stage of asynchronous computation that completes with a value or an error, a `CompletionSubscriber` is subscriber to an asynchronous stream that completes with a value or an error.
 
-The `build` and `run` methods both provide a zero arg variant, which uses the default Reactive Streams engine provided by the platform, as well as a overload that takes a `ReactiveStreamsEngine`, allowing application developers to use a custom engine when they please.
+The `build` and `run` methods both provide a zero arg variant, which uses the default Reactive Streams engine provided by the platform, as well as an overload that takes a `ReactiveStreamsEngine`, allowing application developers to use a custom engine when they please.

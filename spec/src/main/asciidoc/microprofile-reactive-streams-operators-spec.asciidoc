@@ -15,8 +15,8 @@
 //
 
 = MicroProfile Reactive Streams Operators Specification
-:authors: James Roper, Clement Escoffier
-:email: james@lightbend.com, clement.escoffier@redhat.com
+:authors: James Roper, Clement Escoffier, Gordon Hutchison
+:email: james@lightbend.com, clement.escoffier@redhat.com, gordon_hutchison@uk.ibm.com
 :version-label!:
 :sectanchors:
 :doctype: book

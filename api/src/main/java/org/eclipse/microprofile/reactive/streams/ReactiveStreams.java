@@ -166,6 +166,7 @@ public class ReactiveStreams {
 
     /**
      * Create a {@link SubscriberBuilder} from the given {@link Subscriber}.
+     * The subscriber can only be used to create a single subscriber builder.
      *
      * @param subscriber The subscriber to be wrapped.
      * @param <T>        The type of elements that the subscriber consumes.
@@ -239,7 +240,7 @@ public class ReactiveStreams {
      * If the {@code CompletionStage} is completed with a failure, this failure will be propagated through the stream.
      *
      * @param completionStage The {@code CompletionStage} to create the publisher from.
-     * @param <T>             The type of the {@code CompletionStage} value.
+     * @param <T> The type of the {@code CompletionStage} value.
      * @return A {@code PublisherBuilder} representation of this {@code CompletionStage}.
      */
     public static <T> PublisherBuilder<T> fromCompletionStage(CompletionStage<? extends T> completionStage) {
@@ -258,7 +259,7 @@ public class ReactiveStreams {
      * If the {@code CompletionStage} is completed with a failure, this failure will be propagated through the stream.
      *
      * @param completionStage The {@code CompletionStage} to create the publisher from.
-     * @param <T>             The type of the {@code CompletionStage} value.
+     * @param <T> The type of the {@code CompletionStage} value.
      * @return A {@code PublisherBuilder} representation of this {@code CompletionStage}.
      */
     public static <T> PublisherBuilder<T> fromCompletionStageNullable(CompletionStage<? extends T> completionStage) {

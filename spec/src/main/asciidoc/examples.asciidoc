@@ -56,6 +56,15 @@ Publisher<ByteBuffer> publisher = ReactiveStreams
     .map(line -> ByteBuffer.wrap(line.getBytes()))
     .buildRs();
 ----
+A `Publisher` built in this way has its behaviour specified by the Reactive Streams
+specification. Most reactive streams implementations enable the detailed control
+of further aspects of stream stage behaviour such as fan-out, back pressure policy,
+buffer sizes and so on. If you require control of such aspects,
+consult your implementation's documentation. One approach
+would be to create a single `Processor` using your implementation
+library's native API having the detailed behaviour required, subscribe that to
+the built `Publisher` and then subscribe downstream stream processing stages
+to that.
 
 === Building a subscriber
 
@@ -78,6 +87,13 @@ CompletionStage<List<MyDomainObject>> result = subscriber.getCompletion(); <2>
 <1> The object can be deconstructed into the `Subscriber` part
 <2> The `CompletionStage` can be retrieve using `getCompletion`
 
+As a particular `SubscriberBuilder` may be constructed from a user supplied
+reactive streams `Subscriber` and subscribers can only be used once,
+care should be taken not to reuse builders where this may
+cause subscriber reuse, either for the emitted subscriber
+or a subscribing stage, such as a `Processor`,
+that is internal to a stream.
+
 === Building a processor
 
 This shows building a processor, for example, a message library may require processing messages, and then emitting an ACK identifier so that each handled element can be acknowledged as handled.
@@ -93,6 +109,9 @@ Processor<Message<MyDomainObject>, MessageAck> processor =
       .buildRs();
   }
 ----
+The comments above on avoiding inadvertent subscriber reuse are also
+relevant to `Processor` objects as these may contain internal subscription
+relationships as well as user supplied reactive streams `Processor` objects.
 
 === Consuming a publisher
 
@@ -111,6 +130,11 @@ CompletionStage<List<MyDomainObject>> result = ReactiveStreams
     .toList()
     .run();
 ----
+
+Even though the MicroProfile Reactive Streams Operators API
+can be considered a 'lifted' API. The `parser` object above
+is directly embedded in the stream and such cannot be used
+to build more than one stream instance.
 
 === Feeding a subscriber
 

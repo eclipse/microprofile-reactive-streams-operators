@@ -36,3 +36,10 @@ A graph is a sequence of stages, consecutive stages will have an outlet and and 
 Only the stages at the ends of the graph may have no inlet or outlet, whether these end stages have an inlet or outlet determines the shape of the overall graph.
 The API is responsible for ensuring that as graphs are constructed, only graphs that are logically possible are passed to the `ReactiveStreamsEngine` to construct.
 
+The implementation discovery relies on the Java `ServiceLoader` mechanism.
+However, for environments not supporting this mechanism, the user can pass custom implementations using the following methods:
+
+* `org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver#setInstance` - to configure the `ReactiveStreamEngine`
+* `org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsFactoryResolver#setInstance` - to configure the `ReactiveStreamsFactory`
+
+These methods must be called before the access to the API and should only be used for integration purpose.

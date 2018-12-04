@@ -99,7 +99,6 @@
 
     <modules>
         <module>api</module>
-        <module>spi</module>
         <module>core</module>
         <module>tck</module>
         <module>tck-arquillian</module>

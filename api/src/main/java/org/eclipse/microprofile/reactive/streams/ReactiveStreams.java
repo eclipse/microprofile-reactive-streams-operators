@@ -27,7 +27,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static org.eclipse.microprofile.reactive.streams.ReactiveStreamsFactoryResolver.instance;
+import static org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsFactoryResolver.instance;
 
 /**
  * Primary entry point into the Reactive Streams utility API.

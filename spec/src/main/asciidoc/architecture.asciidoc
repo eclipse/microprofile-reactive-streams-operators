@@ -40,7 +40,7 @@ These include how and whether context is propagated, concurrency models, bufferi
 Different implementations of Reactive Streams offer different approaches based on varying opinions on how these cross cutting concerns should be treated.
 
 For this reason, this API provides an underlying SPI to allow different engines to be plugged in to actually run the streams.
-Implementors of this spec will provide a default implementation, however users can select to use a custom implementation if they need.
+Implementors of this spec will provide a default implementation, however users can select to use <<SPI,a custom implementation>> if they need.
 Additional flexibility is provided by using a service loaded implementation of
 the factory class that creates the stream builders that implement the fluent API,
 enabling the provided implementation to be replaced.

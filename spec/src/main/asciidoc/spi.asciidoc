@@ -39,7 +39,7 @@ The API is responsible for ensuring that as graphs are constructed, only graphs 
 The implementation discovery relies on the Java `ServiceLoader` mechanism.
 However, for environments not supporting this mechanism, the user can pass custom implementations using the following methods:
 
-* `org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver#setInstance` - to configure the `ReactiveStreamEngine`
-* `org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsFactoryResolver#setInstance` - to configure the `ReactiveStreamsFactory`
+* `org.eclipse.microprofile.reactive.streams.operators.core.ReactiveStreamsEngineResolver#setInstance` - to configure the `ReactiveStreamEngine`
+* `org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFactoryResolver#setInstance` - to configure the `ReactiveStreamsFactory`
 
 These methods must be called before the access to the API and should only be used for integration purpose.

@@ -5,6 +5,6 @@ Import-Package: \
     org.reactivestreams;version="[1.0.0,2)", \
     *
 
-Bundle-SymbolicName: org.eclipse.microprofile.reactive.streams
-Bundle-Name: MicroProfile Reactive Streams Bundle
+Bundle-SymbolicName: org.eclipse.microprofile.reactive.streams.operators
+Bundle-Name: Eclipse MicroProfile Reactive Streams Operators API Bundle
 Bundle-License: Apache License, Version 2.0

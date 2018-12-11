@@ -53,9 +53,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>
  * To test your implementation in a MicroProfile container you need to:
  * <ol>
- *     <li>Expose your {@code org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine} implementation as an {@code ApplicationScoped} bean,</li>
+ *     <li>Expose your {@code org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine} implementation as an
+ *     {@code ApplicationScoped} bean,</li>
  *     <li>Define an Arquillian test /deployment containing the bean exposing the engine</li>
- *     <li>Have an integration test extending {@code org.eclipse.microprofile.reactive.streams.operators.tck.arquillian.ReactiveStreamsArquillianTck}</li>
+ *     <li>Have an integration test extending
+ *     {@code org.eclipse.microprofile.reactive.streams.operators.tck.arquillian.ReactiveStreamsArquillianTck}</li>
  * </ol>
  */
 public class ReactiveStreamsArquillianTck extends Arquillian {

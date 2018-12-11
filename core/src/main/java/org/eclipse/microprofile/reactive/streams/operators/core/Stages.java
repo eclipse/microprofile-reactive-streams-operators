@@ -17,10 +17,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -40,7 +40,7 @@ final class Stages {
 
     private Stages() {
     }
-    
+
     final static class Map implements Stage.Map {
         private final Function<?, ?> mapper;
 

@@ -17,13 +17,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -40,8 +40,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
 
 final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder implements ProcessorBuilder<T, R> {
 
@@ -214,7 +212,7 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
 
     @Override
     public Processor<T, R> buildRs() {
-        return buildRs(instance());
+        return buildRs(ReactiveStreamsEngineResolver.instance());
     }
 
     @Override

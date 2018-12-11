@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
 import java.util.Objects;
 import java.util.Optional;

@@ -17,16 +17,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.CompletionRunner;
-import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.CompletionRunner;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
-
-import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
 
 final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implements CompletionRunner<T> {
 
@@ -36,7 +34,7 @@ final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implemen
 
     @Override
     public CompletionStage<T> run() {
-        return run(instance());
+        return run(ReactiveStreamsEngineResolver.instance());
     }
 
     @Override

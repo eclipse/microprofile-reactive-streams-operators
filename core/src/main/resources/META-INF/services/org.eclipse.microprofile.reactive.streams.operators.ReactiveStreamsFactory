@@ -17,4 +17,4 @@
 # limitations under the License.
 ################################################################################
 
-org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsFactoryImpl
+org.eclipse.microprofile.reactive.streams.operators.core.ReactiveStreamsFactoryImpl

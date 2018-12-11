@@ -16,10 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.ReactiveStreams;
-import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;

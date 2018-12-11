@@ -17,17 +17,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
-import org.eclipse.microprofile.reactive.streams.spi.ToGraphable;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ToGraphable;
 
 import java.util.Objects;
 
 /**
  * Internal stages, used to capture the graph while being built, but never passed to a
- * {@link org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine}. These exist for performance reasons,
+ * {@link org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine}. These exist for performance reasons,
  * allowing the builder to hold the graph as an immutable linked tree where multiple stages can be appended in constant
  * time, rather than needing to copy an array each time. However, when it comes to building the graph, it is first
  * flattened out to an array, removing any of the internal stages that held nested stages, etc.

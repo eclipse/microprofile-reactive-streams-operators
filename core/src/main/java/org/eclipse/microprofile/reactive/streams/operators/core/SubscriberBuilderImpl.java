@@ -17,17 +17,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.CompletionSubscriber;
-import org.eclipse.microprofile.reactive.streams.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
-import org.eclipse.microprofile.reactive.streams.spi.SubscriberWithCompletionStage;
+import org.eclipse.microprofile.reactive.streams.operators.CompletionSubscriber;
+import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.SubscriberWithCompletionStage;
 
 import java.util.Objects;
-
-import static org.eclipse.microprofile.reactive.streams.core.ReactiveStreamsEngineResolver.instance;
 
 public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder implements SubscriberBuilder<T, R> {
 
@@ -37,7 +35,7 @@ public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuild
 
     @Override
     public CompletionSubscriber<T, R> build() {
-        return build(instance());
+        return build(ReactiveStreamsEngineResolver.instance());
     }
 
     @Override

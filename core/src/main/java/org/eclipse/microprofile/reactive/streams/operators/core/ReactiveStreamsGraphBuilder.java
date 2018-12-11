@@ -17,11 +17,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.eclipse.microprofile.reactive.streams.core;
+package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.spi.Stage;
-import org.eclipse.microprofile.reactive.streams.spi.ToGraphable;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ToGraphable;
 import org.reactivestreams.Publisher;
 
 import java.util.*;

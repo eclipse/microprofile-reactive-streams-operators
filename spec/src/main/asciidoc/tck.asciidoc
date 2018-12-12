@@ -47,7 +47,7 @@ It is run as part of the Eclipse MicroProfile Reactive Streams Operators API's c
 
 ===== Running the API TCK
 
-The API TCK can be run by running the `org.eclipse.microprofile.reactive.streams.tck.api.ReactiveStreamsApiVerification` class.
+The API TCK can be run by running the `org.eclipse.microprofile.reactive.streams.operators.tck.api.ReactiveStreamsApiVerification` class.
 For convenience, implementations might decide to subclass this in their `src/test/java` folder, so that it gets automatically picked up and run by build tools like Maven.
 
 ==== SPI TCK
@@ -60,7 +60,7 @@ Additionally, each stage defines one or more Reactive Streams TCK verification c
 
 The SPI TCK can be run by running the whole TCK (this includes running the API TCK, since the SPI TCK uses the API to create the stages, it doesn't make sense to verify an SPI without verifying that the API on top of it is doing the right thing too).
 
-The whole TCK can be run by creating a subclass of `org.eclipse.microprofile.reactive.streams.tck.ReactiveStreamsTck`.
+The whole TCK can be run by creating a subclass of `org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck`.
 This requires passing an instance of `org.reactivestreams.tck.TestEnvironment` to the super constructor, which contains configuration like timeouts.
 Typically, the timeouts set by using the default constructor for `TestEnvironment` should be satisfactory.
 The `createEngine` method also needs to be implemented, this must create and return a `ReactiveStreamsEngine` for the TCK to test against.
@@ -92,10 +92,10 @@ public class MyReactiveStreamsTckTest extends ReactiveStreamsTck<MyEngine> {
 ==== Running the TCK in a container
 
 A test class for running the TCK in a MicroProfile container is provided so that containers can verify compliance with the spec.
-This container verification comes in the `org.eclipse.microprofile.reactive.streams:microprofile-reactive-streams-operators-tck-arquillian` artifact, which can be added as a dependency to a project that wishes to use it.
+This container verification comes also in the `org.eclipse.microprofile.reactive.streams:microprofile-reactive-streams-operators-tck` artifact, but the TCK is located in the `org.eclipse.microprofile.reactive.streams.operators.tck.arquillian` package.
 
 To run this TCK, the container must provide a `ReactiveStreamsEngine` to be tested as an injectable `ApplicationScoped` bean, and the MicroProfile Reactive Streams Operators API must be on the classpath.
-Having ensured this, the TCK can then be run by executing `org.eclipse.microprofile.reactive.streams.tkc.arquillian.ReactiveStreamsArquillianTck`.
+Having ensured this, the TCK can then be run by executing `org.eclipse.microprofile.reactive.streams.operators.tck.arquillian.ReactiveStreamsArquillianTck`.
 This class deploys the TCK to an Arquillian compatible container, and then runs all the tests in the container in its own configured TestNG suite on the container.
 
 For convenience, implementations may want to subclass this class in their own `src/test/java` class, so that it can automatically be run by build tools like Maven.

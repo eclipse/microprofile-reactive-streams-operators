@@ -23,7 +23,7 @@
 const path = require("path");
 const projectBaseDir = path.normalize(__dirname + "/../../..");
 const htmlPage = "file://" + projectBaseDir + "/src/docs/js/puppeteer.html";
-const outputDir = projectBaseDir + "/src/main/java/org/eclipse/microprofile/reactive/streams/doc-files";
+const outputDir = projectBaseDir + "/src/main/java/org/eclipse/microprofile/reactive/streams/operators/doc-files";
 
 const shell = require("shelljs");
 shell.mkdir("-p", outputDir);

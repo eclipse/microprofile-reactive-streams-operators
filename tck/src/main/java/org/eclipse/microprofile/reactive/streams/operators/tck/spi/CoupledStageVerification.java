@@ -51,7 +51,7 @@ public class CoupledStageVerification extends AbstractStageVerification {
                 rs.coupled(rs.builder().onComplete(() -> subscriberCompleted.complete(null)).ignore(),
                     idlePublisher())
             ).cancel()
-            .run();
+            .run(getEngine());
 
         await(subscriberCompleted);
         await(upstreamCancelled);
@@ -68,7 +68,7 @@ public class CoupledStageVerification extends AbstractStageVerification {
                 rs.coupled(rs.builder().onComplete(() -> subscriberCompleted.complete(null)).ignore(),
                     rs.empty())
             ).ignore()
-            .run();
+            .run(getEngine());
 
         await(subscriberCompleted);
         await(upstreamCancelled);
@@ -85,7 +85,7 @@ public class CoupledStageVerification extends AbstractStageVerification {
                 rs.coupled(rs.builder().onError(subscriberFailed::complete).ignore(),
                     rs.failed(new QuietRuntimeException("failed")))
             ).ignore()
-            .run();
+            .run(getEngine());
 
         assertTrue(await(subscriberFailed) instanceof QuietRuntimeException);
         await(upstreamCancelled);
@@ -102,7 +102,7 @@ public class CoupledStageVerification extends AbstractStageVerification {
                     idlePublisher().onTerminate(() -> publisherCancelled.complete(null)))
             ).onComplete(() -> downstreamCompleted.complete(null))
             .ignore()
-            .run();
+            .run(getEngine());
 
         await(publisherCancelled);
         await(downstreamCompleted);
@@ -119,7 +119,7 @@ public class CoupledStageVerification extends AbstractStageVerification {
                     idlePublisher().onTerminate(() -> publisherCancelled.complete(null)))
             ).onError(downstreamFailed::complete)
             .ignore()
-            .run();
+            .run(getEngine());
 
         await(publisherCancelled);
         assertTrue(await(downstreamFailed) instanceof QuietRuntimeException);
@@ -136,7 +136,7 @@ public class CoupledStageVerification extends AbstractStageVerification {
                     idlePublisher().onTerminate(() -> publisherCancelled.complete(null)))
             ).onComplete(() -> downstreamCompleted.complete(null))
             .ignore()
-            .run();
+            .run(getEngine());
 
         await(publisherCancelled);
         await(downstreamCompleted);
@@ -145,8 +145,8 @@ public class CoupledStageVerification extends AbstractStageVerification {
     @Test
     public void coupledStageShouldBeResuable() {
         ProcessorBuilder<Object, Integer> coupled = rs.coupled(rs.builder().ignore(), rs.of(1, 2, 3));
-        assertEquals(await(idlePublisher().via(coupled).toList().run()), Arrays.asList(1, 2, 3));
-        assertEquals(await(idlePublisher().via(coupled).toList().run()), Arrays.asList(1, 2, 3));
+        assertEquals(await(idlePublisher().via(coupled).toList().run(getEngine())), Arrays.asList(1, 2, 3));
+        assertEquals(await(idlePublisher().via(coupled).toList().run(getEngine())), Arrays.asList(1, 2, 3));
     }
 
     @Override

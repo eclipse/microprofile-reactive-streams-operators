@@ -77,9 +77,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/eclipse/microprofile-reactive-streams.git</connection>
-        <developerConnection>scm:git:git@github.com:eclipse/microprofile-reactive-streams.git</developerConnection>
-        <url>https://github.com/eclipse/microprofile-reactive-streams</url>
+        <connection>scm:git:https://github.com/eclipse/microprofile-reactive-streams-operators.git</connection>
+        <developerConnection>scm:git:git@github.com:eclipse/microprofile-reactive-streams-operators.git</developerConnection>
+        <url>https://github.com/eclipse/microprofile-reactive-streams-operators</url>
         <tag>HEAD</tag>
     </scm>
 

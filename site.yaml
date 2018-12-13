@@ -19,8 +19,8 @@
 %YAML 1.2
 ---
 documentation:
-  - title: Reactive Streams Support for Microprofile
-    file: spec/src/main/asciidoc/microprofile-reactive-streams-spec.asciidoc
+  - title: Reactive Streams Operators for Microprofile
+    file: spec/src/main/asciidoc/microprofile-reactive-streams-operators-spec.asciidoc
 
   - title: Architecture
     file: spec/src/main/asciidoc/architecture.asciidoc

@@ -4,7 +4,7 @@
     "description": "Marble diagram generator",
     "repository": {
         "type": "git",
-        "url": "https://github.com/eclipse/microprofile-reactive-streams.git"
+        "url": "https://github.com/eclipse/microprofile-reactive-streams-operators.git"
     },
     "license": "Apache-2.0",
     "dependencies": {

@@ -20,6 +20,22 @@ image:https://badges.gitter.im/eclipse/microprofile-reactive.svg[link="https://g
 
 = MicroProfile Reactive Streams Operators
 
+'''
+== How to contribute
+
+Do you want to contribute to this project? Here is what you can do:
+
+* Fork the repository, make changes, then do a pull request.
+* https://github.com/eclipse/microprofile-reactive-streams-operators/issues[Create or fix an issues].
+* https://gitter.im/eclipse/microprofile-reactive[Join us on Gitter to discuss this project].
+* Join our https://calendar.google.com/calendar/embed?src=gbnbc373ga40n0tvbl88nkc3r4%40group.calendar.google.com[bi-weekly meeting] every second Tuesday at https://www.timeanddate.com/time/map/[10h00 GMT]. 
+** https://docs.google.com/document/d/1UKBBNFn-CeMih3lNUGvpShcL2aTpnvmJs9LQ8qT9OI0/edit?usp=sharing[Minutes and Agenda].
+** https://zoom.us/j/509807821[Meeting room].
+* Join the discussions on the https://groups.google.com/forum/#!forum/microprofile[MicroProfile Google Group]
+* https://microprofile.io/blog/[Contribute a blog post].
+
+'''
+
 == Rationale
 
 https://www.reactive-streams.org[Reactive Streams] is an integration SPI - it allows two different libraries that provide asynchronous streaming to be able to stream data to and from each other.

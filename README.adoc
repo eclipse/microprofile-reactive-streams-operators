@@ -26,9 +26,11 @@ image:https://badges.gitter.im/eclipse/microprofile-reactive.svg[link="https://g
 Do you want to contribute to this project? Here is what you can do:
 
 * Fork the repository, make changes, then do a pull request.
+** Remember to https://help.github.com/articles/signing-commits/[sign your commits]
+** Make sure you have signed the https://www.eclipse.org/legal/ECA.php[Eclipse Contributor Agreement]
 * https://github.com/eclipse/microprofile-reactive-streams-operators/issues[Create or fix an issue].
 * https://gitter.im/eclipse/microprofile-reactive[Join us on Gitter to discuss this project].
-* Join our https://calendar.google.com/calendar/embed?src=gbnbc373ga40n0tvbl88nkc3r4%40group.calendar.google.com[bi-weekly meeting] every second Tuesday at https://www.timeanddate.com/time/map/[10h00 GMT]. 
+* Join our https://calendar.google.com/calendar/embed?src=gbnbc373ga40n0tvbl88nkc3r4%40group.calendar.google.com[weekly meeting] on Tuesday at https://www.timeanddate.com/time/map/[10h00 GMT]. 
 ** https://docs.google.com/document/d/1UKBBNFn-CeMih3lNUGvpShcL2aTpnvmJs9LQ8qT9OI0/edit?usp=sharing[Minutes and Agenda].
 ** https://zoom.us/j/509807821[Meeting room].
 * Join the discussions on the https://groups.google.com/forum/#!forum/microprofile[MicroProfile Google Group]

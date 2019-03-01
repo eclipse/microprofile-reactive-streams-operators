@@ -20,24 +20,6 @@ image:https://badges.gitter.im/eclipse/microprofile-reactive.svg[link="https://g
 
 = MicroProfile Reactive Streams Operators
 
-'''
-== How to contribute
-
-Do you want to contribute to this project? Here is what you can do:
-
-* Fork the repository, make changes, then do a pull request.
-** Remember to https://help.github.com/articles/signing-commits/[sign your commits]
-** Make sure you have signed the https://www.eclipse.org/legal/ECA.php[Eclipse Contributor Agreement]
-* https://github.com/eclipse/microprofile-reactive-streams-operators/issues[Create or fix an issue].
-* https://gitter.im/eclipse/microprofile-reactive[Join us on Gitter to discuss this project].
-* Join our https://calendar.google.com/calendar/embed?src=gbnbc373ga40n0tvbl88nkc3r4%40group.calendar.google.com[weekly meeting] on Tuesday at https://www.timeanddate.com/time/map/[10h00 GMT]. 
-** https://docs.google.com/document/d/1UKBBNFn-CeMih3lNUGvpShcL2aTpnvmJs9LQ8qT9OI0/edit?usp=sharing[Minutes and Agenda].
-** https://zoom.us/j/509807821[Meeting room].
-* Join the discussions on the https://groups.google.com/forum/#!forum/microprofile[MicroProfile Google Group]
-* https://microprofile.io/blog/[Contribute a blog post].
-
-'''
-
 == Rationale
 
 https://www.reactive-streams.org[Reactive Streams] is an integration SPI - it allows two different libraries that provide asynchronous streaming to be able to stream data to and from each other.
@@ -143,3 +125,7 @@ Make sure to include the `alt` text, the CI build will fail if it's not there.
 You can then view the diagrams in the api docs by opening `api/target/apidocs/index.html`, and navigating to the class that you added the marble diagram to.
 
 Before committing your changes, make sure to use the above command to generate the diagrams, and then check the results of it into git, including the updated link:api/src/docs/js/marble-diagram-hashes.json[`marble-diagram-hashes.json`] file. As part of the verification of the build, we have a task that checks that all the hashes of all the input and output files from the diagram generation process match the hashes when the diagrams were last generated. Failure to do this will result in the build failing in CI, and so it won't pass PR validation.
+
+== Contributing
+
+Do you want to contribute to this project? link:CONTRIBUTING.adoc[Find out how you can help here].

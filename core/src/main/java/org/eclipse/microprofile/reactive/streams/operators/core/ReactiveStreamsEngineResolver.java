@@ -76,11 +76,6 @@ public class ReactiveStreamsEngineResolver {
         if (cl == null) {
             return null;
         }
-
-        // start from the root CL and go back down to the TCCL
-        ClassLoader parentcl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) cl::getParent);
-        ReactiveStreamsEngine instance = loadFromSpi(parentcl);
-
         if (instance == null) {
             ServiceLoader<ReactiveStreamsEngine> sl = ServiceLoader.load(
                 ReactiveStreamsEngine.class, cl);

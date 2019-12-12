@@ -77,10 +77,6 @@ public class ReactiveStreamsFactoryResolver {
             return null;
         }
 
-        // start from the root CL and go back down to the TCCL
-        ClassLoader parentcl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) cl::getParent);
-        ReactiveStreamsFactory instance = loadFromSpi(parentcl);
-
         if (instance == null) {
             ServiceLoader<ReactiveStreamsFactory> sl = ServiceLoader.load(
                 ReactiveStreamsFactory.class, cl);

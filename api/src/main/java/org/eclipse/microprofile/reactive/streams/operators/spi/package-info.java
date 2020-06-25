@@ -26,4 +26,4 @@
  * A TCK is also provided that validates that an implementation is both correct according to this specification, and
  * the Reactive Streams specification.
  */
-package org.eclipse.microprofile.reactive.streams.spi;
+package org.eclipse.microprofile.reactive.streams.operators.spi;

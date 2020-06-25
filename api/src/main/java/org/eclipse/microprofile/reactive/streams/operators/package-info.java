@@ -101,4 +101,4 @@
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
  */
-package org.eclipse.microprofile.reactive.streams;
+package org.eclipse.microprofile.reactive.streams.operators;

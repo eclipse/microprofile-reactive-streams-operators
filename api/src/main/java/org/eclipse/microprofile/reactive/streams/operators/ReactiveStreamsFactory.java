@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -136,7 +136,7 @@ public interface ReactiveStreamsFactory {
      * @param <T>        The type of elements that the subscriber consumes.
      * @return A subscriber builder that wraps the subscriber.
      */
-    <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? extends T> subscriber);
+    <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? super T> subscriber);
 
     /**
      * Creates an infinite stream produced by the iterative application of the function {@code f} to an initial element

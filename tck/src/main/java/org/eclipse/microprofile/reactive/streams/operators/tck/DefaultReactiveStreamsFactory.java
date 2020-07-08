@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -84,7 +84,7 @@ public class DefaultReactiveStreamsFactory implements ReactiveStreamsFactory {
     }
 
     @Override
-    public <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? extends T> subscriber) {
+    public <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? super T> subscriber) {
         return ReactiveStreams.fromSubscriber(subscriber);
     }
 

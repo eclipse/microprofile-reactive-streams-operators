@@ -85,7 +85,7 @@ public class SubscriberBuilderVerification extends AbstractReactiveStreamsApiVer
             }
         });
 
-        assertEquals(returned, CompletionSubscriber.of(Mocks.SUBSCRIBER, expectedCs));
+        assertEquals(returned.getCompletion(), expectedCs);
         assertEquals(builtGraph.get().getStages().size(), 1);
         assertTrue(builtGraph.get().getStages().iterator().next() instanceof Stage.Cancel);
     }

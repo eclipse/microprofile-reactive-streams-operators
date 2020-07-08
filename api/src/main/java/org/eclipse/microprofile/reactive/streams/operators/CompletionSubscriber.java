@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -52,6 +52,12 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
     /**
      * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
      * The objects passed to this method should not be associated with more than one stream instance.
+     * <p>
+     * The returned {@code CompletionSubscriber} will delegate calls from the {@code Subscriber}
+     * interface to {@code subscriber} and will return {@code completion} from {@link #getCompletion()}.
+     * <p>
+     * It is the callers responsibility to ensure that {@code completion} is completed with the correct
+     * value when {@code subscriber} terminates.
      *
      * @param subscriber The subscriber.
      * @param completion The completion stage.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -172,7 +172,7 @@ public class ReactiveStreams {
      * @param <T>        The type of elements that the subscriber consumes.
      * @return A subscriber builder that wraps the subscriber.
      */
-    public static <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? extends T> subscriber) {
+    public static <T> SubscriberBuilder<T, Void> fromSubscriber(Subscriber<? super T> subscriber) {
         return instance().fromSubscriber(subscriber);
     }
 

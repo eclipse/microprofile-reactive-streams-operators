@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -101,4 +101,5 @@
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
  */
+@org.osgi.annotation.versioning.Version("1.0")
 package org.eclipse.microprofile.reactive.streams.operators;

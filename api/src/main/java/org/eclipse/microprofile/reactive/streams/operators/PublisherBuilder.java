@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -46,6 +46,8 @@ import java.util.stream.Collector;
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
+ * <p>
+ * Instances of this interface are immutable. Methods which return a {@code PublisherBuilder} will return a new instance.
  *
  * @param <T> The type of the elements that the publisher emits.
  * @see ReactiveStreams

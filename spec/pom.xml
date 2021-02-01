@@ -32,12 +32,14 @@
     <description>Eclipse MicroProfile Reactive Streams Operators :: Specification</description>
 
     <properties>
-        <asciidoctor-maven.version>1.5.5</asciidoctor-maven.version>
+        <asciidoctor-maven.version>1.5.6</asciidoctor-maven.version>
         <asciidoctorj-pdf.version>1.5.0-alpha.15</asciidoctorj-pdf.version>
         <license>Apache License v 2.0</license>
         <maven.build.timestamp.format>MMMM dd, yyyy</maven.build.timestamp.format>
         <revisiondate>${maven.build.timestamp}</revisiondate>
         <revremark>Draft</revremark>
+        <reactive.streams.ops.spec.pdf>${project.build.directory}/generated-docs/${project.build.finalName}.pdf</reactive.streams.ops.spec.pdf>
+        <reactive.streams.ops.spec.html>${project.build.directory}/generated-docs/${project.build.finalName}.html</reactive.streams.ops.spec.html>
     </properties>
 
     <build>
@@ -64,11 +66,7 @@
                         <configuration>
                             <backend>pdf</backend>
                             <imagesDir>.</imagesDir>
-                            <attributes>
-                                <revnumber>${project.version}</revnumber>
-                                <revremark>${revremark}</revremark>
-                                <revdate>${revisiondate}</revdate>
-                            </attributes>
+                            <outputFile>${reactive.streams.ops.spec.pdf}</outputFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -80,11 +78,7 @@
                         <configuration>
                             <backend>html5</backend>
                             <imagesDir>.</imagesDir>
-                            <attributes>
-                                <revnumber>${project.version}</revnumber>
-                                <revremark>${revremark}</revremark>
-                                <revdate>${revisiondate}</revdate>
-                            </attributes>
+                            <outputFile>${reactive.streams.ops.spec.html}</outputFile>
                         </configuration>
                     </execution>
                 </executions>
@@ -93,8 +87,38 @@
                     <sourceHighlighter>coderay</sourceHighlighter>
                     <attributes>
                         <license>Apache License v2.0</license>
+                        <revnumber>${project.version}</revnumber>
+                        <revremark>${revremark}</revremark>
+                        <revdate>${revisiondate}</revdate>  
+                        <inceptionYear>${inceptionYear}</inceptionYear>
+                        <currentYear>${currentYear}</currentYear>
                     </attributes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${reactive.streams.ops.spec.pdf}</file>
+                                    <type>pdf</type>
+                                </artifact>
+                                <artifact>
+                                    <file>${reactive.streams.ops.spec.html}</file>
+                                    <type>html</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

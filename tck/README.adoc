@@ -38,7 +38,7 @@ The TCK artifact is the following:
 </dependency>
 ----
 
-The TCK used TestNG.
+The TCK uses TestNG.
 In your test classes, add a class extending the `org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck` class, such as:
 
 [source, java]

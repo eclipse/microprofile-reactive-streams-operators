@@ -17,3 +17,4 @@ test-output
 release.conf
 /bin/
 .~lock.*.odg#
+**.DS_Store

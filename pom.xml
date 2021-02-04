@@ -272,6 +272,7 @@
                         <exclude>**/*.asciidoc</exclude>
                         <exclude>**/*.md</exclude>
                         <exclude>.vscode**</exclude>
+                        <exclude>**/*.adoc</exclude>
                     </excludes>
                 </configuration>
             </plugin>

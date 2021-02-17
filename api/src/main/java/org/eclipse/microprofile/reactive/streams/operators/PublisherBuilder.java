@@ -260,7 +260,8 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
-     *
+     * This method is designed for the use case where you have to supply a paritcular {@link ReactiveStreamsEngine}. 
+     * Most cases you should use {@link #buildRs()}.
      * @param engine The engine to run the stream with.
      * @return A {@link Publisher} that will run this stream.
      */

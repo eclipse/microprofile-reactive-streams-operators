@@ -327,6 +327,8 @@ public interface Stage {
      * <p>
      * The flat map stage must execute the given mapper on each element, and concatenate the values redeemed by the
      * {@link CompletionStage}'s emitted by the mapper function into the resulting stream.
+     * If the value is {@code null}, then no element must be emitted, and the stream should be failed with a
+     * {@link NullPointerException}. 
      * <p>
      * The engine must ensure only one mapper function is executed at a time, with the next mapper function not
      * executing until the {@link CompletionStage} returned by the previous mapper function has been redeemed.

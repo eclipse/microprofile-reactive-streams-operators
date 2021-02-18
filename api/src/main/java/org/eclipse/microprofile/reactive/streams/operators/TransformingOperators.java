@@ -91,6 +91,7 @@ public interface TransformingOperators<T> {
     /**
      * Map the elements to {@link CompletionStage}, and flatten so that the elements the values redeemed by each
      * {@link CompletionStage} are emitted from this stream.
+     * If the element is {@code null}, this operation should be failed with a {@link NullPointerException}. 
      * <p>
      * <img src="doc-files/flatMapCompletionStage.png" alt="flatMapCompletionStage marble diagram">
      * <p>

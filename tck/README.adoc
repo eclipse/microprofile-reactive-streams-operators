@@ -157,7 +157,7 @@ For Maven project not using TestNG as their main test framework, the following c
 </plugin>
 ---
 
-===== Using Arquillian
+==== Using Arquillian
 
 A test class for running the TCK in a MicroProfile container is provided so that containers can verify compliance with the spec.
 This container verification comes also in the `org.eclipse.microprofile.reactive.streams:microprofile-reactive-streams-operators-tck` artifact, but the TCK is located in the `org.eclipse.microprofile.reactive.streams.operators.tck.arquillian` package.

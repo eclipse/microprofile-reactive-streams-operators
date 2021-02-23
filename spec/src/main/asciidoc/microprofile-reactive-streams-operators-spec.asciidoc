@@ -47,4 +47,4 @@ include::java-streams.asciidoc[]
 
 include::spi.asciidoc[]
 
-include::tck.asciidoc[]
+include::release_notes.asciidoc[]

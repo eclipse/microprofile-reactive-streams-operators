@@ -155,7 +155,7 @@ For Maven project not using TestNG as their main test framework, the following c
         </execution>
     </executions>
 </plugin>
----
+----
 
 ==== Using Arquillian
 

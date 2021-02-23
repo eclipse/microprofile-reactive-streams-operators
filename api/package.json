@@ -11,7 +11,7 @@
         "svg.js": "2.6.5"
     },
     "devDependencies": {
-        "puppeteer": "1.7.0",
+        "puppeteer": "1.13.0",
         "shelljs": "0.8.2"
     },
     "scripts": {

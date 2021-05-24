@@ -51,6 +51,7 @@ The following Implementations are available:
 * https://github.com/lightbend/microprofile-reactive-streams/tree/master/akka[Akka Streams]
 * https://github.com/lightbend/microprofile-reactive-streams/tree/master/zerodep[Zero Dependency] - intended as a possible reference implementation for when this is proposed to the JDK, but not the reference implementation for MicroProfile as MicroProfile does not have reference implementations.
 * https://github.com/smallrye/smallrye-reactive-streams-operators[SmallRye] - based on RxJava 2 and Eclipse Vert.x.
+* https://github.com/smallrye/smallrye-mutiny/tree/main/reactive-streams-operators[smallrye-mutiny] - based on Eclipse Vert.x.
 
 == Design
 

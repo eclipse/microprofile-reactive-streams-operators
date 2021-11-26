@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -78,19 +78,15 @@ abstract class AbstractStageVerification {
     <T> T await(CompletionStage<T> future) {
         try {
             return future.toCompletableFuture().get(environment.defaultTimeoutMillis(), TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             if (e.getCause() instanceof RuntimeException) {
                 throw (RuntimeException) e.getCause();
-            }
-            else {
+            } else {
                 throw new RuntimeException(e.getCause());
             }
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             throw new RuntimeException("Future timed out after " + environment.defaultTimeoutMillis() + "ms", e);
         }
     }

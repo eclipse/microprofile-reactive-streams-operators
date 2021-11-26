@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -109,8 +109,7 @@ public class CollectStageVerification extends AbstractStageVerification {
                 }, (a, b) -> {
                 }, (a, b) -> a + b, Function.identity()))
                 .run(getEngine());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Exception thrown directly from stream, it should have been captured by the returned CompletionStage", e);
         }
         await(cancelled);

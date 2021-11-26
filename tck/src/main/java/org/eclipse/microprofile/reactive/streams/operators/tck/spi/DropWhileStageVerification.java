@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -90,11 +90,9 @@ public class DropWhileStageVerification extends AbstractStageVerification {
             .dropWhile(i -> {
                 if (i < 3) {
                     return true;
-                }
-                else if (i == 4) {
+                } else if (i == 4) {
                     throw new RuntimeException("4 was passed");
-                }
-                else {
+                } else {
                     return false;
                 }
             })

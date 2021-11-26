@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -73,8 +73,7 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
                 .flatMap(i -> {
                     if (i == 4) {
                         return rs.failed(new QuietRuntimeException("failed"));
-                    }
-                    else {
+                    } else {
                         return rs.of(i);
                     }
                 })

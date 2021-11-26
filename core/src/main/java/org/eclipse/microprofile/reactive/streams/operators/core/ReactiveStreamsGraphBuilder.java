@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -51,25 +51,21 @@ abstract class ReactiveStreamsGraphBuilder implements ToGraphable {
         while (thisStage != null) {
             if (thisStage.stage == InternalStages.Identity.INSTANCE) {
                 // Ignore, no need to add an identity stage
-            }
-            else if (thisStage.stage instanceof InternalStages.Nested) {
+            } else if (thisStage.stage instanceof InternalStages.Nested) {
                 ((InternalStages.Nested) thisStage.stage).getBuilder().flatten(stages);
-            }
-            else if (thisStage.stage instanceof InternalStages.NestedGraph) {
+            } else if (thisStage.stage instanceof InternalStages.NestedGraph) {
                 // need to prepend to front in reverse order
                 Collection<Stage> nestedStages = ((InternalStages.NestedGraph) thisStage.stage).getGraph().getStages();
                 ListIterator<Stage> iter;
                 if (nestedStages instanceof List) {
                     iter = ((List<Stage>) nestedStages).listIterator(nestedStages.size());
-                }
-                else {
+                } else {
                     iter = new ArrayList<>(nestedStages).listIterator(nestedStages.size());
                 }
                 while (iter.hasPrevious()) {
                     stages.addFirst(iter.previous());
                 }
-            }
-            else {
+            } else {
                 stages.addFirst(thisStage.stage);
             }
             thisStage = thisStage.previous;
@@ -80,8 +76,7 @@ abstract class ReactiveStreamsGraphBuilder implements ToGraphable {
         Objects.requireNonNull(obj);
         if (obj instanceof ToGraphable) {
             return (((ToGraphable) obj).toGraph());
-        }
-        else {
+        } else {
             throw new IllegalArgumentException(obj + " is not an instance of ToGraphable and so can't participate " +
                 "in this graph");
         }

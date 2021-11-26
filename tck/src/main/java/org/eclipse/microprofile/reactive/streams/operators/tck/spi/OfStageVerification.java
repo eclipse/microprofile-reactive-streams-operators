@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -75,8 +75,7 @@ public class OfStageVerification extends AbstractStageVerification {
             })
                 .toList()
                 .run(getEngine());
-        }
-        catch (QuietRuntimeException e) {
+        } catch (QuietRuntimeException e) {
             throw new AssertionError("Exception was thrown directly, should have been part of the redeemed completion stage", e);
         }
         await(result);

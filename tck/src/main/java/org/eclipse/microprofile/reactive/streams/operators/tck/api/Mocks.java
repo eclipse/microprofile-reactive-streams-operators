@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -131,8 +131,7 @@ class Mocks {
         (obj, method, args) -> {
             if (method.getName().equals("toGraph")) {
                 return Mocks.EMPTY_PUBLISHER_GRAPH;
-            }
-            else {
+            } else {
                 return null;
             }
         });
@@ -143,8 +142,7 @@ class Mocks {
         (obj, method, args) -> {
             if (method.getName().equals("toGraph")) {
                 return Mocks.PROCESSOR_GRAPH;
-            }
-            else {
+            } else {
                 return null;
             }
         });
@@ -155,8 +153,7 @@ class Mocks {
         (obj, method, args) -> {
             if (method.getName().equals("toGraph")) {
                 return Mocks.SUBSCRIBER_GRAPH;
-            }
-            else {
+            } else {
                 return null;
             }
         });

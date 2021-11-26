@@ -85,8 +85,7 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
         testng.setObjectFactory((IObjectFactory) (constructor, params) -> {
             if (constructor.getDeclaringClass().equals(ReactiveStreamsCdiTck.class)) {
                 return tck;
-            }
-            else {
+            } else {
                 return delegate.newInstance(constructor, params);
             }
         });
@@ -113,8 +112,7 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
         if (resultListener.failed.get() > 0) {
             if (resultListener.lastFailure.get() != null) {
                 throw resultListener.lastFailure.get();
-            }
-            else {
+            } else {
                 throw new Exception("Tests failed with no exception");
             }
         }

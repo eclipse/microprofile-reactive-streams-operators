@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -90,11 +90,9 @@ class InternalStages {
         Objects.requireNonNull(object);
         if (object instanceof ReactiveStreamsGraphBuilder) {
             return new Nested((ReactiveStreamsGraphBuilder) object);
-        }
-        else if (object instanceof ToGraphable) {
+        } else if (object instanceof ToGraphable) {
             return new NestedGraph(((ToGraphable) object).toGraph());
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("The passed in builder does not implement " + ToGraphable.class +
                 " and so can't be added to this graph");
         }

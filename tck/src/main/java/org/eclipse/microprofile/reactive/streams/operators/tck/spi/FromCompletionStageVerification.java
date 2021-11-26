@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -124,8 +124,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
         public Publisher<String> createPublisher(long elements) {
             if (elements == 0) {
                 return rs.<String>empty().buildRs(getEngine());
-            }
-            else {
+            } else {
                 return rs.fromCompletionStage(
                     CompletableFuture.completedFuture("value")
                 ).buildRs(getEngine());

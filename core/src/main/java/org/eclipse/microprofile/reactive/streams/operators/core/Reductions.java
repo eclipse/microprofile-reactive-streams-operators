@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -38,19 +38,16 @@ final class Reductions {
             (r, t) -> {
                 if (r.value == null) {
                     r.value = t;
-                }
-                else {
+                } else {
                     r.value = reducer.apply(r.value, t);
                 }
             },
             (r, s) -> {
                 if (r.value == null) {
                     return r.replace(s.value);
-                }
-                else if (s.value != null) {
+                } else if (s.value != null) {
                     return r.replace(reducer.apply(r.value, s.value));
-                }
-                else {
+                } else {
                     return r;
                 }
             },

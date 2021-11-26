@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -86,8 +86,7 @@ public class ReactiveStreamsFactoryResolver {
                         "Multiple ReactiveStreamsFactory implementations found: "
                             + spi.getClass().getName() + " and "
                             + instance.getClass().getName());
-                }
-                else {
+                } else {
                     instance = spi;
                 }
             }

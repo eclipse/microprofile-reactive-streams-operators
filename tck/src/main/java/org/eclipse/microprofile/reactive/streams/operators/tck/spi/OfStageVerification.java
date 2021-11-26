@@ -19,10 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +28,9 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.LongStream;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 public class OfStageVerification extends AbstractStageVerification {
 
@@ -42,28 +41,28 @@ public class OfStageVerification extends AbstractStageVerification {
     @Test
     public void iterableStageShouldEmitManyElements() {
         assertEquals(await(
-            rs.of("a", "b", "c")
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList("a", "b", "c"));
+                rs.of("a", "b", "c")
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList("a", "b", "c"));
     }
 
     @Test
     public void emptyIterableStageShouldEmitNoElements() {
         assertEquals(await(
-            rs.empty()
-                .toList()
-                .run(getEngine())
-        ), Collections.emptyList());
+                rs.empty()
+                        .toList()
+                        .run(getEngine())),
+                Collections.emptyList());
     }
 
     @Test
     public void singleIterableStageShouldEmitOneElement() {
         assertEquals(await(
-            rs.of("a")
-                .toList()
-                .run(getEngine())
-        ), Collections.singletonList("a"));
+                rs.of("a")
+                        .toList()
+                        .run(getEngine())),
+                Collections.singletonList("a"));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -73,10 +72,11 @@ public class OfStageVerification extends AbstractStageVerification {
             result = rs.fromIterable(() -> {
                 throw new QuietRuntimeException("failed");
             })
-                .toList()
-                .run(getEngine());
+                    .toList()
+                    .run(getEngine());
         } catch (QuietRuntimeException e) {
-            throw new AssertionError("Exception was thrown directly, should have been part of the redeemed completion stage", e);
+            throw new AssertionError(
+                    "Exception was thrown directly, should have been part of the redeemed completion stage", e);
         }
         await(result);
     }
@@ -94,8 +94,8 @@ public class OfStageVerification extends AbstractStageVerification {
                 return null;
             }
         })
-            .toList()
-            .run(getEngine()));
+                .toList()
+                .run(getEngine()));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -111,8 +111,8 @@ public class OfStageVerification extends AbstractStageVerification {
                 throw new QuietRuntimeException("failed");
             }
         })
-            .toList()
-            .run(getEngine()));
+                .toList()
+                .run(getEngine()));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -137,10 +137,8 @@ public class OfStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Long> createPublisher(long elements) {
             return rs.fromIterable(
-                () -> LongStream.rangeClosed(1, elements).boxed().iterator()
-            ).buildRs(getEngine());
+                    () -> LongStream.rangeClosed(1, elements).boxed().iterator()).buildRs(getEngine());
         }
     }
-
 
 }

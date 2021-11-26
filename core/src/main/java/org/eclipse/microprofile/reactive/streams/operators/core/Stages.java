@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,12 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
@@ -32,6 +26,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
+
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
 /**
  * Implementations of stages.
@@ -127,7 +127,6 @@ final class Stages {
             // Avoid direct instantiation.
         }
     }
-
 
     final static class TakeWhile implements Stage.TakeWhile {
         private final Predicate<?> predicate;
@@ -287,7 +286,7 @@ final class Stages {
     final static class OnErrorResume implements Stage.OnErrorResume {
         private final Function<Throwable, ?> function;
 
-        OnErrorResume(Function<Throwable, ?>  function) {
+        OnErrorResume(Function<Throwable, ?> function) {
             this.function = Objects.requireNonNull(function, "Resume function must not be null");
         }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static org.testng.Assert.assertEquals;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,12 +27,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertEquals;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 /**
- * A publisher that publishes one element 100ms after being requested,
- * and then completes 100ms later. It also uses activePublishers to ensure
- * that it is the only publisher that is subscribed to at any one time.
+ * A publisher that publishes one element 100ms after being requested, and then completes 100ms later. It also uses
+ * activePublishers to ensure that it is the only publisher that is subscribed to at any one time.
  */
 class ScheduledPublisher implements Publisher<Integer> {
     private final int id;

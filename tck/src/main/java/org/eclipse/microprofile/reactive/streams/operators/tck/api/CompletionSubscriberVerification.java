@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,18 +19,18 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
-import org.eclipse.microprofile.reactive.streams.operators.CompletionSubscriber;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.CompletableFuture;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.microprofile.reactive.streams.operators.CompletionSubscriber;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 /**
  * Verification for {@link org.eclipse.microprofile.reactive.streams.operators.CompletionSubscriber}.
@@ -76,7 +76,7 @@ public class CompletionSubscriberVerification {
         subscriber.onError(e);
         assertSame(calls.removeFirst(), e);
         subscriber.onComplete();
-        assertEquals(calls.removeFirst(),"onComplete");
+        assertEquals(calls.removeFirst(), "onComplete");
         assertTrue(calls.isEmpty());
     }
 

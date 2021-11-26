@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.operators;
 
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -35,25 +30,38 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
 /**
  * A builder for a {@link Publisher}.
  * <p>
  * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
- * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
- * applying some transformation or some side effect, termination and error signals potentially being passed, and
- * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator applying
+ * some transformation or some side effect, termination and error signals potentially being passed, and for operators
+ * that subscribe to the stream, an output value being redeemed at the end.
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
  * <p>
- * Instances of this interface are immutable. Methods which return a {@code PublisherBuilder} will return a new instance.
+ * Instances of this interface are immutable. Methods which return a {@code PublisherBuilder} will return a new
+ * instance.
  *
- * @param <T> The type of the elements that the publisher emits.
+ * @param <T>
+ *            The type of the elements that the publisher emits.
  * @see ReactiveStreams
  */
-public interface PublisherBuilder<T> extends TransformingOperators<T>, FilteringOperators<T>, PeekingOperators<T>, ConsumingOperators<T>,
-    ErrorHandlingOperators<T>, ConnectingOperators<T> {
+public interface PublisherBuilder<T>
+        extends
+            TransformingOperators<T>,
+            FilteringOperators<T>,
+            PeekingOperators<T>,
+            ConsumingOperators<T>,
+            ErrorHandlingOperators<T>,
+            ConnectingOperators<T> {
 
     /**
      * {@inheritDoc}
@@ -147,6 +155,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -154,6 +163,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -161,6 +171,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -168,6 +179,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -175,6 +187,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -182,6 +195,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -189,13 +203,15 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
-     * @return A new {@link CompletionRunner} that can be used to run the stream,
-     * R is the result type of the collector's reduction operation.
+     * 
+     * @return A new {@link CompletionRunner} that can be used to run the stream, R is the result type of the
+     *         collector's reduction operation.
      */
     @Override
     <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector);
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream which emits the collected result.
      */
     @Override
@@ -203,6 +219,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the stream that emits the list.
      */
     @Override
@@ -224,10 +241,12 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
      * {@inheritDoc}
      */
     @Override
-    PublisherBuilder<T> onErrorResumeWithRsPublisher(Function<Throwable, ? extends Publisher<? extends T>> errorHandler);
+    PublisherBuilder<T> onErrorResumeWithRsPublisher(
+            Function<Throwable, ? extends Publisher<? extends T>> errorHandler);
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the composed stream.
      */
     @Override
@@ -235,6 +254,7 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link CompletionRunner} that can be used to run the composed stream.
      */
     @Override
@@ -259,10 +279,12 @@ public interface PublisherBuilder<T> extends TransformingOperators<T>, Filtering
     Publisher<T> buildRs();
 
     /**
-     * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
-     * This method is designed for the use case where you have to supply a paritcular {@link ReactiveStreamsEngine}. 
-     * Most cases you should use {@link #buildRs()}.
-     * @param engine The engine to run the stream with.
+     * Build this stream, using the supplied {@link ReactiveStreamsEngine}. This method is designed for the use case
+     * where you have to supply a paritcular {@link ReactiveStreamsEngine}. Most cases you should use
+     * {@link #buildRs()}.
+     * 
+     * @param engine
+     *            The engine to run the stream with.
      * @return A {@link Publisher} that will run this stream.
      */
     Publisher<T> buildRs(ReactiveStreamsEngine engine);

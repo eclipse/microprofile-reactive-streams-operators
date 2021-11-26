@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +28,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 public class MapStageVerification extends AbstractStageVerification {
 
@@ -43,21 +42,21 @@ public class MapStageVerification extends AbstractStageVerification {
     @Test
     public void mapStageShouldMapElements() {
         assertEquals(await(rs.of(1, 2, 3)
-            .map(Object::toString)
-            .toList()
-            .run(getEngine())), Arrays.asList("1", "2", "3"));
+                .map(Object::toString)
+                .toList()
+                .run(getEngine())), Arrays.asList("1", "2", "3"));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void mapStageShouldHandleExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .map(foo -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .map(foo -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -65,17 +64,17 @@ public class MapStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void mapStageShouldPropagateUpstreamExceptions() {
         await(rs.failed(new QuietRuntimeException("failed"))
-            .map(Function.identity())
-            .toList()
-            .run(getEngine()));
+                .map(Function.identity())
+                .toList()
+                .run(getEngine()));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void mapStageShouldFailIfNullReturned() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream().onTerminate(() -> cancelled.complete(null))
-            .map(t -> null)
-            .toList().run(getEngine());
+                .map(t -> null)
+                .toList().run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -90,8 +89,7 @@ public class MapStageVerification extends AbstractStageVerification {
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Collections.singletonList(
-            new ProcessorVerification()
-        );
+                new ProcessorVerification());
     }
 
     public class ProcessorVerification extends StageProcessorVerification<Integer> {
@@ -104,7 +102,7 @@ public class MapStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .map(Function.identity()).buildRs(getEngine());
+                    .map(Function.identity()).buildRs(getEngine());
         }
 
         @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,15 +19,15 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.reactivestreams.tck.TestEnvironment;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
+
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.reactivestreams.tck.TestEnvironment;
 
 /**
  * This test is a factory for all the tests for verifying implementations of the SPI.
@@ -40,7 +40,7 @@ public class ReactiveStreamsSpiVerification {
     private final ScheduledExecutorService executorService;
 
     public ReactiveStreamsSpiVerification(TestEnvironment testEnvironment, ReactiveStreamsFactory rs,
-        ReactiveStreamsEngine engine, ScheduledExecutorService executorService) {
+            ReactiveStreamsEngine engine, ScheduledExecutorService executorService) {
         this.testEnvironment = testEnvironment;
         this.rs = rs;
         this.engine = engine;
@@ -67,30 +67,29 @@ public class ReactiveStreamsSpiVerification {
 
     public List<Object> allTests() {
         List<Function<VerificationDeps, AbstractStageVerification>> stageVerifications = Arrays.asList(
-            OfStageVerification::new,
-            MapStageVerification::new,
-            FlatMapStageVerification::new,
-            FilterStageVerification::new,
-            FindFirstStageVerification::new,
-            CollectStageVerification::new,
-            TakeWhileStageVerification::new,
-            FlatMapCompletionStageVerification::new,
-            FlatMapIterableStageVerification::new,
-            ConcatStageVerification::new,
-            EmptyProcessorVerification::new,
-            CancelStageVerification::new,
-            SubscriberStageVerification::new,
-            PeekStageVerification::new,
-            DistinctStageVerification::new,
-            OnStagesVerification::new,
-            LimitStageVerification::new,
-            SkipStageVerification::new,
-            DropWhileStageVerification::new,
-            OnErrorResumeStageVerification::new,
-            FromCompletionStageVerification::new,
-            FromCompletionStageNullableVerification::new,
-            CoupledStageVerification::new
-        );
+                OfStageVerification::new,
+                MapStageVerification::new,
+                FlatMapStageVerification::new,
+                FilterStageVerification::new,
+                FindFirstStageVerification::new,
+                CollectStageVerification::new,
+                TakeWhileStageVerification::new,
+                FlatMapCompletionStageVerification::new,
+                FlatMapIterableStageVerification::new,
+                ConcatStageVerification::new,
+                EmptyProcessorVerification::new,
+                CancelStageVerification::new,
+                SubscriberStageVerification::new,
+                PeekStageVerification::new,
+                DistinctStageVerification::new,
+                OnStagesVerification::new,
+                LimitStageVerification::new,
+                SkipStageVerification::new,
+                DropWhileStageVerification::new,
+                OnErrorResumeStageVerification::new,
+                FromCompletionStageVerification::new,
+                FromCompletionStageNullableVerification::new,
+                CoupledStageVerification::new);
 
         List<Object> allTests = new ArrayList<>();
         VerificationDeps deps = new VerificationDeps();

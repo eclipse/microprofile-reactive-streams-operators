@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,11 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Collections;
+
 import org.eclipse.microprofile.reactive.streams.operators.CompletionRunner;
 import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
@@ -27,11 +32,6 @@ import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ToGraphable;
-
-import java.util.Collections;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public abstract class AbstractReactiveStreamsApiVerification {
 

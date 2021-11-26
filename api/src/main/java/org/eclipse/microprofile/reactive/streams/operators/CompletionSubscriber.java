@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,22 +19,24 @@
 
 package org.eclipse.microprofile.reactive.streams.operators;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 /**
  * A subscriber that redeems a completion stage when it completes.
  * <p>
- * The result is provided through a {@link CompletionStage}, which is redeemed when the subscriber receives a
- * completion or error signal, or otherwise cancels the stream.
+ * The result is provided through a {@link CompletionStage}, which is redeemed when the subscriber receives a completion
+ * or error signal, or otherwise cancels the stream.
  * <p>
  * The best way to instantiate one of these is using the {@link CompletionSubscriber#of} factory method.
  *
- * @param <T> The type of the elements that the subscriber consumes.
- * @param <R> The type of the result that the subscriber emits.
+ * @param <T>
+ *            The type of the elements that the subscriber consumes.
+ * @param <R>
+ *            The type of the result that the subscriber emits.
  */
 public interface CompletionSubscriber<T, R> extends Subscriber<T> {
 
@@ -50,17 +52,19 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
     CompletionStage<R> getCompletion();
 
     /**
-     * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage.
-     * The objects passed to this method should not be associated with more than one stream instance.
+     * Create a {@link CompletionSubscriber} by combining the given subscriber and completion stage. The objects passed
+     * to this method should not be associated with more than one stream instance.
      * <p>
-     * The returned {@code CompletionSubscriber} will delegate calls from the {@code Subscriber}
-     * interface to {@code subscriber} and will return {@code completion} from {@link #getCompletion()}.
+     * The returned {@code CompletionSubscriber} will delegate calls from the {@code Subscriber} interface to
+     * {@code subscriber} and will return {@code completion} from {@link #getCompletion()}.
      * <p>
-     * It is the callers responsibility to ensure that {@code completion} is completed with the correct
-     * value when {@code subscriber} terminates.
+     * It is the callers responsibility to ensure that {@code completion} is completed with the correct value when
+     * {@code subscriber} terminates.
      *
-     * @param subscriber The subscriber.
-     * @param completion The completion stage.
+     * @param subscriber
+     *            The subscriber.
+     * @param completion
+     *            The completion stage.
      * @return A completion subscriber.
      */
     static <T, R> CompletionSubscriber<T, R> of(Subscriber<T> subscriber, CompletionStage<R> completion) {
@@ -116,7 +120,7 @@ public interface CompletionSubscriber<T, R> extends Subscriber<T> {
                 }
                 DefaultCompletionSubscriber that = (DefaultCompletionSubscriber) o;
                 return Objects.equals(subscriber, that.subscriber) &&
-                    Objects.equals(completion, that.completion);
+                        Objects.equals(completion, that.completion);
             }
 
             @Override

@@ -19,17 +19,17 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 public class FromCompletionStageVerification extends AbstractStageVerification {
 
@@ -40,18 +40,18 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test
     public void fromCsStageShouldEmitAnElementWhenAlreadyRedeemed() {
         assertEquals(await(
-            rs.fromCompletionStage(CompletableFuture.completedFuture(10))
-                .toList()
-                .run(getEngine())
-        ), Collections.singletonList(10));
+                rs.fromCompletionStage(CompletableFuture.completedFuture(10))
+                        .toList()
+                        .run(getEngine())),
+                Collections.singletonList(10));
     }
 
     @Test
     public void fromCsStageShouldEmitAnElementWhenRedeemedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = rs.fromCompletionStage(future)
-            .toList()
-            .run(getEngine());
+                .toList()
+                .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
@@ -62,18 +62,17 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = NullPointerException.class)
     public void fromCsStageShouldFailWhenAlreadyRedeemedWithNull() {
         await(
-            rs.fromCompletionStage(CompletableFuture.completedFuture(null))
-                .toList()
-                .run(getEngine())
-        );
+                rs.fromCompletionStage(CompletableFuture.completedFuture(null))
+                        .toList()
+                        .run(getEngine()));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void fromCsStageShouldFailWhenRedeemedWithNullLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = rs.fromCompletionStage(future)
-            .toList()
-            .run(getEngine());
+                .toList()
+                .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
@@ -86,18 +85,17 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         future.completeExceptionally(new QuietRuntimeException("failed"));
         await(
-            rs.fromCompletionStage(future)
-                .toList()
-                .run(getEngine())
-        );
+                rs.fromCompletionStage(future)
+                        .toList()
+                        .run(getEngine()));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void fromCsStageShouldPropagateExceptionsWhenFailedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = rs.fromCompletionStage(future)
-            .toList()
-            .run(getEngine());
+                .toList()
+                .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
@@ -108,7 +106,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
     @Test
     public void fromCsStageShouldBeReusable() {
         PublisherBuilder<Integer> publisher =
-            rs.fromCompletionStage(CompletableFuture.completedFuture(10));
+                rs.fromCompletionStage(CompletableFuture.completedFuture(10));
 
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
@@ -126,8 +124,7 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
                 return rs.<String>empty().buildRs(getEngine());
             } else {
                 return rs.fromCompletionStage(
-                    CompletableFuture.completedFuture("value")
-                ).buildRs(getEngine());
+                        CompletableFuture.completedFuture("value")).buildRs(getEngine());
             }
         }
 
@@ -136,6 +133,5 @@ public class FromCompletionStageVerification extends AbstractStageVerification {
             return 1;
         }
     }
-
 
 }

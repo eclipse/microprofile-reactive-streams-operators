@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +28,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
-import static org.testng.Assert.assertEquals;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 /**
  * Test cases for OnErrorResume stages. This includes the
@@ -40,160 +39,158 @@ import static org.testng.Assert.assertEquals;
  */
 public class OnErrorResumeStageVerification extends AbstractStageVerification {
 
-  OnErrorResumeStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
-    super(deps);
-  }
+    OnErrorResumeStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
+        super(deps);
+    }
 
-  @Test
-  public void onErrorResumeShouldCatchErrorFromSource() {
-    AtomicReference<Throwable> exception = new AtomicReference<>();
-    assertEquals(await(rs.failed(new QuietRuntimeException("failed"))
-        .onErrorResume(err -> {
-          exception.set(err);
-          return "foo";
-        })
-        .toList()
-        .run(getEngine())), Collections.singletonList("foo"));
-    assertEquals(exception.get().getMessage(), "failed");
-  }
+    @Test
+    public void onErrorResumeShouldCatchErrorFromSource() {
+        AtomicReference<Throwable> exception = new AtomicReference<>();
+        assertEquals(await(rs.failed(new QuietRuntimeException("failed"))
+                .onErrorResume(err -> {
+                    exception.set(err);
+                    return "foo";
+                })
+                .toList()
+                .run(getEngine())), Collections.singletonList("foo"));
+        assertEquals(exception.get().getMessage(), "failed");
+    }
 
-  @Test
-  public void onErrorResumeWithShouldCatchErrorFromSource() {
-    AtomicReference<Throwable> exception = new AtomicReference<>();
-    assertEquals(await(rs.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWith(err -> {
-        exception.set(err);
-        return rs.of("foo", "bar");
-      })
-      .toList()
-      .run(getEngine())), Arrays.asList("foo", "bar"));
-    assertEquals(exception.get().getMessage(), "failed");
-  }
+    @Test
+    public void onErrorResumeWithShouldCatchErrorFromSource() {
+        AtomicReference<Throwable> exception = new AtomicReference<>();
+        assertEquals(await(rs.failed(new QuietRuntimeException("failed"))
+                .onErrorResumeWith(err -> {
+                    exception.set(err);
+                    return rs.of("foo", "bar");
+                })
+                .toList()
+                .run(getEngine())), Arrays.asList("foo", "bar"));
+        assertEquals(exception.get().getMessage(), "failed");
+    }
 
-  @Test
-  public void onErrorResumeWithRsPublisherShouldCatchErrorFromSource() {
-    AtomicReference<Throwable> exception = new AtomicReference<>();
-    assertEquals(await(rs.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWithRsPublisher(err -> {
-        exception.set(err);
-        return rs.of("foo", "bar").buildRs(getEngine());
-      })
-      .toList()
-      .run(getEngine())), Arrays.asList("foo", "bar"));
-    assertEquals(exception.get().getMessage(), "failed");
-  }
+    @Test
+    public void onErrorResumeWithRsPublisherShouldCatchErrorFromSource() {
+        AtomicReference<Throwable> exception = new AtomicReference<>();
+        assertEquals(await(rs.failed(new QuietRuntimeException("failed"))
+                .onErrorResumeWithRsPublisher(err -> {
+                    exception.set(err);
+                    return rs.of("foo", "bar").buildRs(getEngine());
+                })
+                .toList()
+                .run(getEngine())), Arrays.asList("foo", "bar"));
+        assertEquals(exception.get().getMessage(), "failed");
+    }
 
-  @Test
-  public void onErrorResumeShouldCatchErrorFromStage() {
-    AtomicReference<Throwable> exception = new AtomicReference<>();
-    assertEquals(await(rs.of("a", "b", "c")
-      .map(word -> {
-        if (word.equals("b")) {
-          throw new QuietRuntimeException("failed");
-        }
-        return word.toUpperCase();
-      })
-      .onErrorResume(err -> {
-        exception.set(err);
-        return "foo";
-      })
-      .toList()
-      .run(getEngine())), Arrays.asList("A", "foo"));
-    assertEquals(exception.get().getMessage(), "failed");
-  }
+    @Test
+    public void onErrorResumeShouldCatchErrorFromStage() {
+        AtomicReference<Throwable> exception = new AtomicReference<>();
+        assertEquals(await(rs.of("a", "b", "c")
+                .map(word -> {
+                    if (word.equals("b")) {
+                        throw new QuietRuntimeException("failed");
+                    }
+                    return word.toUpperCase();
+                })
+                .onErrorResume(err -> {
+                    exception.set(err);
+                    return "foo";
+                })
+                .toList()
+                .run(getEngine())), Arrays.asList("A", "foo"));
+        assertEquals(exception.get().getMessage(), "failed");
+    }
 
-  @Test
-  public void onErrorResumeWithShouldCatchErrorFromStage() {
-    AtomicReference<Throwable> exception = new AtomicReference<>();
-    assertEquals(await(rs.of("a", "b", "c")
-      .map(word -> {
-        if (word.equals("b")) {
-          throw new QuietRuntimeException("failed");
-        }
-        return word.toUpperCase();
-      })
-      .onErrorResumeWith(err -> {
-        exception.set(err);
-        return rs.of("foo", "bar");
-      })
-      .toList()
-      .run(getEngine())), Arrays.asList("A", "foo", "bar"));
-    assertEquals(exception.get().getMessage(), "failed");
-  }
+    @Test
+    public void onErrorResumeWithShouldCatchErrorFromStage() {
+        AtomicReference<Throwable> exception = new AtomicReference<>();
+        assertEquals(await(rs.of("a", "b", "c")
+                .map(word -> {
+                    if (word.equals("b")) {
+                        throw new QuietRuntimeException("failed");
+                    }
+                    return word.toUpperCase();
+                })
+                .onErrorResumeWith(err -> {
+                    exception.set(err);
+                    return rs.of("foo", "bar");
+                })
+                .toList()
+                .run(getEngine())), Arrays.asList("A", "foo", "bar"));
+        assertEquals(exception.get().getMessage(), "failed");
+    }
 
-  @Test
-  public void onErrorResumeWithRsPublisherShouldCatchErrorFromStage() {
-    AtomicReference<Throwable> exception = new AtomicReference<>();
-    assertEquals(await(rs.of("a", "b", "c")
-      .map(word -> {
-        if (word.equals("b")) {
-          throw new QuietRuntimeException("failed");
-        }
-        return word.toUpperCase();
-      })
-      .onErrorResumeWithRsPublisher(err -> {
-        exception.set(err);
-        return rs.of("foo", "bar").buildRs(getEngine());
-      })
-      .toList()
-      .run(getEngine())), Arrays.asList("A", "foo", "bar"));
-    assertEquals(exception.get().getMessage(), "failed");
-  }
+    @Test
+    public void onErrorResumeWithRsPublisherShouldCatchErrorFromStage() {
+        AtomicReference<Throwable> exception = new AtomicReference<>();
+        assertEquals(await(rs.of("a", "b", "c")
+                .map(word -> {
+                    if (word.equals("b")) {
+                        throw new QuietRuntimeException("failed");
+                    }
+                    return word.toUpperCase();
+                })
+                .onErrorResumeWithRsPublisher(err -> {
+                    exception.set(err);
+                    return rs.of("foo", "bar").buildRs(getEngine());
+                })
+                .toList()
+                .run(getEngine())), Arrays.asList("A", "foo", "bar"));
+        assertEquals(exception.get().getMessage(), "failed");
+    }
 
+    @Test(expectedExceptions = RuntimeException.class)
+    public void onErrorResumeStageShouldPropagateRuntimeExceptions() {
+        await(rs.failed(new Exception("source-failure"))
+                .onErrorResume(t -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine()));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void onErrorResumeStageShouldPropagateRuntimeExceptions() {
-    await(rs.failed(new Exception("source-failure"))
-        .onErrorResume(t -> {
-          throw new QuietRuntimeException("failed");
-        })
-        .toList()
-        .run(getEngine()));
-  }
+    @Test(expectedExceptions = RuntimeException.class)
+    public void onErrorResumeWithStageShouldPropagateRuntimeExceptions() {
+        await(rs.failed(new Exception("source-failure"))
+                .onErrorResumeWith(t -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine()));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void onErrorResumeWithStageShouldPropagateRuntimeExceptions() {
-    await(rs.failed(new Exception("source-failure"))
-      .onErrorResumeWith(t -> {
-        throw new QuietRuntimeException("failed");
-      })
-      .toList()
-      .run(getEngine()));
-  }
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*failed.*")
+    public void onErrorResumeWithRsPublisherStageShouldPropagateRuntimeExceptions() {
+        await(rs.failed(new QuietRuntimeException("source-failure"))
+                .onErrorResumeWithRsPublisher(t -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine()));
+    }
 
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*failed.*")
-  public void onErrorResumeWithRsPublisherStageShouldPropagateRuntimeExceptions() {
-    await(rs.failed(new QuietRuntimeException("source-failure"))
-      .onErrorResumeWithRsPublisher(t -> {
-        throw new QuietRuntimeException("failed");
-      })
-      .toList()
-      .run(getEngine()));
-  }
+    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+    public void onErrorResumeWithShouldBeAbleToInjectAFailure() {
+        await(rs.failed(new QuietRuntimeException("failed"))
+                .onErrorResumeWith(err -> rs.failed(new QuietRuntimeException("boom")))
+                .toList()
+                .run(getEngine()));
+    }
 
-  @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
-  public void onErrorResumeWithShouldBeAbleToInjectAFailure() {
-    await(rs.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWith(err -> rs.failed(new QuietRuntimeException("boom")))
-      .toList()
-      .run(getEngine()));
-  }
-
-  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
-  public void onErrorResumeWithRsPublisherShouldBeAbleToInjectAFailure() {
-    await(rs.failed(new QuietRuntimeException("failed"))
-      .onErrorResumeWithRsPublisher(err -> rs.failed(new QuietRuntimeException("boom")).buildRs(getEngine()))
-      .toList()
-      .run(getEngine()));
-  }
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+    public void onErrorResumeWithRsPublisherShouldBeAbleToInjectAFailure() {
+        await(rs.failed(new QuietRuntimeException("failed"))
+                .onErrorResumeWithRsPublisher(err -> rs.failed(new QuietRuntimeException("boom")).buildRs(getEngine()))
+                .toList()
+                .run(getEngine()));
+    }
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Arrays.asList(
-            new OnErrorResumeWithVerification(),
-            new OnErrorResumeVerification(),
-            new OnErrorResumeWithPublisherVerification()
-        );
+                new OnErrorResumeWithVerification(),
+                new OnErrorResumeVerification(),
+                new OnErrorResumeWithPublisherVerification());
     }
 
     public class OnErrorResumeWithVerification extends StageProcessorVerification<Integer> {
@@ -201,22 +198,22 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
             return rs.<Integer>builder()
-                .onErrorResumeWith(rs::failed)
-                .map(Function.identity()).buildRs(getEngine());
+                    .onErrorResumeWith(rs::failed)
+                    .map(Function.identity()).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .onErrorResumeWith(t -> {
-                    // Re-throw the exception.
-                    if (t instanceof RuntimeException) {
-                        throw (RuntimeException) t;
-                    }
-                    // Wrap if required.
-                    throw new RuntimeException(t);
-                })
-                .buildRs(getEngine());
+                    .onErrorResumeWith(t -> {
+                        // Re-throw the exception.
+                        if (t instanceof RuntimeException) {
+                            throw (RuntimeException) t;
+                        }
+                        // Wrap if required.
+                        throw new RuntimeException(t);
+                    })
+                    .buildRs(getEngine());
         }
 
         @Override
@@ -230,27 +227,27 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
             return rs.<Integer>builder()
-                .onErrorResume(t -> {
-                    if (t instanceof RuntimeException) {
-                        throw (RuntimeException) t;
-                    }
-                    throw new RuntimeException(t);
-                })
-                .map(Function.identity()).buildRs(getEngine());
+                    .onErrorResume(t -> {
+                        if (t instanceof RuntimeException) {
+                            throw (RuntimeException) t;
+                        }
+                        throw new RuntimeException(t);
+                    })
+                    .map(Function.identity()).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .onErrorResume(t -> {
-                    // Re-throw the exception.
-                    if (t instanceof RuntimeException) {
-                        throw (RuntimeException) t;
-                    }
-                    // Wrap if required.
-                    throw new RuntimeException(t);
-                })
-                .buildRs(getEngine());
+                    .onErrorResume(t -> {
+                        // Re-throw the exception.
+                        if (t instanceof RuntimeException) {
+                            throw (RuntimeException) t;
+                        }
+                        // Wrap if required.
+                        throw new RuntimeException(t);
+                    })
+                    .buildRs(getEngine());
         }
 
         @Override
@@ -263,14 +260,11 @@ public class OnErrorResumeStageVerification extends AbstractStageVerification {
     public class OnErrorResumeWithPublisherVerification extends StagePublisherVerification<Long> {
         @Override
         public Publisher<Long> createPublisher(long elements) {
-            return
-                rs.<Long>failed(new Exception("BOOM"))
+            return rs.<Long>failed(new Exception("BOOM"))
                     .onErrorResumeWith(
-                        t -> rs.fromIterable(() -> LongStream.rangeClosed(1, elements).boxed().iterator())
-                    )
+                            t -> rs.fromIterable(() -> LongStream.rangeClosed(1, elements).boxed().iterator()))
                     .buildRs(getEngine());
         }
     }
-
 
 }

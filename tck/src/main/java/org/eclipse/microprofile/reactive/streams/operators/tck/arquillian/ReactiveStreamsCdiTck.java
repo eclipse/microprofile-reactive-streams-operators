@@ -19,8 +19,8 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.arquillian;
 
-import org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck;
 import org.reactivestreams.tck.TestEnvironment;
 
 import jakarta.enterprise.context.ApplicationScoped;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,17 +19,17 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 public class FromCompletionStageNullableVerification extends AbstractStageVerification {
 
@@ -40,18 +40,18 @@ public class FromCompletionStageNullableVerification extends AbstractStageVerifi
     @Test
     public void fromCsNullableStageShouldEmitAnElementWhenAlreadyRedeemed() {
         assertEquals(await(
-            rs.fromCompletionStageNullable(CompletableFuture.completedFuture(10))
-                .toList()
-                .run(getEngine())
-        ), Collections.singletonList(10));
+                rs.fromCompletionStageNullable(CompletableFuture.completedFuture(10))
+                        .toList()
+                        .run(getEngine())),
+                Collections.singletonList(10));
     }
 
     @Test
     public void fromCsNullableStageShouldEmitAnElementWhenRedeemedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = rs.fromCompletionStageNullable(future)
-            .toList()
-            .run(getEngine());
+                .toList()
+                .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
@@ -62,18 +62,18 @@ public class FromCompletionStageNullableVerification extends AbstractStageVerifi
     @Test
     public void fromCsNullableStageShouldBeEmptyWhenAlreadyRedeemedWithNull() {
         assertEquals(await(
-            rs.fromCompletionStageNullable(CompletableFuture.completedFuture(null))
-                .toList()
-                .run(getEngine())
-        ), Collections.emptyList());
+                rs.fromCompletionStageNullable(CompletableFuture.completedFuture(null))
+                        .toList()
+                        .run(getEngine())),
+                Collections.emptyList());
     }
 
     @Test
     public void fromCsNullableStageShouldBeEmptyWhenRedeemedWithNullLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = rs.fromCompletionStageNullable(future)
-            .toList()
-            .run(getEngine());
+                .toList()
+                .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
@@ -86,18 +86,17 @@ public class FromCompletionStageNullableVerification extends AbstractStageVerifi
         CompletableFuture<Integer> future = new CompletableFuture<>();
         future.completeExceptionally(new QuietRuntimeException("failed"));
         await(
-            rs.fromCompletionStageNullable(future)
-                .toList()
-                .run(getEngine())
-        );
+                rs.fromCompletionStageNullable(future)
+                        .toList()
+                        .run(getEngine()));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void fromCsNullableStageShouldPropagateExceptionsWhenFailedLater() throws InterruptedException {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = rs.fromCompletionStageNullable(future)
-            .toList()
-            .run(getEngine());
+                .toList()
+                .run(getEngine());
         // Give it some time to not complete
         Thread.sleep(100);
         assertFalse(result.toCompletableFuture().isDone());
@@ -108,7 +107,7 @@ public class FromCompletionStageNullableVerification extends AbstractStageVerifi
     @Test
     public void fromCsNullableStageShouldBeReusable() {
         PublisherBuilder<Integer> publisher =
-            rs.fromCompletionStageNullable(CompletableFuture.completedFuture(10));
+                rs.fromCompletionStageNullable(CompletableFuture.completedFuture(10));
 
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
         assertEquals(await(publisher.toList().run(getEngine())), Collections.singletonList(10));
@@ -123,8 +122,7 @@ public class FromCompletionStageNullableVerification extends AbstractStageVerifi
         @Override
         public Publisher<String> createPublisher(long elements) {
             return rs.fromCompletionStageNullable(
-                CompletableFuture.completedFuture(elements == 0 ? null : "value")
-            ).buildRs(getEngine());
+                    CompletableFuture.completedFuture(elements == 0 ? null : "value")).buildRs(getEngine());
         }
 
         @Override
@@ -132,6 +130,5 @@ public class FromCompletionStageNullableVerification extends AbstractStageVerifi
             return 1;
         }
     }
-
 
 }

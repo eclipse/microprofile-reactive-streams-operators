@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,15 +25,16 @@ import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEn
  * A builder for a {@link org.reactivestreams.Subscriber} and its result.
  * <p>
  * When built, this builder returns a {@link CompletionSubscriber}, which encapsulates both a
- * {@link org.reactivestreams.Subscriber} and a {@link java.util.concurrent.CompletionStage} that will be redeemed
- * with the result produced by the subscriber when the stream completes normally, or will be redeemed with an error
- * if the subscriber receives an error. A {@link SubscriberBuilder} may represent a compound set of
- * stream stages and may complete exceptionally without receiving an error externally.
- * Similarly, {@link SubscriberBuilder}s may encapsulate error handling such as the
- * onErrorResume operator and recover from an externally received errors.
+ * {@link org.reactivestreams.Subscriber} and a {@link java.util.concurrent.CompletionStage} that will be redeemed with
+ * the result produced by the subscriber when the stream completes normally, or will be redeemed with an error if the
+ * subscriber receives an error. A {@link SubscriberBuilder} may represent a compound set of stream stages and may
+ * complete exceptionally without receiving an error externally. Similarly, {@link SubscriberBuilder}s may encapsulate
+ * error handling such as the onErrorResume operator and recover from an externally received errors.
  *
- * @param <T> The type of the elements that this subscriber consumes.
- * @param <R> The type of the result that this subscriber emits.
+ * @param <T>
+ *            The type of the elements that this subscriber consumes.
+ * @param <R>
+ *            The type of the result that this subscriber emits.
  * @see ReactiveStreams
  */
 public interface SubscriberBuilder<T, R> extends ProducesResult<R> {
@@ -47,7 +48,8 @@ public interface SubscriberBuilder<T, R> extends ProducesResult<R> {
     /**
      * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
      *
-     * @param engine The engine to run the stream with.
+     * @param engine
+     *            The engine to run the stream with.
      * @return A {@link CompletionSubscriber} that will run this stream.
      */
     CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine);

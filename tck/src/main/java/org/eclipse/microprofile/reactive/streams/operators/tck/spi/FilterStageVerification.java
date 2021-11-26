@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +27,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the filter stage.
@@ -45,21 +44,21 @@ public class FilterStageVerification extends AbstractStageVerification {
     @Test
     public void filterStageShouldFilterElements() {
         assertEquals(await(rs.of(1, 2, 3, 4, 5, 6)
-            .filter(i -> (i & 1) == 1)
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 3, 5));
+                .filter(i -> (i & 1) == 1)
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 3, 5));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void filterStageShouldPropagateExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .filter(foo -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .filter(foo -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -67,15 +66,16 @@ public class FilterStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void filterStageShouldPropagateUpstreamExceptions() {
         await(rs.failed(new QuietRuntimeException("failed"))
-            .filter(foo -> true)
-            .toList()
-            .run(getEngine()));
+                .filter(foo -> true)
+                .toList()
+                .run(getEngine()));
     }
 
     @Test
     public void filterStageShouldPropagateCancel() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        await(infiniteStream().onTerminate(() -> cancelled.complete(null)).filter(i -> i < 3).cancel().run(getEngine()));
+        await(infiniteStream().onTerminate(() -> cancelled.complete(null)).filter(i -> i < 3).cancel()
+                .run(getEngine()));
         await(cancelled);
     }
 
@@ -89,8 +89,7 @@ public class FilterStageVerification extends AbstractStageVerification {
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Collections.singletonList(
-            new ProcessorVerification()
-        );
+                new ProcessorVerification());
     }
 
     class ProcessorVerification extends StageProcessorVerification<Integer> {
@@ -103,7 +102,7 @@ public class FilterStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .filter(i -> true).buildRs(getEngine());
+                    .filter(i -> true).buildRs(getEngine());
         }
 
         @Override

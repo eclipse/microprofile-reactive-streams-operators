@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,13 +19,13 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
+import java.util.Objects;
+
 import org.eclipse.microprofile.reactive.streams.operators.CompletionSubscriber;
 import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.eclipse.microprofile.reactive.streams.operators.spi.SubscriberWithCompletionStage;
-
-import java.util.Objects;
 
 public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder implements SubscriberBuilder<T, R> {
 
@@ -42,6 +42,7 @@ public final class SubscriberBuilderImpl<T, R> extends ReactiveStreamsGraphBuild
     public CompletionSubscriber<T, R> build(ReactiveStreamsEngine engine) {
         Objects.requireNonNull(engine, "Engine must not be null");
         SubscriberWithCompletionStage<T, R> subscriberWithCompletionStage = engine.buildSubscriber(toGraph());
-        return CompletionSubscriber.of(subscriberWithCompletionStage.getSubscriber(), subscriberWithCompletionStage.getCompletion());
+        return CompletionSubscriber.of(subscriberWithCompletionStage.getSubscriber(),
+                subscriberWithCompletionStage.getCompletion());
     }
 }

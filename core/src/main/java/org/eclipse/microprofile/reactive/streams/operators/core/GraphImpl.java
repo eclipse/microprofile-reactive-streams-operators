@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,10 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
+import java.util.Collection;
+
 import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-
-import java.util.Collection;
 
 final class GraphImpl implements Graph {
     private final Collection<Stage> stages;
@@ -34,7 +34,8 @@ final class GraphImpl implements Graph {
      * {@link org.reactivestreams.Subscriber}. If the last stage has an outlet, then this graph has an outlet, and
      * therefore can be represented as a {@link org.reactivestreams.Publisher}.
      *
-     * @param stages The stages.
+     * @param stages
+     *            The stages.
      */
     GraphImpl(Collection<Stage> stages) {
         this.stages = stages;
@@ -48,7 +49,7 @@ final class GraphImpl implements Graph {
     @Override
     public String toString() {
         return "Graph{" +
-            "stages=" + stages +
-            '}';
+                "stages=" + stages +
+                '}';
     }
 }

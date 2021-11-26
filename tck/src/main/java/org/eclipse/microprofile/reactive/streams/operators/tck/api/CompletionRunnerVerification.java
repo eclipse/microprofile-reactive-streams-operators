@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,24 +19,24 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.spi.SubscriberWithCompletionStage;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.eclipse.microprofile.reactive.streams.operators.spi.UnsupportedStageException;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.SubscriberWithCompletionStage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.UnsupportedStageException;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the {@link org.eclipse.microprofile.reactive.streams.operators.CompletionRunner} class.
@@ -58,7 +58,8 @@ public class CompletionRunnerVerification extends AbstractReactiveStreamsApiVeri
             }
 
             @Override
-            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
+            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph)
+                    throws UnsupportedStageException {
                 throw new RuntimeException("Wrong method invoked");
             }
 

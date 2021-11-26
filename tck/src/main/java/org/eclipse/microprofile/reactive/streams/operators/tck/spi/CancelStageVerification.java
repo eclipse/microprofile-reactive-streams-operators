@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,16 +19,16 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
 import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Verification for the cancel stage.
@@ -59,7 +59,7 @@ public class CancelStageVerification extends AbstractStageVerification {
     @Test
     public void cancelStageShouldIgnoreAnyUpstreamFailures() {
         await(rs.failed(new QuietRuntimeException())
-            .cancel().run(getEngine()));
+                .cancel().run(getEngine()));
     }
 
     @Test
@@ -91,12 +91,14 @@ public class CancelStageVerification extends AbstractStageVerification {
         }
 
         @Override
-        public void required_spec209_blackbox_mustBePreparedToReceiveAnOnCompleteSignalWithPrecedingRequestCall() throws Throwable {
+        public void required_spec209_blackbox_mustBePreparedToReceiveAnOnCompleteSignalWithPrecedingRequestCall()
+                throws Throwable {
             throw new SkipException("Cancel subscriber does not need to signal demand.");
         }
 
         @Override
-        public void required_spec210_blackbox_mustBePreparedToReceiveAnOnErrorSignalWithPrecedingRequestCall() throws Throwable {
+        public void required_spec210_blackbox_mustBePreparedToReceiveAnOnErrorSignalWithPrecedingRequestCall()
+                throws Throwable {
             throw new SkipException("Cancel subscriber does not need to signal demand.");
         }
     }

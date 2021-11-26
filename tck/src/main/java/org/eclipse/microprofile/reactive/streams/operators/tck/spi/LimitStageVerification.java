@@ -19,19 +19,18 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 public class LimitStageVerification extends AbstractStageVerification {
 
@@ -42,80 +41,77 @@ public class LimitStageVerification extends AbstractStageVerification {
     @Test
     public void limitStageShouldLimitTheOutputElements() {
         assertEquals(await(infiniteStream()
-            .limit(3)
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3));
+                .limit(3)
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void limitStageShouldAllowLimitingToZero() {
         assertEquals(await(infiniteStream()
-            .limit(0)
-            .toList()
-            .run(getEngine())), Collections.emptyList());
+                .limit(0)
+                .toList()
+                .run(getEngine())), Collections.emptyList());
     }
 
     @Test
     public void limitStageToZeroShouldCompleteStreamEvenWhenNoElementsAreReceived() {
-        assertEquals(await(rs.fromPublisher(subscriber ->
-            subscriber.onSubscribe(new Subscription() {
-                @Override
-                public void request(long n) {
-                }
+        assertEquals(await(rs.fromPublisher(subscriber -> subscriber.onSubscribe(new Subscription() {
+            @Override
+            public void request(long n) {
+            }
 
-                @Override
-                public void cancel() {
-                }
-            })
-        ).limit(0)
-            .toList()
-            .run(getEngine())), Collections.emptyList());
+            @Override
+            public void cancel() {
+            }
+        })).limit(0)
+                .toList()
+                .run(getEngine())), Collections.emptyList());
     }
 
     @Test
     public void limitStageShouldCancelUpStreamWhenDone() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .limit(1)
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .limit(1)
+                .toList()
+                .run(getEngine());
         await(cancelled);
     }
 
     @Test
     public void limitStageShouldIgnoreSubsequentErrorsWhenDone() {
         assertEquals(await(
-            infiniteStream()
-                .flatMap(i -> {
-                    if (i == 4) {
-                        return rs.failed(new RuntimeException("failed"));
-                    } else {
-                        return rs.of(i);
-                    }
-                })
-                .limit(3)
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList(1, 2, 3));
+                infiniteStream()
+                        .flatMap(i -> {
+                            if (i == 4) {
+                                return rs.failed(new RuntimeException("failed"));
+                            } else {
+                                return rs.of(i);
+                            }
+                        })
+                        .limit(3)
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void limitStageShouldPropagateCancellation() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         await(
-            infiniteStream()
-                .onTerminate(() -> cancelled.complete(null))
-                .peek(i -> {
-                    if (i == 100) {
-                        cancelled.completeExceptionally(new RuntimeException("Was not cancelled"));
-                    }
-                })
-                .limit(100)
-                .limit(3)
-                .toList()
-                .run(getEngine())
-        );
+                infiniteStream()
+                        .onTerminate(() -> cancelled.complete(null))
+                        .peek(i -> {
+                            if (i == 100) {
+                                cancelled.completeExceptionally(new RuntimeException("Was not cancelled"));
+                            }
+                        })
+                        .limit(100)
+                        .limit(3)
+                        .toList()
+                        .run(getEngine()));
         await(cancelled);
     }
 
@@ -123,7 +119,8 @@ public class LimitStageVerification extends AbstractStageVerification {
     public void limitStageBuilderShouldBeReusable() {
         ProcessorBuilder<Integer, Integer> limit = rs.<Integer>builder().limit(3);
         assertEquals(await(infiniteStream().via(limit).toList().run(getEngine())), Arrays.asList(1, 2, 3));
-        assertEquals(await(infiniteStream().map(i -> i + 1).via(limit).toList().run(getEngine())), Arrays.asList(2, 3, 4));
+        assertEquals(await(infiniteStream().map(i -> i + 1).via(limit).toList().run(getEngine())),
+                Arrays.asList(2, 3, 4));
     }
 
     @Override
@@ -135,8 +132,8 @@ public class LimitStageVerification extends AbstractStageVerification {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
             return rs.<Integer>builder()
-                .limit(Long.MAX_VALUE)
-                .buildRs(getEngine());
+                    .limit(Long.MAX_VALUE)
+                    .buildRs(getEngine());
         }
 
         @Override
@@ -147,8 +144,8 @@ public class LimitStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .limit(Long.MAX_VALUE)
-                .buildRs(getEngine());
+                    .limit(Long.MAX_VALUE)
+                    .buildRs(getEngine());
         }
     }
 }

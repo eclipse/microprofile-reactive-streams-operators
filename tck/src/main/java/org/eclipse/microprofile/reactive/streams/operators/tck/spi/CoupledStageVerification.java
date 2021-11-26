@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,20 +19,20 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.LongStream;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 public class CoupledStageVerification extends AbstractStageVerification {
 
@@ -46,12 +46,12 @@ public class CoupledStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> upstreamCancelled = new CompletableFuture<>();
 
         idlePublisher()
-            .onTerminate(() -> upstreamCancelled.complete(null))
-            .via(
-                rs.coupled(rs.builder().onComplete(() -> subscriberCompleted.complete(null)).ignore(),
-                    idlePublisher())
-            ).cancel()
-            .run(getEngine());
+                .onTerminate(() -> upstreamCancelled.complete(null))
+                .via(
+                        rs.coupled(rs.builder().onComplete(() -> subscriberCompleted.complete(null)).ignore(),
+                                idlePublisher()))
+                .cancel()
+                .run(getEngine());
 
         await(subscriberCompleted);
         await(upstreamCancelled);
@@ -63,12 +63,12 @@ public class CoupledStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> upstreamCancelled = new CompletableFuture<>();
 
         idlePublisher()
-            .onTerminate(() -> upstreamCancelled.complete(null))
-            .via(
-                rs.coupled(rs.builder().onComplete(() -> subscriberCompleted.complete(null)).ignore(),
-                    rs.empty())
-            ).ignore()
-            .run(getEngine());
+                .onTerminate(() -> upstreamCancelled.complete(null))
+                .via(
+                        rs.coupled(rs.builder().onComplete(() -> subscriberCompleted.complete(null)).ignore(),
+                                rs.empty()))
+                .ignore()
+                .run(getEngine());
 
         await(subscriberCompleted);
         await(upstreamCancelled);
@@ -80,12 +80,12 @@ public class CoupledStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> upstreamCancelled = new CompletableFuture<>();
 
         idlePublisher()
-            .onTerminate(() -> upstreamCancelled.complete(null))
-            .via(
-                rs.coupled(rs.builder().onError(subscriberFailed::complete).ignore(),
-                    rs.failed(new QuietRuntimeException("failed")))
-            ).ignore()
-            .run(getEngine());
+                .onTerminate(() -> upstreamCancelled.complete(null))
+                .via(
+                        rs.coupled(rs.builder().onError(subscriberFailed::complete).ignore(),
+                                rs.failed(new QuietRuntimeException("failed"))))
+                .ignore()
+                .run(getEngine());
 
         assertTrue(await(subscriberFailed) instanceof QuietRuntimeException);
         await(upstreamCancelled);
@@ -97,12 +97,12 @@ public class CoupledStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> downstreamCompleted = new CompletableFuture<>();
 
         rs.empty()
-            .via(
-                rs.coupled(rs.builder().ignore(),
-                    idlePublisher().onTerminate(() -> publisherCancelled.complete(null)))
-            ).onComplete(() -> downstreamCompleted.complete(null))
-            .ignore()
-            .run(getEngine());
+                .via(
+                        rs.coupled(rs.builder().ignore(),
+                                idlePublisher().onTerminate(() -> publisherCancelled.complete(null))))
+                .onComplete(() -> downstreamCompleted.complete(null))
+                .ignore()
+                .run(getEngine());
 
         await(publisherCancelled);
         await(downstreamCompleted);
@@ -114,12 +114,12 @@ public class CoupledStageVerification extends AbstractStageVerification {
         CompletableFuture<Throwable> downstreamFailed = new CompletableFuture<>();
 
         rs.failed(new QuietRuntimeException("failed"))
-            .via(
-                rs.coupled(rs.builder().ignore(),
-                    idlePublisher().onTerminate(() -> publisherCancelled.complete(null)))
-            ).onError(downstreamFailed::complete)
-            .ignore()
-            .run(getEngine());
+                .via(
+                        rs.coupled(rs.builder().ignore(),
+                                idlePublisher().onTerminate(() -> publisherCancelled.complete(null))))
+                .onError(downstreamFailed::complete)
+                .ignore()
+                .run(getEngine());
 
         await(publisherCancelled);
         assertTrue(await(downstreamFailed) instanceof QuietRuntimeException);
@@ -131,12 +131,12 @@ public class CoupledStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> downstreamCompleted = new CompletableFuture<>();
 
         idlePublisher()
-            .via(
-                rs.coupled(rs.builder().cancel(),
-                    idlePublisher().onTerminate(() -> publisherCancelled.complete(null)))
-            ).onComplete(() -> downstreamCompleted.complete(null))
-            .ignore()
-            .run(getEngine());
+                .via(
+                        rs.coupled(rs.builder().cancel(),
+                                idlePublisher().onTerminate(() -> publisherCancelled.complete(null))))
+                .onComplete(() -> downstreamCompleted.complete(null))
+                .ignore()
+                .run(getEngine());
 
         await(publisherCancelled);
         await(downstreamCompleted);
@@ -152,23 +152,22 @@ public class CoupledStageVerification extends AbstractStageVerification {
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Arrays.asList(
-            new PublisherVerification(),
-            new SubscriberVerification(),
-            new ProcessorVerification()
-        );
+                new PublisherVerification(),
+                new SubscriberVerification(),
+                new ProcessorVerification());
     }
 
     public class PublisherVerification extends StagePublisherVerification<Long> {
         @Override
         public Publisher<Long> createPublisher(long elements) {
             return rs.coupled(rs.builder().ignore(), rs.fromIterable(
-                () -> LongStream.rangeClosed(1, elements).boxed().iterator()
-            )).buildRs(getEngine());
+                    () -> LongStream.rangeClosed(1, elements).boxed().iterator())).buildRs(getEngine());
         }
 
         @Override
         public Publisher<Long> createFailedPublisher() {
-            return rs.coupled(rs.builder().ignore(), rs.<Long>failed(new QuietRuntimeException("failed"))).buildRs(getEngine());
+            return rs.coupled(rs.builder().ignore(), rs.<Long>failed(new QuietRuntimeException("failed")))
+                    .buildRs(getEngine());
         }
     }
 
@@ -230,7 +229,8 @@ public class CoupledStageVerification extends AbstractStageVerification {
 
         @Override
         public long maxElementsFromPublisher() {
-            // This must be zero because the coupled nature of the stream means that completion signals can overtake elements.
+            // This must be zero because the coupled nature of the stream means that completion signals can overtake
+            // elements.
             return 0;
         }
     }

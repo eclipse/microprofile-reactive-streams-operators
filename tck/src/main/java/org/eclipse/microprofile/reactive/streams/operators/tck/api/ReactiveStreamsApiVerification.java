@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,10 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
 
 /**
  * Factory for tests that verify the API itself without dependence on an SPI implementation.
@@ -40,12 +40,11 @@ public class ReactiveStreamsApiVerification {
 
     public List<Object> allTests() {
         return Arrays.asList(
-            new ReactiveStreamsVerification(rs),
-            new PublisherBuilderVerification(rs),
-            new ProcessorBuilderVerification(rs),
-            new SubscriberBuilderVerification(rs),
-            new CompletionRunnerVerification(rs),
-            new CompletionSubscriberVerification()
-        );
+                new ReactiveStreamsVerification(rs),
+                new PublisherBuilderVerification(rs),
+                new ProcessorBuilderVerification(rs),
+                new SubscriberBuilderVerification(rs),
+                new CompletionRunnerVerification(rs),
+                new CompletionSubscriberVerification());
     }
 }

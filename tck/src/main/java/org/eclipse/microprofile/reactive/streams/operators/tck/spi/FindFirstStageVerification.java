@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,16 +19,15 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static org.testng.Assert.assertEquals;
+import org.reactivestreams.Subscriber;
+import org.testng.annotations.Test;
 
 /**
  * Verification for find first stage.
@@ -42,39 +41,39 @@ public class FindFirstStageVerification extends AbstractStageVerification {
     @Test
     public void findFirstStageShouldFindTheFirstElement() {
         assertEquals(await(rs.of(1, 2, 3)
-            .findFirst().run(getEngine())), Optional.of(1));
+                .findFirst().run(getEngine())), Optional.of(1));
     }
 
     @Test
     public void findFirstStageShouldFindTheFirstElementInSingleElementStream() {
         assertEquals(await(rs.of(1)
-            .findFirst().run(getEngine())), Optional.of(1));
+                .findFirst().run(getEngine())), Optional.of(1));
     }
 
     @Test
     public void findFirstStageShouldReturnEmptyForEmptyStream() {
         assertEquals(await(rs.of()
-            .findFirst().run(getEngine())), Optional.empty());
+                .findFirst().run(getEngine())), Optional.empty());
     }
 
     @Test
     public void findFirstStageShouldCancelUpstream() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         assertEquals(await(infiniteStream().onTerminate(() -> cancelled.complete(null))
-            .findFirst().run(getEngine())), Optional.of(1));
+                .findFirst().run(getEngine())), Optional.of(1));
         await(cancelled);
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void findFirstStageShouldPropagateErrors() {
         await(rs.failed(new QuietRuntimeException("failed"))
-            .findFirst().run(getEngine()));
+                .findFirst().run(getEngine()));
     }
 
     @Test
     public void findFirstStageShouldBeReusable() {
         assertEquals(await(rs.of(1, 2, 3)
-            .findFirst().run(getEngine())), Optional.of(1));
+                .findFirst().run(getEngine())), Optional.of(1));
     }
 
     @Override

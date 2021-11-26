@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,14 +19,13 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionStage;
+
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 public class SubscriberStageVerification extends AbstractStageVerification {
     SubscriberStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
@@ -36,16 +35,14 @@ public class SubscriberStageVerification extends AbstractStageVerification {
     @Test
     public void subscriberStageShouldRedeemCompletionStageWhenCompleted() {
         CompletionStage<Void> result = rs.of().to(
-            rs.builder().ignore().build(getEngine())
-        ).run(getEngine());
+                rs.builder().ignore().build(getEngine())).run(getEngine());
         await(result);
     }
 
     @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void subscriberStageShouldRedeemCompletionStageWhenFailed() {
         CompletionStage<Void> result = rs.failed(new RuntimeException("failed")).to(
-            rs.builder().ignore().build(getEngine())
-        ).run(getEngine());
+                rs.builder().ignore().build(getEngine())).run(getEngine());
         await(result);
     }
 
@@ -60,8 +57,7 @@ public class SubscriberStageVerification extends AbstractStageVerification {
             public void cancel() {
             }
         })).to(
-            rs.builder().cancel().build(getEngine())
-        ).run(getEngine());
+                rs.builder().cancel().build(getEngine())).run(getEngine());
         await(result);
     }
 

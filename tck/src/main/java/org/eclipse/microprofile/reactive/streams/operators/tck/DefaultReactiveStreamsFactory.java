@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,10 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck;
 
+import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
 import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
@@ -27,10 +31,6 @@ import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
-
-import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 /**
  * Implementation of the {@link ReactiveStreamsFactory} that delegates to {@link ReactiveStreams} static factory
@@ -114,7 +114,8 @@ public class DefaultReactiveStreamsFactory implements ReactiveStreamsFactory {
     }
 
     @Override
-    public <T, R> ProcessorBuilder<T, R> coupled(SubscriberBuilder<? super T, ?> subscriber, PublisherBuilder<? extends R> publisher) {
+    public <T, R> ProcessorBuilder<T, R> coupled(SubscriberBuilder<? super T, ?> subscriber,
+            PublisherBuilder<? extends R> publisher) {
         return ReactiveStreams.coupled(subscriber, publisher);
     }
 

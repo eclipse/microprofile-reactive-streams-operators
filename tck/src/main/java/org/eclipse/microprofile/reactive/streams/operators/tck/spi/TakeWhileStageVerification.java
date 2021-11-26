@@ -19,11 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +27,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 public class TakeWhileStageVerification extends AbstractStageVerification {
 
@@ -42,57 +41,57 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
     @Test
     public void takeWhileStageShouldTakeWhileConditionIsTrue() {
         assertEquals(await(rs.of(1, 2, 3, 4, 5, 6, 1, 2)
-            .takeWhile(i -> i < 5)
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3, 4));
+                .takeWhile(i -> i < 5)
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3, 4));
     }
 
     @Test
     public void takeWhileStageShouldEmitEmpty() {
         assertEquals(await(rs.of(1, 2, 3, 4, 5, 6)
-            .takeWhile(i -> false)
-            .toList()
-            .run(getEngine())), Collections.emptyList());
+                .takeWhile(i -> false)
+                .toList()
+                .run(getEngine())), Collections.emptyList());
     }
 
     @Test
     public void takeWhileShouldCancelUpStreamWhenDone() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .takeWhile(t -> false)
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .takeWhile(t -> false)
+                .toList()
+                .run(getEngine());
         await(cancelled);
     }
 
     @Test
     public void takeWhileShouldIgnoreSubsequentErrorsWhenDone() {
         assertEquals(await(
-            rs.of(1, 2, 3, 4)
-                .flatMap(i -> {
-                    if (i == 4) {
-                        return rs.failed(new QuietRuntimeException("failed"));
-                    } else {
-                        return rs.of(i);
-                    }
-                })
-                .takeWhile(t -> t < 3)
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList(1, 2));
+                rs.of(1, 2, 3, 4)
+                        .flatMap(i -> {
+                            if (i == 4) {
+                                return rs.failed(new QuietRuntimeException("failed"));
+                            } else {
+                                return rs.of(i);
+                            }
+                        })
+                        .takeWhile(t -> t < 3)
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList(1, 2));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void takeWhileStageShouldHandleErrors() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .takeWhile(i -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .takeWhile(i -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -113,8 +112,8 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
         @Override
         public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
             return rs.<Integer>builder()
-                .takeWhile(t -> true)
-                .buildRs(getEngine());
+                    .takeWhile(t -> true)
+                    .buildRs(getEngine());
         }
 
         @Override
@@ -125,8 +124,8 @@ public class TakeWhileStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .takeWhile(t -> true)
-                .buildRs(getEngine());
+                    .takeWhile(t -> true)
+                    .buildRs(getEngine());
         }
     }
 }

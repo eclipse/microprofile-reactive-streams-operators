@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,27 +25,29 @@ import java.util.function.Predicate;
  * Operations for transforming a stream.
  * <p>
  * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
- * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
- * applying some transformation or some side effect, termination and error signals potentially being passed, and
- * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator applying
+ * some transformation or some side effect, termination and error signals potentially being passed, and for operators
+ * that subscribe to the stream, an output value being redeemed at the end.
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
  *
- * @param <T> The type of the elements that the stream emits.
+ * @param <T>
+ *            The type of the elements that the stream emits.
  */
 public interface FilteringOperators<T> {
 
     /**
      * Filter elements emitted by this publisher using the given {@link Predicate}.
      * <p>
-     * Any elements that return {@code true} when passed to the {@link Predicate} will be emitted, all other
-     * elements will be dropped.
+     * Any elements that return {@code true} when passed to the {@link Predicate} will be emitted, all other elements
+     * will be dropped.
      * <p>
      * <img src="doc-files/filter.png" alt="filter marbles diagram">
      *
-     * @param predicate The predicate to apply to each element.
+     * @param predicate
+     *            The predicate to apply to each element.
      * @return A new stream builder.
      */
     FilteringOperators<T> filter(Predicate<? super T> predicate);
@@ -67,21 +69,25 @@ public interface FilteringOperators<T> {
      * If {@code maxSize} is reached, the stream will be completed, and upstream will be cancelled. Completion of the
      * stream will occur immediately when the element that satisfies the {@code maxSize} is received.
      *
-     * @param maxSize The maximum size of the returned stream.
+     * @param maxSize
+     *            The maximum size of the returned stream.
      * @return A new stream builder.
-     * @throws IllegalArgumentException If {@code maxSize} is less than zero.
+     * @throws IllegalArgumentException
+     *             If {@code maxSize} is less than zero.
      */
     FilteringOperators<T> limit(long maxSize);
 
     /**
-     * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream will
-     * effectively be an empty stream.
+     * Discard the first {@code n} of this stream. If this stream contains fewer than {@code n} elements, this stream
+     * will effectively be an empty stream.
      * <p>
      * <img src="doc-files/skip.png" alt="skip marble diagram">
      *
-     * @param n The number of elements to discard.
+     * @param n
+     *            The number of elements to discard.
      * @return A new stream builder.
-     * @throws IllegalArgumentException If {@code n} is less than zero.
+     * @throws IllegalArgumentException
+     *             If {@code n} is less than zero.
      */
     FilteringOperators<T> skip(long n);
 
@@ -92,7 +98,8 @@ public interface FilteringOperators<T> {
      * <p>
      * When the {@code predicate} returns false, the stream will be completed, and upstream will be cancelled.
      *
-     * @param predicate The predicate.
+     * @param predicate
+     *            The predicate.
      * @return A new stream builder.
      */
     FilteringOperators<T> takeWhile(Predicate<? super T> predicate);
@@ -102,11 +109,12 @@ public interface FilteringOperators<T> {
      * <p>
      * <img src="doc-files/dropWhile.png" alt="dropWhile marble diagram">
      * <p>
-     * As long as the {@code predicate} returns true, no elements will be emitted from this stream. Once the first element
-     * is encountered for which the {@code predicate} returns false, all subsequent elements will be emitted, and the
-     * {@code predicate} will no longer be invoked.
+     * As long as the {@code predicate} returns true, no elements will be emitted from this stream. Once the first
+     * element is encountered for which the {@code predicate} returns false, all subsequent elements will be emitted,
+     * and the {@code predicate} will no longer be invoked.
      *
-     * @param predicate The predicate.
+     * @param predicate
+     *            The predicate.
      * @return A new stream builder.
      */
     FilteringOperators<T> dropWhile(Predicate<? super T> predicate);

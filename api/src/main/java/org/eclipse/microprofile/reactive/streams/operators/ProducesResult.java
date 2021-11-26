@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,7 +25,8 @@ package org.eclipse.microprofile.reactive.streams.operators;
  * This will either be a {@link SubscriberBuilder}, representing a stream with an inlet that can be plumbed to a
  * publisher in order to run it, or a {@link CompletionRunner}, representing a closed graph that can be run as is.
  *
- * @param <T> The result of the stream.
+ * @param <T>
+ *            The result of the stream.
  * @see SubscriberBuilder
  * @see CompletionRunner
  */

@@ -19,12 +19,12 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
+import java.util.*;
+
 import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ToGraphable;
 import org.reactivestreams.Publisher;
-
-import java.util.*;
 
 /**
  * Builds graphs of reactive streams.
@@ -78,7 +78,7 @@ abstract class ReactiveStreamsGraphBuilder implements ToGraphable {
             return (((ToGraphable) obj).toGraph());
         } else {
             throw new IllegalArgumentException(obj + " is not an instance of ToGraphable and so can't participate " +
-                "in this graph");
+                    "in this graph");
         }
     }
 

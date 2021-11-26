@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,14 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +29,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 public class FlatMapStageVerification extends AbstractStageVerification {
     FlatMapStageVerification(ReactiveStreamsSpiVerification.VerificationDeps deps) {
@@ -46,29 +45,29 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     @Test
     public void flatMapStageShouldMapElements() {
         assertEquals(await(rs.of(1, 2, 3)
-            .flatMap(n -> rs.of(n, n, n))
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
+                .flatMap(n -> rs.of(n, n, n))
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
 
     @Test
     public void flatMapStageShouldAllowEmptySubStreams() {
         assertEquals(await(rs.of(rs.empty(), rs.of(1, 2))
-            .flatMap(Function.identity())
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2));
+                .flatMap(Function.identity())
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void flatMapStageShouldHandleExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .flatMap(foo -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .flatMap(foo -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -76,19 +75,19 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void flatMapStageShouldPropagateUpstreamExceptions() {
         await(rs.failed(new QuietRuntimeException("failed"))
-            .flatMap(rs::of)
-            .toList()
-            .run(getEngine()));
+                .flatMap(rs::of)
+                .toList()
+                .run(getEngine()));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void flatMapStageShouldPropagateSubstreamExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .flatMap(f -> rs.failed(new QuietRuntimeException("failed")))
-            .toList()
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .flatMap(f -> rs.failed(new QuietRuntimeException("failed")))
+                .toList()
+                .run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -98,12 +97,12 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         AtomicInteger activePublishers = new AtomicInteger();
 
         CompletionStage<List<Integer>> result = rs.of(1, 2, 3, 4, 5)
-            .flatMap(id -> rs.fromPublisher(new ScheduledPublisher(id, activePublishers, this::getExecutorService)))
-            .toList()
-            .run(getEngine());
+                .flatMap(id -> rs.fromPublisher(new ScheduledPublisher(id, activePublishers, this::getExecutorService)))
+                .toList()
+                .run(getEngine());
 
         assertEquals(result.toCompletableFuture().get(2, TimeUnit.SECONDS),
-            Arrays.asList(1, 2, 3, 4, 5));
+                Arrays.asList(1, 2, 3, 4, 5));
     }
 
     @Test
@@ -111,11 +110,11 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> outerCancelled = new CompletableFuture<>();
         CompletableFuture<Void> innerCancelled = new CompletableFuture<>();
         await(infiniteStream()
-            .onTerminate(() -> outerCancelled.complete(null))
-            .flatMap(i -> infiniteStream().onTerminate(() -> innerCancelled.complete(null)))
-            .limit(5)
-            .toList()
-            .run(getEngine()));
+                .onTerminate(() -> outerCancelled.complete(null))
+                .flatMap(i -> infiniteStream().onTerminate(() -> innerCancelled.complete(null)))
+                .limit(5)
+                .toList()
+                .run(getEngine()));
 
         await(outerCancelled);
         await(innerCancelled);
@@ -124,7 +123,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
     @Test
     public void flatMapStageBuilderShouldBeReusable() {
         ProcessorBuilder<PublisherBuilder<Integer>, Integer> flatMap =
-            rs.<PublisherBuilder<Integer>>builder().flatMap(Function.identity());
+                rs.<PublisherBuilder<Integer>>builder().flatMap(Function.identity());
 
         assertEquals(await(rs.of(rs.of(1, 2)).via(flatMap).toList().run(getEngine())), Arrays.asList(1, 2));
         assertEquals(await(rs.of(rs.of(3, 4)).via(flatMap).toList().run(getEngine())), Arrays.asList(3, 4));
@@ -148,7 +147,7 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .flatMap(rs::of).buildRs(getEngine());
+                    .flatMap(rs::of).buildRs(getEngine());
         }
 
         @Override
@@ -166,41 +165,41 @@ public class FlatMapStageVerification extends AbstractStageVerification {
         public Subscriber<Integer> createSubscriber(WhiteboxSubscriberProbe<Integer> probe) {
             CompletableFuture<Subscriber<? super Integer>> subscriber = new CompletableFuture<>();
             rs.of(rs.<Integer>fromPublisher(subscriber::complete))
-                .flatMap(Function.identity())
-                .to(new Subscriber<Integer>() {
-                    @Override
-                    public void onSubscribe(Subscription subscription) {
-                        // We need to initially request an element to ensure that we get the publisher.
-                        subscription.request(1);
-                        probe.registerOnSubscribe(new SubscriberPuppet() {
-                            @Override
-                            public void triggerRequest(long elements) {
-                                subscription.request(elements);
-                            }
+                    .flatMap(Function.identity())
+                    .to(new Subscriber<Integer>() {
+                        @Override
+                        public void onSubscribe(Subscription subscription) {
+                            // We need to initially request an element to ensure that we get the publisher.
+                            subscription.request(1);
+                            probe.registerOnSubscribe(new SubscriberPuppet() {
+                                @Override
+                                public void triggerRequest(long elements) {
+                                    subscription.request(elements);
+                                }
 
-                            @Override
-                            public void signalCancel() {
-                                subscription.cancel();
-                            }
-                        });
-                    }
+                                @Override
+                                public void signalCancel() {
+                                    subscription.cancel();
+                                }
+                            });
+                        }
 
-                    @Override
-                    public void onNext(Integer item) {
-                        probe.registerOnNext(item);
-                    }
+                        @Override
+                        public void onNext(Integer item) {
+                            probe.registerOnNext(item);
+                        }
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        probe.registerOnError(throwable);
-                    }
+                        @Override
+                        public void onError(Throwable throwable) {
+                            probe.registerOnError(throwable);
+                        }
 
-                    @Override
-                    public void onComplete() {
-                        probe.registerOnComplete();
-                    }
-                })
-                .run(getEngine());
+                        @Override
+                        public void onComplete() {
+                            probe.registerOnComplete();
+                        }
+                    })
+                    .run(getEngine());
 
             return (Subscriber) await(subscriber);
         }

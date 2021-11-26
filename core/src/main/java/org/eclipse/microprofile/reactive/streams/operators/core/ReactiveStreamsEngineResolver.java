@@ -18,19 +18,18 @@
  ******************************************************************************/
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+
 /**
- * This class is not intended to be used by end-users but for
- * portable container integration purpose only.
+ * This class is not intended to be used by end-users but for portable container integration purpose only.
  * <p>
- * Service provider for ReactiveStreamsEngine. The implementation registers
- * itself via the {@link ServiceLoader} mechanism.
+ * Service provider for ReactiveStreamsEngine. The implementation registers itself via the {@link ServiceLoader}
+ * mechanism.
  */
 public class ReactiveStreamsEngineResolver {
 
@@ -41,8 +40,7 @@ public class ReactiveStreamsEngineResolver {
     private static volatile ReactiveStreamsEngine instance = null;
 
     /**
-     * Creates a ReactiveStreamsFactory object
-     * Only used internally from within {@link ReactiveStreams}
+     * Creates a ReactiveStreamsFactory object Only used internally from within {@link ReactiveStreams}
      *
      * @return ReactiveStreamsFactory an instance of ReactiveStreamsFactory
      */
@@ -53,7 +51,8 @@ public class ReactiveStreamsEngineResolver {
                     return instance;
                 }
 
-                ClassLoader cl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
+                ClassLoader cl = AccessController.doPrivileged(
+                        (PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
                 if (cl == null) {
                     cl = ReactiveStreamsEngine.class.getClassLoader();
                 }
@@ -62,7 +61,7 @@ public class ReactiveStreamsEngineResolver {
 
                 if (newInstance == null) {
                     throw new IllegalStateException(
-                        "No ReactiveStreamsEngine implementation found!");
+                            "No ReactiveStreamsEngine implementation found!");
                 }
 
                 instance = newInstance;
@@ -78,13 +77,13 @@ public class ReactiveStreamsEngineResolver {
         }
         if (instance == null) {
             ServiceLoader<ReactiveStreamsEngine> sl = ServiceLoader.load(
-                ReactiveStreamsEngine.class, cl);
+                    ReactiveStreamsEngine.class, cl);
             for (ReactiveStreamsEngine spi : sl) {
                 if (instance != null) {
                     throw new IllegalStateException(
-                        "Multiple ReactiveStreamsEngine implementations found: "
-                            + spi.getClass().getName() + " and "
-                            + instance.getClass().getName());
+                            "Multiple ReactiveStreamsEngine implementations found: "
+                                    + spi.getClass().getName() + " and "
+                                    + instance.getClass().getName());
                 } else {
                     instance = spi;
                 }
@@ -94,10 +93,10 @@ public class ReactiveStreamsEngineResolver {
     }
 
     /**
-     * Set the instance. It is used by OSGi environment while service loader
-     * pattern is not supported.
+     * Set the instance. It is used by OSGi environment while service loader pattern is not supported.
      *
-     * @param factory set the instance.
+     * @param factory
+     *            set the instance.
      */
     public static void setInstance(ReactiveStreamsEngine factory) {
         instance = factory;

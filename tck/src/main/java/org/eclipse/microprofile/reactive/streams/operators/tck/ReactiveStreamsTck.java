@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,28 +19,29 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.tck.api.ReactiveStreamsApiVerification;
-import org.eclipse.microprofile.reactive.streams.operators.tck.spi.ReactiveStreamsSpiVerification;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.reactivestreams.tck.TestEnvironment;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.Factory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.tck.api.ReactiveStreamsApiVerification;
+import org.eclipse.microprofile.reactive.streams.operators.tck.spi.ReactiveStreamsSpiVerification;
+import org.reactivestreams.tck.TestEnvironment;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.Factory;
+
 /**
  * The Reactive Streams TCK.
  * <p>
- * A concrete class that extends this class is all that is needed to verify a {@link ReactiveStreamsEngine} against
- * this TCK.
+ * A concrete class that extends this class is all that is needed to verify a {@link ReactiveStreamsEngine} against this
+ * TCK.
  * <p>
  * It produces a number of TestNG test classes via the TestNG {@link Factory} annotated {@link #allTests()} method.
  *
- * @param <E> The type of the Reactive Streams engine.
+ * @param <E>
+ *            The type of the Reactive Streams engine.
  */
 public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
 
@@ -59,8 +60,8 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
     protected abstract E createEngine();
 
     /**
-     * Create the reactive streams factory to use. By default, will use one backed by the ReactiveStreams static
-     * factory methods, that is, using the ServiceLoader to locate one.
+     * Create the reactive streams factory to use. By default, will use one backed by the ReactiveStreams static factory
+     * methods, that is, using the ServiceLoader to locate one.
      */
     protected ReactiveStreamsFactory createFactory() {
         return new DefaultReactiveStreamsFactory();
@@ -95,7 +96,8 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         executorService = Executors.newScheduledThreadPool(4);
 
         ReactiveStreamsApiVerification apiVerification = new ReactiveStreamsApiVerification(rs);
-        ReactiveStreamsSpiVerification spiVerification = new ReactiveStreamsSpiVerification(testEnvironment, rs, engine, executorService);
+        ReactiveStreamsSpiVerification spiVerification =
+                new ReactiveStreamsSpiVerification(testEnvironment, rs, engine, executorService);
 
         // Add tests that aren't dependent on the dependencies.
         List<Object> allTests = new ArrayList<>();

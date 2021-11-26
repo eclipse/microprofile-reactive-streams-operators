@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,11 +20,11 @@
 /**
  * The Reactive Streams utils SPI.
  *
- * Implementors are expected to implement the {@code ReactiveStreamsEngine} interface, and use this SPI to inspect
- * the graph of stages.
+ * Implementors are expected to implement the {@code ReactiveStreamsEngine} interface, and use this SPI to inspect the
+ * graph of stages.
  *
- * A TCK is also provided that validates that an implementation is both correct according to this specification, and
- * the Reactive Streams specification.
+ * A TCK is also provided that validates that an implementation is both correct according to this specification, and the
+ * Reactive Streams specification.
  */
 @org.osgi.annotation.versioning.Version("1.0")
 package org.eclipse.microprofile.reactive.streams.operators.spi;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,9 @@
 
 package org.eclipse.microprofile.reactive.streams.operators;
 
+import java.util.concurrent.CompletionStage;
 
 import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-
-import java.util.concurrent.CompletionStage;
 
 /**
  * A builder for a closed reactive streams graph.
@@ -31,7 +30,8 @@ import java.util.concurrent.CompletionStage;
  * subscriber of the stream when the stream completes normally, or will be redeemed with an error if the stream
  * encounters an error.
  *
- * @param <T> The result of the stream.
+ * @param <T>
+ *            The result of the stream.
  * @see ReactiveStreams
  */
 public interface CompletionRunner<T> extends ProducesResult<T> {
@@ -45,7 +45,8 @@ public interface CompletionRunner<T> extends ProducesResult<T> {
     /**
      * Run this stream, using the supplied {@code ReactiveStreamsEngine}.
      *
-     * @param engine The engine to run the stream with.
+     * @param engine
+     *            The engine to run the stream with.
      * @return A completion stage that will be redeemed with the result of the stream, or an error if the stream fails.
      */
     CompletionStage<T> run(ReactiveStreamsEngine engine);

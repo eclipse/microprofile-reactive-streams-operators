@@ -19,9 +19,8 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
-import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,8 +32,9 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
+import org.reactivestreams.Subscriber;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the collect stage.
@@ -48,53 +48,52 @@ public class CollectStageVerification extends AbstractStageVerification {
     @Test
     public void toListStageShouldReturnAList() {
         assertEquals(await(rs.of(1, 2, 3)
-            .toList().run(getEngine())), Arrays.asList(1, 2, 3));
+                .toList().run(getEngine())), Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void toListStageShouldReturnEmpty() {
         assertEquals(await(rs.of()
-            .toList().run(getEngine())), Collections.emptyList());
+                .toList().run(getEngine())), Collections.emptyList());
     }
 
     @Test
     public void collectShouldAccumulateResult() {
         assertEquals(await(rs.of(1, 2, 3)
-            .collect(
-                () -> new AtomicInteger(0),
-                AtomicInteger::addAndGet
-            ).run(getEngine())).get(), 6);
+                .collect(
+                        () -> new AtomicInteger(0),
+                        AtomicInteger::addAndGet)
+                .run(getEngine())).get(), 6);
     }
 
     @Test
     public void collectShouldSupportEmptyStreams() {
         assertEquals(await(rs.<Integer>empty()
-            .collect(
-                () -> new AtomicInteger(42),
-                AtomicInteger::addAndGet
-            ).run(getEngine())).get(), 42);
+                .collect(
+                        () -> new AtomicInteger(42),
+                        AtomicInteger::addAndGet)
+                .run(getEngine())).get(), 42);
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void collectShouldPropagateUpstreamErrors() {
         await(rs.<Integer>failed(new QuietRuntimeException("failed"))
-            .collect(
-                () -> new AtomicInteger(0),
-                AtomicInteger::addAndGet
-            ).run(getEngine()));
+                .collect(
+                        () -> new AtomicInteger(0),
+                        AtomicInteger::addAndGet)
+                .run(getEngine()));
     }
-
 
     @Test
     public void finisherFunctionShouldBeInvoked() {
         assertEquals(await(rs.of("1", "2", "3")
-            .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
+                .collect(Collectors.joining(", ")).run(getEngine())), "1, 2, 3");
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void toListStageShouldPropagateUpstreamErrors() {
         await(rs.failed(new QuietRuntimeException("failed"))
-            .toList().run(getEngine()));
+                .toList().run(getEngine()));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -103,14 +102,15 @@ public class CollectStageVerification extends AbstractStageVerification {
         CompletionStage<Integer> result = null;
         try {
             result = infiniteStream()
-                .onTerminate(() -> cancelled.complete(null))
-                .collect(Collector.<Integer, Integer, Integer>of(() -> {
-                    throw new QuietRuntimeException("failed");
-                }, (a, b) -> {
-                }, (a, b) -> a + b, Function.identity()))
-                .run(getEngine());
+                    .onTerminate(() -> cancelled.complete(null))
+                    .collect(Collector.<Integer, Integer, Integer>of(() -> {
+                        throw new QuietRuntimeException("failed");
+                    }, (a, b) -> {
+                    }, (a, b) -> a + b, Function.identity()))
+                    .run(getEngine());
         } catch (Exception e) {
-            fail("Exception thrown directly from stream, it should have been captured by the returned CompletionStage", e);
+            fail("Exception thrown directly from stream, it should have been captured by the returned CompletionStage",
+                    e);
         }
         await(cancelled);
         await(result);
@@ -120,11 +120,11 @@ public class CollectStageVerification extends AbstractStageVerification {
     public void collectStageShouldPropagateErrorsFromAccumulator() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<String> result = infiniteStream()
-            .onTerminate(() -> cancelled.complete(null))
-            .collect(Collector.of(() -> "", (a, b) -> {
-                throw new QuietRuntimeException("failed");
-            }, (a, b) -> a + b, Function.identity()))
-            .run(getEngine());
+                .onTerminate(() -> cancelled.complete(null))
+                .collect(Collector.of(() -> "", (a, b) -> {
+                    throw new QuietRuntimeException("failed");
+                }, (a, b) -> a + b, Function.identity()))
+                .run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -132,13 +132,13 @@ public class CollectStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void collectStageShouldPropagateErrorsFromFinisher() {
         CompletionStage<Integer> result = rs.of(1, 2, 3)
-            .collect(Collector.<Integer, Integer, Integer>of(() -> 0, (a, b) -> {
+                .collect(Collector.<Integer, Integer, Integer>of(() -> 0, (a, b) -> {
                 },
-                (a, b) -> a + b,
-                r -> {
-                    throw new QuietRuntimeException("failed");
-                }))
-            .run(getEngine());
+                        (a, b) -> a + b,
+                        r -> {
+                            throw new QuietRuntimeException("failed");
+                        }))
+                .run(getEngine());
         await(result);
     }
 
@@ -148,7 +148,6 @@ public class CollectStageVerification extends AbstractStageVerification {
         assertEquals(await(rs.of(1, 2, 3).to(toList).run(getEngine())), Arrays.asList(1, 2, 3));
         assertEquals(await(rs.of(4, 5, 6).to(toList).run(getEngine())), Arrays.asList(4, 5, 6));
     }
-
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
@@ -171,10 +170,10 @@ public class CollectStageVerification extends AbstractStageVerification {
         @Override
         public Subscriber<Integer> createSubscriber() {
             return rs.<Integer>builder()
-                .collect(
-                    () -> new AtomicInteger(0),
-                    AtomicInteger::addAndGet)
-                .build(getEngine());
+                    .collect(
+                            () -> new AtomicInteger(0),
+                            AtomicInteger::addAndGet)
+                    .build(getEngine());
         }
 
         @Override

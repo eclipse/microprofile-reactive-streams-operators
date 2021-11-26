@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2021 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,21 +19,10 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
-
-import org.eclipse.microprofile.reactive.streams.operators.CompletionRunner;
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.eclipse.microprofile.reactive.streams.operators.spi.SubscriberWithCompletionStage;
-import org.eclipse.microprofile.reactive.streams.operators.spi.UnsupportedStageException;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -51,10 +40,20 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.microprofile.reactive.streams.operators.CompletionRunner;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.SubscriberWithCompletionStage;
+import org.eclipse.microprofile.reactive.streams.operators.spi.UnsupportedStageException;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the {@link org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder} class.
@@ -152,7 +151,9 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void flatMapCompletionStage() throws Exception {
         Graph graph = graphFor(builder().flatMapCompletionStage(i -> CompletableFuture.completedFuture(i + 1)));
-        CompletionStage result = (CompletionStage) ((Function) getAddedStage(Stage.FlatMapCompletionStage.class, graph).getMapper()).apply(1);
+        CompletionStage result =
+                (CompletionStage) ((Function) getAddedStage(Stage.FlatMapCompletionStage.class, graph).getMapper())
+                        .apply(1);
         assertEquals(result.toCompletableFuture().get(1, TimeUnit.SECONDS), 2);
     }
 
@@ -164,7 +165,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void flatMapIterable() {
         Graph graph = graphFor(builder().flatMapIterable(i -> Arrays.asList(i, i + 1)));
-        assertEquals(((Function) getAddedStage(Stage.FlatMapIterable.class, graph).getMapper()).apply(1), Arrays.asList(1, 2));
+        assertEquals(((Function) getAddedStage(Stage.FlatMapIterable.class, graph).getMapper()).apply(1),
+                Arrays.asList(1, 2));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -311,7 +313,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void collectComponents() {
         Supplier supplier = () -> null;
-        BiConsumer accumulator = (a, b) -> {};
+        BiConsumer accumulator = (a, b) -> {
+        };
         Graph graph = graphFor(builder().collect(supplier, accumulator));
         Collector collector = getAddedStage(Stage.Collect.class, graph).getCollector();
         assertSame(collector.supplier(), supplier);
@@ -323,7 +326,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
 
     @Test(expectedExceptions = NullPointerException.class)
     public void collectComponentsSupplierNull() {
-        builder().collect(null, (a, b) -> {});
+        builder().collect(null, (a, b) -> {
+        });
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -372,7 +376,7 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void toMultipleStages() {
         Graph graph = graphFor(builder().to(
-            rs.<Integer>builder().map(Function.identity()).cancel()));
+                rs.<Integer>builder().map(Function.identity()).cancel()));
         assertEquals(graph.getStages().size(), 3);
         Iterator<Stage> stages = graph.getStages().iterator();
         assertTrue(stages.next() instanceof Stage.Of);
@@ -422,7 +426,7 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void viaMultipleStages() {
         Graph graph = graphFor(builder().via(
-            rs.<Integer>builder().map(Function.identity()).filter(t -> true)));
+                rs.<Integer>builder().map(Function.identity()).filter(t -> true)));
         assertEquals(graph.getStages().size(), 3);
         Iterator<Stage> stages = graph.getStages().iterator();
         assertTrue(stages.next() instanceof Stage.Of);
@@ -437,7 +441,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
 
     @Test
     public void onError() {
-        Consumer consumer = t -> {};
+        Consumer consumer = t -> {
+        };
         Graph graph = graphFor(builder().onError(consumer));
         assertSame(getAddedStage(Stage.OnError.class, graph).getConsumer(), consumer);
     }
@@ -461,7 +466,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResumeWith() {
         Graph graph = graphFor(builder().onErrorResumeWith(t -> rs.empty()));
-        Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
+        Graph resumeWith =
+                getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertEquals(resumeWith.getStages().size(), 1);
         assertEmptyStage(resumeWith.getStages().iterator().next());
     }
@@ -469,7 +475,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResumeWithToBuilderFromDifferentReactiveStreamsImplementation() {
         Graph graph = graphFor(builder().onErrorResumeWith(t -> Mocks.EMPTY_PUBLISHER_BUILDER));
-        Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
+        Graph resumeWith =
+                getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertSame(resumeWith, Mocks.EMPTY_PUBLISHER_GRAPH);
     }
 
@@ -481,7 +488,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
     @Test
     public void onErrorResumeWithRsPublisher() {
         Graph graph = graphFor(builder().onErrorResumeWithRsPublisher(t -> Mocks.PUBLISHER));
-        Graph resumeWith = getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
+        Graph resumeWith =
+                getAddedStage(Stage.OnErrorResumeWith.class, graph).getFunction().apply(new RuntimeException());
         assertEquals(resumeWith.getStages().size(), 1);
         assertSame(((Stage.PublisherStage) resumeWith.getStages().iterator().next()).getRsPublisher(), Mocks.PUBLISHER);
     }
@@ -493,7 +501,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
 
     @Test
     public void onTerminate() {
-        Runnable action = () -> {};
+        Runnable action = () -> {
+        };
         Graph graph = graphFor(builder().onTerminate(action));
         assertSame(getAddedStage(Stage.OnTerminate.class, graph).getAction(), action);
     }
@@ -505,7 +514,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
 
     @Test
     public void onComplete() {
-        Runnable action = () -> {};
+        Runnable action = () -> {
+        };
         Graph graph = graphFor(builder().onComplete(action));
         assertSame(getAddedStage(Stage.OnComplete.class, graph).getAction(), action);
     }
@@ -525,7 +535,8 @@ public class PublisherBuilderVerification extends AbstractReactiveStreamsApiVeri
                 return Mocks.PUBLISHER;
             }
             @Override
-            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph) throws UnsupportedStageException {
+            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph)
+                    throws UnsupportedStageException {
                 throw new RuntimeException("Wrong method invoked");
             }
 

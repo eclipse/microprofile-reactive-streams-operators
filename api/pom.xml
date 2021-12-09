@@ -121,7 +121,6 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
-                <version>4.2.0</version>
 
                 <executions>
                     <execution>

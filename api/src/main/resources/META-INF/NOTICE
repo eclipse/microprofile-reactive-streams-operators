@@ -1,0 +1,19 @@
+=========================================================================
+==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+==  Version 2.0, MicroProfile Reactive Streams Operators               ==
+=========================================================================
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+SPDXVersion: SPDX-2.1
+PackageName: Eclipse Microprofile
+PackageHomePage: http://www.eclipse.org/microprofile
+PackageLicenseDeclared: Apache-2.0
+
+PackageCopyrightText: <text>
+James Roper james@lightbend.com
+Clement Escoffier clement.escoffier@redhat.com
+Gordon Hutchison gordon_hutchison@uk.ibm.com
+</text>

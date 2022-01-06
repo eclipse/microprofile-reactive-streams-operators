@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.eclipse.microprofile</groupId>
         <artifactId>microprofile-parent</artifactId>
-        <version>2.4</version>
+        <version>2.5</version>
     </parent>
 
     <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
@@ -98,38 +98,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>rat-check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${skipChecks}</skip>
-                    <consoleOutput>true</consoleOutput>
-                    <includes>
-                        <include>pom.xml</include>
-                        <include>src/**</include>
-                    </includes>
-                    <excludes>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/javadoc/**</exclude>
-                        <exclude>src/main/asciidoc/license*</exclude>
-                        <exclude>**/LICENSE*</exclude>
-                        <exclude>**/*.svg</exclude>
-                        <exclude>**/*.json</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

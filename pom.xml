@@ -113,23 +113,20 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <skip>${skipChecks}</skip>
+                    <consoleOutput>true</consoleOutput>
+                    <includes>
+                        <include>pom.xml</include>
+                        <include>src/**</include>
+                    </includes>
                     <excludes>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>src/main/javadoc/**</exclude>
+                        <exclude>src/main/asciidoc/license*</exclude>
+                        <exclude>**/LICENSE*</exclude>
                         <exclude>**/*.svg</exclude>
-                        <exclude>**/target</exclude>
-                        <exclude>.travis.yml.*</exclude>
-                        <exclude>bnd.bnd</exclude>
-                        <exclude>*.log</exclude>
-                        <exclude>.checkstyle</exclude>
-                        <exclude>.factorypath</exclude>
-                        <exclude>.editorconfig</exclude>
-                        <exclude>**/node_modules/**</exclude>
                         <exclude>**/*.json</exclude>
-                        <exclude>**/*.html</exclude>
-                        <exclude>**/license-efsl.adoc</exclude>
-                        <exclude>**/*.asciidoc</exclude>
-                        <exclude>**/*.md</exclude>
-                        <exclude>.vscode**</exclude>
-                        <exclude>**/*.adoc</exclude>
                     </excludes>
                 </configuration>
             </plugin>

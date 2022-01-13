@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,12 +19,12 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.arquillian;
 
-import org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck;
 import org.reactivestreams.tck.TestEnvironment;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class ReactiveStreamsCdiTck extends ReactiveStreamsTck<ReactiveStreamsEngine> {

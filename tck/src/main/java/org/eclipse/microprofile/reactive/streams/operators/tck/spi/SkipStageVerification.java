@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,17 +19,16 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 public class SkipStageVerification extends AbstractStageVerification {
 
@@ -40,17 +39,17 @@ public class SkipStageVerification extends AbstractStageVerification {
     @Test
     public void skipStageShouldSkipElements() {
         assertEquals(await(rs.of(1, 2, 3, 4)
-            .skip(2)
-            .toList()
-            .run(getEngine())), Arrays.asList(3, 4));
+                .skip(2)
+                .toList()
+                .run(getEngine())), Arrays.asList(3, 4));
     }
 
     @Test
     public void skipStageShouldSupportSkippingNoElements() {
         assertEquals(await(rs.of(1, 2, 3, 4)
-            .skip(0)
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3, 4));
+                .skip(0)
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3, 4));
     }
 
     @Test
@@ -64,8 +63,7 @@ public class SkipStageVerification extends AbstractStageVerification {
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Collections.singletonList(
-            new ProcessorVerification()
-        );
+                new ProcessorVerification());
     }
 
     class ProcessorVerification extends StageProcessorVerification<Integer> {
@@ -78,7 +76,7 @@ public class SkipStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .skip(1).buildRs(getEngine());
+                    .skip(1).buildRs(getEngine());
         }
 
         @Override

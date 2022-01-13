@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,17 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.tck.IdentityProcessorVerification;
-import org.reactivestreams.tck.PublisherVerification;
-import org.reactivestreams.tck.SubscriberBlackboxVerification;
-import org.reactivestreams.tck.SubscriberWhiteboxVerification;
-import org.reactivestreams.tck.TestEnvironment;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -40,6 +29,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.tck.IdentityProcessorVerification;
+import org.reactivestreams.tck.PublisherVerification;
+import org.reactivestreams.tck.SubscriberBlackboxVerification;
+import org.reactivestreams.tck.SubscriberWhiteboxVerification;
+import org.reactivestreams.tck.TestEnvironment;
 
 /**
  * All stage verifications should inherit from this. This provides access to dependencies of the TCK, as well as some
@@ -78,19 +77,15 @@ abstract class AbstractStageVerification {
     <T> T await(CompletionStage<T> future) {
         try {
             return future.toCompletableFuture().get(environment.defaultTimeoutMillis(), TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             if (e.getCause() instanceof RuntimeException) {
                 throw (RuntimeException) e.getCause();
-            }
-            else {
+            } else {
                 throw new RuntimeException(e.getCause());
             }
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             throw new RuntimeException("Future timed out after " + environment.defaultTimeoutMillis() + "ms", e);
         }
     }

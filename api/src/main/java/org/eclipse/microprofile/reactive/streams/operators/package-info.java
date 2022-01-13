@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -39,8 +39,8 @@
  * <p>
  * Operations on these builders may change the shape of the builder, for example,
  * {@link org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder#toList()} changes the builder to a
- * {@link org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder}, since the processor now has a termination
- * stage to direct its elements to.
+ * {@link org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder}, since the processor now has a
+ * termination stage to direct its elements to.
  * <p>
  * {@link SubscriberBuilder}'s are a special case, in that they don't just build a
  * {@link org.reactivestreams.Subscriber}, they build a
@@ -56,16 +56,16 @@
  * result is the {@link java.lang.Void} type, and the {@link java.util.concurrent.CompletionStage} is only useful for
  * signalling normal or error termination of the stream.
  * <p>
- * The {@link org.eclipse.microprofile.reactive.streams.operators.CompletionRunner} builds a closed graph, in that case both a
- * {@link org.reactivestreams.Publisher} and {@link org.reactivestreams.Subscriber} have been provided, and building the
- * graph will run it and return the result of the {@link org.reactivestreams.Subscriber} as a
+ * The {@link org.eclipse.microprofile.reactive.streams.operators.CompletionRunner} builds a closed graph, in that case
+ * both a {@link org.reactivestreams.Publisher} and {@link org.reactivestreams.Subscriber} have been provided, and
+ * building the graph will run it and return the result of the {@link org.reactivestreams.Subscriber} as a
  * {@link java.util.concurrent.CompletionStage}.
  * <p>
- * An example use of this API is perhaps you have a {@link org.reactivestreams.Publisher} of rows from a database,
- * and you want to output it as a comma separated list of lines to publish to an HTTP client request body, which
- * expects a {@link org.reactivestreams.Publisher} of {@link java.nio.ByteBuffer}. Here's how this might be
- * implemented:
+ * An example use of this API is perhaps you have a {@link org.reactivestreams.Publisher} of rows from a database, and
+ * you want to output it as a comma separated list of lines to publish to an HTTP client request body, which expects a
+ * {@link org.reactivestreams.Publisher} of {@link java.nio.ByteBuffer}. Here's how this might be implemented:
  * <p>
+ * 
  * <pre>
  *   Publisher&lt;Row&gt; rowsPublisher = ...;
  *
@@ -93,9 +93,9 @@
  * </pre>
  * <p>
  * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
- * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
- * applying some transformation or some side effect, termination and error signals potentially being passed, and
- * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator applying
+ * some transformation or some side effect, termination and error signals potentially being passed, and for operators
+ * that subscribe to the stream, an output value being redeemed at the end.
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,8 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.operators;
 
-import org.reactivestreams.Publisher;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -30,19 +28,22 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import org.reactivestreams.Publisher;
+
 /**
  * Operators for completing a stream.
  * <p>
  * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
- * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
- * applying some transformation or having some side effect, termination and error signals potentially being passed, and
- * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator applying
+ * some transformation or having some side effect, termination and error signals potentially being passed, and for
+ * operators that subscribe to the stream, an output value being redeemed at the end.
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
  *
- * @param <T> The type of the elements that the stream emits.
+ * @param <T>
+ *            The type of the elements that the stream emits.
  */
 public interface ConsumingOperators<T> {
 
@@ -51,10 +52,12 @@ public interface ConsumingOperators<T> {
      * <p>
      * <img src="doc-files/forEach.png" alt="forEach marble diagram">
      * <p>
-     * The returned {@link CompletionStage} will be redeemed when the stream completes, either successfully if the stream
-     * completes normally, or with an error if the stream completes with an error or if the action throws an exception.
+     * The returned {@link CompletionStage} will be redeemed when the stream completes, either successfully if the
+     * stream completes normally, or with an error if the stream completes with an error or if the action throws an
+     * exception.
      *
-     * @param action The action.
+     * @param action
+     *            The action.
      * @return A new completion runner.
      */
     ProducesResult<Void> forEach(Consumer<? super T> action);
@@ -89,8 +92,10 @@ public interface ConsumingOperators<T> {
      * <p>
      * The result of the reduction is returned in the {@link CompletionStage}.
      *
-     * @param identity    The identity value.
-     * @param accumulator The accumulator function.
+     * @param identity
+     *            The identity value.
+     * @param accumulator
+     *            The accumulator function.
      * @return A completion builder for the reduction.
      */
     ProducesResult<T> reduce(T identity, BinaryOperator<T> accumulator);
@@ -100,18 +105,17 @@ public interface ConsumingOperators<T> {
      * <p>
      * <img src="doc-files/reduce.png" alt="reduce marble diagram">
      * <p>
-     * The result of the reduction is returned as an {@code Optional<T>}
-     * in the {@link CompletionStage}. If there are no elements in this stream,
-     * empty will be returned.
+     * The result of the reduction is returned as an {@code Optional<T>} in the {@link CompletionStage}. If there are no
+     * elements in this stream, empty will be returned.
      *
-     * @param accumulator The accumulator function.
+     * @param accumulator
+     *            The accumulator function.
      * @return A completion builder for the reduction.
      */
     ProducesResult<Optional<T>> reduce(BinaryOperator<T> accumulator);
 
     /**
-     * Find the first element emitted by the {@link Publisher}, and return it in a
-     * {@link CompletionStage}.
+     * Find the first element emitted by the {@link Publisher}, and return it in a {@link CompletionStage}.
      * <p>
      * <img src="doc-files/findFirst.png" alt="findFirst marble diagram">
      * <p>
@@ -127,26 +131,32 @@ public interface ConsumingOperators<T> {
      * Since Reactive Streams are intrinsically sequential, only the accumulator of the collector will be used, the
      * combiner will not be used.
      *
-     * @param collector The collector to collect the elements.
-     * @param <R>       The result of the collector.
-     * @param <A>       The accumulator type.
+     * @param collector
+     *            The collector to collect the elements.
+     * @param <R>
+     *            The result of the collector.
+     * @param <A>
+     *            The accumulator type.
      * @return A completion builder that emits the collected result.
      */
     <R, A> ProducesResult<R> collect(Collector<? super T, A, R> collector);
 
     /**
-     * Collect the elements emitted by this stream using a {@link Collector} built from the given
-     * {@link Supplier supplier} and {@link BiConsumer accumulator}.
+     * Collect the elements emitted by this stream using a {@link Collector} built from the given {@link Supplier
+     * supplier} and {@link BiConsumer accumulator}.
      * <p>
      * <img src="doc-files/collect.png" alt="collect marble diagram">
      * <p>
-     * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does not
-     * accept a <em>combiner</em> method.
+     * Since Reactive Streams are intrinsically sequential, the combiner will not be used. This is why this method does
+     * not accept a <em>combiner</em> method.
      *
-     * @param supplier    a function that creates a new result container. It creates objects of type {@code <A>}.
-     * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a
-     *                    result
-     * @param <R>         The result of the collector.
+     * @param supplier
+     *            a function that creates a new result container. It creates objects of type {@code <A>}.
+     * @param accumulator
+     *            an associative, non-interfering, stateless function for incorporating an additional element into a
+     *            result
+     * @param <R>
+     *            The result of the collector.
      * @return A completion builder that emits the collected result.
      */
     <R> ProducesResult<R> collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator);

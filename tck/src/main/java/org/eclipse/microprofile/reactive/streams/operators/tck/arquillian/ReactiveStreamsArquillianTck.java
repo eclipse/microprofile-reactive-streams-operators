@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,13 @@
  ******************************************************************************/
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.arquillian;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.streams.operators.tck.ReactiveStreamsTck;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -40,37 +47,31 @@ import org.testng.TestNG;
 import org.testng.annotations.Test;
 import org.testng.internal.ObjectFactoryImpl;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import jakarta.inject.Inject;
 
 /**
  * Test runner for running the TCK in Arquillian.
  * <p>
  * To test your implementation in a MicroProfile container you need to:
  * <ol>
- *     <li>Expose your {@code org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine} implementation as an
- *     {@code ApplicationScoped} bean,</li>
- *     <li>Define an Arquillian test /deployment containing the bean exposing the engine</li>
- *     <li>Have an integration test extending
- *     {@code org.eclipse.microprofile.reactive.streams.operators.tck.arquillian.ReactiveStreamsArquillianTck}</li>
+ * <li>Expose your {@code org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine} implementation
+ * as an {@code ApplicationScoped} bean,</li>
+ * <li>Define an Arquillian test /deployment containing the bean exposing the engine</li>
+ * <li>Have an integration test extending
+ * {@code org.eclipse.microprofile.reactive.streams.operators.tck.arquillian.ReactiveStreamsArquillianTck}</li>
  * </ol>
  */
 public class ReactiveStreamsArquillianTck extends Arquillian {
     @Deployment
     public static JavaArchive tckDeployment() {
         return ShrinkWrap.create(JavaArchive.class)
-            // Add everything from the TCK
-            .addPackages(true, ReactiveStreamsTck.class.getPackage())
-            // And add the reactive streams TCK
-            .addPackages(true, TestEnvironment.class.getPackage())
-            .addPackages(true, AsyncIterablePublisher.class.getPackage())
-            // And we need a CDI descriptor
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                // Add everything from the TCK
+                .addPackages(true, ReactiveStreamsTck.class.getPackage())
+                // And add the reactive streams TCK
+                .addPackages(true, TestEnvironment.class.getPackage())
+                .addPackages(true, AsyncIterablePublisher.class.getPackage())
+                // And we need a CDI descriptor
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
     }
 
@@ -85,8 +86,7 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
         testng.setObjectFactory((IObjectFactory) (constructor, params) -> {
             if (constructor.getDeclaringClass().equals(ReactiveStreamsCdiTck.class)) {
                 return tck;
-            }
-            else {
+            } else {
                 return delegate.newInstance(constructor, params);
             }
         });
@@ -94,7 +94,7 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
         testng.setUseDefaultListeners(false);
         ResultListener resultListener = new ResultListener();
         testng.addListener((ITestNGListener) resultListener);
-        testng.setTestClasses(new Class[]{ ReactiveStreamsCdiTck.class });
+        testng.setTestClasses(new Class[]{ReactiveStreamsCdiTck.class});
         testng.setMethodInterceptor(new IMethodInterceptor() {
             @Override
             public List<IMethodInstance> intercept(List<IMethodInstance> methods, ITestContext context) {
@@ -104,8 +104,9 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
         });
         testng.run();
         int total = resultListener.success.get() + resultListener.failed.get() + resultListener.skipped.get();
-        System.out.println(String.format("Ran %d tests, %d passed, %d failed, %d skipped.", total, resultListener.success.get(),
-            resultListener.failed.get(), resultListener.skipped.get()));
+        System.out.println(
+                String.format("Ran %d tests, %d passed, %d failed, %d skipped.", total, resultListener.success.get(),
+                        resultListener.failed.get(), resultListener.skipped.get()));
         System.out.println("Failed tests:");
         resultListener.failures.forEach(result -> {
             System.out.println(result.getInstance().getClass().getName() + "." + result.getMethod().getMethodName());
@@ -113,8 +114,7 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
         if (resultListener.failed.get() > 0) {
             if (resultListener.lastFailure.get() != null) {
                 throw resultListener.lastFailure.get();
-            }
-            else {
+            } else {
                 throw new Exception("Tests failed with no exception");
             }
         }

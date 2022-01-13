@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,8 +24,8 @@ import java.util.Collection;
 /**
  * A graph.
  * <p>
- * Reactive Streams engines are required to convert the stages of this graph into a stream with interfaces according
- * to the shape, which is determined by which method is invoked on the {@link ReactiveStreamsEngine}.
+ * Reactive Streams engines are required to convert the stages of this graph into a stream with interfaces according to
+ * the shape, which is determined by which method is invoked on the {@link ReactiveStreamsEngine}.
  */
 public interface Graph {
     /**

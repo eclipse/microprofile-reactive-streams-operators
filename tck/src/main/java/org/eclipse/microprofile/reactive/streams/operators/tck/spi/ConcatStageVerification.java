@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,9 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +28,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.LongStream;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the concat stage.
@@ -44,13 +44,12 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test
     public void concatStageShouldConcatTwoGraphs() {
         assertEquals(await(
-            rs.concat(
-                rs.of(1, 2, 3),
-                rs.of(4, 5, 6)
-            )
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList(1, 2, 3, 4, 5, 6));
+                rs.concat(
+                        rs.of(1, 2, 3),
+                        rs.of(4, 5, 6))
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList(1, 2, 3, 4, 5, 6));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -58,11 +57,10 @@ public class ConcatStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
 
         CompletionStage<Void> completion = rs.concat(
-            rs.failed(new QuietRuntimeException("failed")),
-            infiniteStream().onTerminate(() -> cancelled.complete(null))
-        )
-            .ignore()
-            .run(getEngine());
+                rs.failed(new QuietRuntimeException("failed")),
+                infiniteStream().onTerminate(() -> cancelled.complete(null)))
+                .ignore()
+                .run(getEngine());
 
         await(cancelled);
         await(completion);
@@ -73,12 +71,11 @@ public class ConcatStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
 
         CompletionStage<List<Integer>> result = rs.concat(
-            infiniteStream(),
-            infiniteStream().onTerminate(() -> cancelled.complete(null))
-        )
-            .limit(5)
-            .toList()
-            .run(getEngine());
+                infiniteStream(),
+                infiniteStream().onTerminate(() -> cancelled.complete(null)))
+                .limit(5)
+                .toList()
+                .run(getEngine());
 
         await(cancelled);
         assertEquals(await(result), Arrays.asList(1, 2, 3, 4, 5));
@@ -89,12 +86,11 @@ public class ConcatStageVerification extends AbstractStageVerification {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
 
         CompletionStage<List<Integer>> result = rs.concat(
-            rs.of(1, 2, 3),
-            infiniteStream().onTerminate(() -> cancelled.complete(null))
-        )
-            .limit(5)
-            .toList()
-            .run(getEngine());
+                rs.of(1, 2, 3),
+                infiniteStream().onTerminate(() -> cancelled.complete(null)))
+                .limit(5)
+                .toList()
+                .run(getEngine());
 
         await(cancelled);
         assertEquals(await(result), Arrays.asList(1, 2, 3, 1, 2));
@@ -103,73 +99,64 @@ public class ConcatStageVerification extends AbstractStageVerification {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void concatStageShouldPropagateExceptionsFromSecondStage() {
         await(
-            rs.concat(
-                rs.of(1, 2, 3),
-                rs.failed(new QuietRuntimeException("failed"))
-            ).toList().run(getEngine())
-        );
+                rs.concat(
+                        rs.of(1, 2, 3),
+                        rs.failed(new QuietRuntimeException("failed"))).toList().run(getEngine()));
     }
 
     @Test
     public void concatStageShouldWorkWithEmptyFirstGraph() {
         assertEquals(await(
-            rs.concat(
-                rs.empty(),
-                rs.of(1, 2, 3)
-            )
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList(1, 2, 3));
+                rs.concat(
+                        rs.empty(),
+                        rs.of(1, 2, 3))
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void concatStageShouldWorkWithEmptySecondGraph() {
         assertEquals(await(
-            rs.concat(
-                rs.of(1, 2, 3),
-                rs.empty()
-            )
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList(1, 2, 3));
+                rs.concat(
+                        rs.of(1, 2, 3),
+                        rs.empty())
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void concatStageShouldWorkWithBothGraphsEmpty() {
         assertEquals(await(
-            rs.concat(
-                rs.empty(),
-                rs.empty()
-            )
-                .toList()
-                .run(getEngine())
-        ), Collections.emptyList());
+                rs.concat(
+                        rs.empty(),
+                        rs.empty())
+                        .toList()
+                        .run(getEngine())),
+                Collections.emptyList());
     }
 
     @Test
     public void concatStageShouldSupportNestedConcats() {
         assertEquals(await(
-            rs.concat(
                 rs.concat(
-                    rs.of(1, 2, 3),
-                    rs.of(4, 5, 6)
-                ),
-                rs.concat(
-                    rs.of(7, 8, 9),
-                    rs.of(10, 11, 12)
-                )
-            )
-                .toList()
-                .run(getEngine())
-        ), Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+                        rs.concat(
+                                rs.of(1, 2, 3),
+                                rs.of(4, 5, 6)),
+                        rs.concat(
+                                rs.of(7, 8, 9),
+                                rs.of(10, 11, 12)))
+                        .toList()
+                        .run(getEngine())),
+                Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
     }
 
     @Test
     public void concatStageBuilderShouldBeReusable() {
         PublisherBuilder<Integer> concated = rs.concat(
-            rs.of(1, 2, 3),
-            rs.of(4, 5, 6)
-        );
+                rs.of(1, 2, 3),
+                rs.of(4, 5, 6));
         assertEquals(await(concated.toList().run(getEngine())), Arrays.asList(1, 2, 3, 4, 5, 6));
         assertEquals(await(concated.toList().run(getEngine())), Arrays.asList(1, 2, 3, 4, 5, 6));
     }
@@ -185,13 +172,11 @@ public class ConcatStageVerification extends AbstractStageVerification {
             long toEmitFromFirst = elements / 2;
 
             return rs.concat(
-                rs.fromIterable(
-                    () -> LongStream.rangeClosed(1, toEmitFromFirst).boxed().iterator()
-                ),
-                rs.fromIterable(
-                    () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()
-                )
-            ).buildRs(getEngine());
+                    rs.fromIterable(
+                            () -> LongStream.rangeClosed(1, toEmitFromFirst).boxed().iterator()),
+                    rs.fromIterable(
+                            () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()))
+                    .buildRs(getEngine());
         }
     }
 

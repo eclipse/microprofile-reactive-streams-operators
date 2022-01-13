@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,11 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
@@ -29,11 +34,6 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Shared mock objects
@@ -57,20 +57,18 @@ class Mocks {
     }
 
     static final Graph EMPTY_PUBLISHER_GRAPH =
-        new GraphImpl(Collections.singleton((Stage.Of) Collections::emptyList));
+            new GraphImpl(Collections.singleton((Stage.Of) Collections::emptyList));
 
     static final Graph SUBSCRIBER_GRAPH = new GraphImpl(Arrays.asList(
-        new Stage.Distinct() {
-        },
-        new Stage.Cancel() {
-        }
-    ));
+            new Stage.Distinct() {
+            },
+            new Stage.Cancel() {
+            }));
 
     static final Graph PROCESSOR_GRAPH = new GraphImpl(Arrays.asList(
-        new Stage.Distinct() {
-        },
-        (Stage.Limit) () -> 5
-    ));
+            new Stage.Distinct() {
+            },
+            (Stage.Limit) () -> 5));
 
     static final Subscriber SUBSCRIBER = new Subscriber() {
         @Override
@@ -126,39 +124,36 @@ class Mocks {
     };
 
     static final PublisherBuilder EMPTY_PUBLISHER_BUILDER = (PublisherBuilder) Proxy.newProxyInstance(
-        Mocks.class.getClassLoader(),
-        new Class<?>[]{PublisherBuilder.class, ToGraphable.class},
-        (obj, method, args) -> {
-            if (method.getName().equals("toGraph")) {
-                return Mocks.EMPTY_PUBLISHER_GRAPH;
-            }
-            else {
-                return null;
-            }
-        });
+            Mocks.class.getClassLoader(),
+            new Class<?>[]{PublisherBuilder.class, ToGraphable.class},
+            (obj, method, args) -> {
+                if (method.getName().equals("toGraph")) {
+                    return Mocks.EMPTY_PUBLISHER_GRAPH;
+                } else {
+                    return null;
+                }
+            });
 
     static final ProcessorBuilder PROCESSOR_BUILDER = (ProcessorBuilder) Proxy.newProxyInstance(
-        Mocks.class.getClassLoader(),
-        new Class<?>[]{ProcessorBuilder.class, ToGraphable.class},
-        (obj, method, args) -> {
-            if (method.getName().equals("toGraph")) {
-                return Mocks.PROCESSOR_GRAPH;
-            }
-            else {
-                return null;
-            }
-        });
+            Mocks.class.getClassLoader(),
+            new Class<?>[]{ProcessorBuilder.class, ToGraphable.class},
+            (obj, method, args) -> {
+                if (method.getName().equals("toGraph")) {
+                    return Mocks.PROCESSOR_GRAPH;
+                } else {
+                    return null;
+                }
+            });
 
     static final SubscriberBuilder SUBSCRIBER_BUILDER = (SubscriberBuilder) Proxy.newProxyInstance(
-        Mocks.class.getClassLoader(),
-        new Class<?>[]{SubscriberBuilder.class, ToGraphable.class},
-        (obj, method, args) -> {
-            if (method.getName().equals("toGraph")) {
-                return Mocks.SUBSCRIBER_GRAPH;
-            }
-            else {
-                return null;
-            }
-        });
+            Mocks.class.getClassLoader(),
+            new Class<?>[]{SubscriberBuilder.class, ToGraphable.class},
+            (obj, method, args) -> {
+                if (method.getName().equals("toGraph")) {
+                    return Mocks.SUBSCRIBER_GRAPH;
+                } else {
+                    return null;
+                }
+            });
 
 }

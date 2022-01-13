@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.operators;
 
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -35,26 +30,40 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
 /**
  * A builder for a {@link Processor}.
  * <p>
  * The documentation for each operator uses marble diagrams to visualize how the operator functions. Each element
- * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator
- * applying some transformation or some side effect, termination and error signals potentially being passed, and
- * for operators that subscribe to the stream, an output value being redeemed at the end.
+ * flowing in and out of the stream is represented as a coloured marble that has a value, with the operator applying
+ * some transformation or some side effect, termination and error signals potentially being passed, and for operators
+ * that subscribe to the stream, an output value being redeemed at the end.
  * <p>
  * Below is an example diagram labelling all the parts of the stream.
  * <p>
  * <img src="doc-files/example.png" alt="Example marble diagram">
  * <p>
- * Instances of this interface are immutable. Methods which return a {@code ProcessorBuilder} will return a new instance.
+ * Instances of this interface are immutable. Methods which return a {@code ProcessorBuilder} will return a new
+ * instance.
  *
- * @param <T> The type of the elements that the processor consumes.
- * @param <R> The type of the elements that the processor emits.
+ * @param <T>
+ *            The type of the elements that the processor consumes.
+ * @param <R>
+ *            The type of the elements that the processor emits.
  * @see ReactiveStreams
  */
-public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, FilteringOperators<R>, PeekingOperators<R>, ConsumingOperators<R>,
-    ErrorHandlingOperators<R>, ConnectingOperators<R> {
+public interface ProcessorBuilder<T, R>
+        extends
+            TransformingOperators<R>,
+            FilteringOperators<R>,
+            PeekingOperators<R>,
+            ConsumingOperators<R>,
+            ErrorHandlingOperators<R>,
+            ConnectingOperators<R> {
 
     /**
      * {@inheritDoc}
@@ -78,7 +87,8 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
      * {@inheritDoc}
      */
     @Override
-    <S> ProcessorBuilder<T, S> flatMapCompletionStage(Function<? super R, ? extends CompletionStage<? extends S>> mapper);
+    <S> ProcessorBuilder<T, S> flatMapCompletionStage(
+            Function<? super R, ? extends CompletionStage<? extends S>> mapper);
 
     /**
      * {@inheritDoc}
@@ -148,6 +158,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A {@link SubscriberBuilder} that will invoke the action for each element of the stream.
      */
     @Override
@@ -155,6 +166,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} for the stream.
      */
     @Override
@@ -162,6 +174,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} for the stream.
      */
     @Override
@@ -169,6 +182,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} for the reduction.
      */
     @Override
@@ -176,6 +190,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} for the reduction.
      */
     @Override
@@ -183,6 +198,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} that will emit the collected result.
      */
     @Override
@@ -190,6 +206,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} that will emit the collected result.
      */
     @Override
@@ -197,6 +214,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder} that will emit the list.
      */
     @Override
@@ -204,6 +222,7 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
 
     /**
      * {@inheritDoc}
+     * 
      * @return A new {@link SubscriberBuilder}.
      */
     @Override
@@ -225,7 +244,8 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
      * {@inheritDoc}
      */
     @Override
-    ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, ? extends Publisher<? extends R>> errorHandler);
+    ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(
+            Function<Throwable, ? extends Publisher<? extends R>> errorHandler);
 
     /**
      * {@inheritDoc}
@@ -261,7 +281,8 @@ public interface ProcessorBuilder<T, R> extends TransformingOperators<R>, Filter
     /**
      * Build this stream, using the supplied {@link ReactiveStreamsEngine}.
      *
-     * @param engine The engine to run the stream with.
+     * @param engine
+     *            The engine to run the stream with.
      * @return A {@link Processor} that will run this stream.
      */
     Processor<T, R> buildRs(ReactiveStreamsEngine engine);

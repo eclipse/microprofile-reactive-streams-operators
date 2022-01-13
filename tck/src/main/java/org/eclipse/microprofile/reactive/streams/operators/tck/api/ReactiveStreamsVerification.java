@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,19 +19,19 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the {@link ReactiveStreamsFactory} class.
@@ -113,7 +113,8 @@ public class ReactiveStreamsVerification extends AbstractReactiveStreamsApiVerif
     @Test
     public void builder() {
         Graph graph = graphFor(rs.builder());
-        assertEquals(graph.getStages(), Collections.emptyList(), "Identity builder should have an empty list of stages");
+        assertEquals(graph.getStages(), Collections.emptyList(),
+                "Identity builder should have an empty list of stages");
     }
 
     @Test
@@ -207,7 +208,8 @@ public class ReactiveStreamsVerification extends AbstractReactiveStreamsApiVerif
     public void fromCompletionStageNullable() {
         CompletableFuture<Integer> future = CompletableFuture.completedFuture(1);
         Graph graph = graphFor(rs.fromCompletionStageNullable(future));
-        Stage.FromCompletionStageNullable fromCompletionStage = getStage(Stage.FromCompletionStageNullable.class, graph);
+        Stage.FromCompletionStageNullable fromCompletionStage =
+                getStage(Stage.FromCompletionStageNullable.class, graph);
         assertSame(fromCompletionStage.getCompletionStage(), future);
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,13 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.api;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.eclipse.microprofile.reactive.streams.operators.CompletionSubscriber;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
@@ -30,13 +37,6 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.testng.annotations.Test;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Verification for the {@link org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder} class.
@@ -58,8 +58,8 @@ public class SubscriberBuilderVerification extends AbstractReactiveStreamsApiVer
             }
 
             @Override
-            public <T, R> SubscriberWithCompletionStage<T, R>
-            buildSubscriber(Graph graph) throws UnsupportedStageException {
+            public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph)
+                    throws UnsupportedStageException {
                 builtGraph.set(graph);
                 return new SubscriberWithCompletionStage<T, R>() {
                     @Override

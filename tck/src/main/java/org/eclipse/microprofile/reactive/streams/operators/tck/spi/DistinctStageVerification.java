@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +27,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.testng.Assert.assertEquals;
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 /**
  * Verification for the distinct stage.
@@ -44,25 +44,25 @@ public class DistinctStageVerification extends AbstractStageVerification {
     @Test
     public void distinctStageShouldReturnDistinctElements() {
         assertEquals(await(rs.of(1, 2, 2, 3, 2, 1, 3)
-            .distinct()
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3));
+                .distinct()
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void distinctStageShouldReturnAnEmptyStreamWhenCalledOnEmptyStreams() {
         assertEquals(await(rs.empty()
-            .distinct()
-            .toList()
-            .run(getEngine())), Collections.emptyList());
+                .distinct()
+                .toList()
+                .run(getEngine())), Collections.emptyList());
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void distinctStageShouldPropagateUpstreamExceptions() {
         await(rs.failed(new QuietRuntimeException("failed"))
-            .distinct()
-            .toList()
-            .run(getEngine()));
+                .distinct()
+                .toList()
+                .run(getEngine()));
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
@@ -80,10 +80,9 @@ public class DistinctStageVerification extends AbstractStageVerification {
             }
         }
         CompletionStage<List<ObjectThatThrowsFromEquals>> result = rs.of(
-            new ObjectThatThrowsFromEquals(), new ObjectThatThrowsFromEquals()
-        )
-            .onTerminate(() -> cancelled.complete(null))
-            .distinct().toList().run(getEngine());
+                new ObjectThatThrowsFromEquals(), new ObjectThatThrowsFromEquals())
+                .onTerminate(() -> cancelled.complete(null))
+                .distinct().toList().run(getEngine());
         await(cancelled);
         await(result);
     }
@@ -105,8 +104,7 @@ public class DistinctStageVerification extends AbstractStageVerification {
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Collections.singletonList(
-            new ProcessorVerification()
-        );
+                new ProcessorVerification());
     }
 
     public class ProcessorVerification extends StageProcessorVerification<Integer> {
@@ -119,7 +117,7 @@ public class DistinctStageVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new RuntimeException("failed"))
-                .distinct().buildRs(getEngine());
+                    .distinct().buildRs(getEngine());
         }
 
         @Override

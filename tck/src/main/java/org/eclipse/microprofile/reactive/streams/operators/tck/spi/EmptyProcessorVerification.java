@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,10 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.reactivestreams.Processor;
-
 import java.util.Collections;
 import java.util.List;
+
+import org.reactivestreams.Processor;
 
 /**
  * Verification for an empty processor, ie, the processor returned from rs.builder().buildRs().

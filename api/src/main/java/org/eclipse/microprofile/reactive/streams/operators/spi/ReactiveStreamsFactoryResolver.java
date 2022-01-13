@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,19 +18,18 @@
  ******************************************************************************/
 package org.eclipse.microprofile.reactive.streams.operators.spi;
 
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+
 /**
- * This class is not intended to be used by end-users but for
- * portable container integration purpose only.
+ * This class is not intended to be used by end-users but for portable container integration purpose only.
  * <p>
- * Service provider for ReactiveStreamsFactory. The implementation registers
- * itself via the {@link java.util.ServiceLoader} mechanism.
+ * Service provider for ReactiveStreamsFactory. The implementation registers itself via the
+ * {@link java.util.ServiceLoader} mechanism.
  */
 public class ReactiveStreamsFactoryResolver {
 
@@ -41,8 +40,7 @@ public class ReactiveStreamsFactoryResolver {
     private static volatile ReactiveStreamsFactory instance = null;
 
     /**
-     * Creates a ReactiveStreamsFactory object
-     * Only used internally from within {@link ReactiveStreams}
+     * Creates a ReactiveStreamsFactory object Only used internally from within {@link ReactiveStreams}
      *
      * @return ReactiveStreamsFactory an instance of ReactiveStreamsFactory
      */
@@ -53,7 +51,8 @@ public class ReactiveStreamsFactoryResolver {
                     return instance;
                 }
 
-                ClassLoader cl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
+                ClassLoader cl = AccessController.doPrivileged(
+                        (PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
                 if (cl == null) {
                     cl = ReactiveStreamsFactory.class.getClassLoader();
                 }
@@ -62,7 +61,7 @@ public class ReactiveStreamsFactoryResolver {
 
                 if (newInstance == null) {
                     throw new IllegalStateException(
-                        "No ReactiveStreamsFactory implementation found!");
+                            "No ReactiveStreamsFactory implementation found!");
                 }
 
                 instance = newInstance;
@@ -79,15 +78,14 @@ public class ReactiveStreamsFactoryResolver {
 
         if (instance == null) {
             ServiceLoader<ReactiveStreamsFactory> sl = ServiceLoader.load(
-                ReactiveStreamsFactory.class, cl);
+                    ReactiveStreamsFactory.class, cl);
             for (ReactiveStreamsFactory spi : sl) {
                 if (instance != null) {
                     throw new IllegalStateException(
-                        "Multiple ReactiveStreamsFactory implementations found: "
-                            + spi.getClass().getName() + " and "
-                            + instance.getClass().getName());
-                }
-                else {
+                            "Multiple ReactiveStreamsFactory implementations found: "
+                                    + spi.getClass().getName() + " and "
+                                    + instance.getClass().getName());
+                } else {
                     instance = spi;
                 }
             }
@@ -96,10 +94,10 @@ public class ReactiveStreamsFactoryResolver {
     }
 
     /**
-     * Set the instance. It is used by OSGi environment while service loader
-     * pattern is not supported.
+     * Set the instance. It is used by OSGi environment while service loader pattern is not supported.
      *
-     * @param factory set the instance.
+     * @param factory
+     *            set the instance.
      */
     public static void setInstance(ReactiveStreamsFactory factory) {
         instance = factory;

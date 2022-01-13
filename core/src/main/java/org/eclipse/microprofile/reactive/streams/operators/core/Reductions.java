@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -35,36 +35,31 @@ final class Reductions {
     static <T> Collector<T, ?, Optional<T>> reduce(BinaryOperator<T> reducer) {
         Objects.requireNonNull(reducer, "Reduction function must not be null");
         return Collector.of(Reduction<T>::new,
-            (r, t) -> {
-                if (r.value == null) {
-                    r.value = t;
-                }
-                else {
-                    r.value = reducer.apply(r.value, t);
-                }
-            },
-            (r, s) -> {
-                if (r.value == null) {
-                    return r.replace(s.value);
-                }
-                else if (s.value != null) {
-                    return r.replace(reducer.apply(r.value, s.value));
-                }
-                else {
-                    return r;
-                }
-            },
-            r -> Optional.ofNullable(r.value)
-        );
+                (r, t) -> {
+                    if (r.value == null) {
+                        r.value = t;
+                    } else {
+                        r.value = reducer.apply(r.value, t);
+                    }
+                },
+                (r, s) -> {
+                    if (r.value == null) {
+                        return r.replace(s.value);
+                    } else if (s.value != null) {
+                        return r.replace(reducer.apply(r.value, s.value));
+                    } else {
+                        return r;
+                    }
+                },
+                r -> Optional.ofNullable(r.value));
     }
 
     static <T> Collector<T, ?, T> reduce(T identity, BinaryOperator<T> reducer) {
         Objects.requireNonNull(reducer, "Reduction function must not be null");
         return Collector.of(() -> new Reduction<>(identity),
-            (r, t) -> r.value = reducer.apply(r.value, t),
-            (r, s) -> r.replace(reducer.apply(r.value, s.value)),
-            r -> r.value
-        );
+                (r, t) -> r.value = reducer.apply(r.value, t),
+                (r, s) -> r.replace(reducer.apply(r.value, s.value)),
+                r -> r.value);
     }
 
     private static class Reduction<T> {

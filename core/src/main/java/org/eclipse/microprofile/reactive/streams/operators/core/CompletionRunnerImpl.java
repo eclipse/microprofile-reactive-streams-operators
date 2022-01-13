@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,12 +19,12 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
+import java.util.Objects;
+import java.util.concurrent.CompletionStage;
+
 import org.eclipse.microprofile.reactive.streams.operators.CompletionRunner;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-
-import java.util.Objects;
-import java.util.concurrent.CompletionStage;
 
 final class CompletionRunnerImpl<T> extends ReactiveStreamsGraphBuilder implements CompletionRunner<T> {
 

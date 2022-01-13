@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,14 +19,17 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.spi;
 
-import org.reactivestreams.Subscriber;
 import java.util.concurrent.CompletionStage;
+
+import org.reactivestreams.Subscriber;
 
 /**
  * A subscriber and completion stage pair.
  *
- * @param <T> The type of the elements that the subscriber consumes.
- * @param <R> The type of the result that the subscriber emits.
+ * @param <T>
+ *            The type of the elements that the subscriber consumes.
+ * @param <R>
+ *            The type of the result that the subscriber emits.
  */
 public interface SubscriberWithCompletionStage<T, R> {
 

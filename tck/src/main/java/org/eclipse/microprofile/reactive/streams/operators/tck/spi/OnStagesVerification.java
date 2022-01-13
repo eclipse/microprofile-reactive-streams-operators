@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,10 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.spi;
 
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,10 +31,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 /**
  * Test cases for OnError, OnTerminate and onComplete.
@@ -52,9 +51,9 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onCompleteStageShouldBeCalledWhenTheStreamComplete() {
         AtomicBoolean called = new AtomicBoolean();
         assertEquals(await(rs.of(1, 2, 3)
-            .onComplete(() -> called.set(true))
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3));
+                .onComplete(() -> called.set(true))
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3));
         assertTrue(called.get());
     }
 
@@ -62,9 +61,9 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onTerminateStageShouldBeCalledWhenTheStreamComplete() {
         AtomicBoolean called = new AtomicBoolean();
         assertEquals(await(rs.of(1, 2, 3)
-            .onTerminate(() -> called.set(true))
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3));
+                .onTerminate(() -> called.set(true))
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3));
         assertTrue(called.get());
     }
 
@@ -72,31 +71,30 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onErrorStageShouldNotBeCalledWhenTheStreamComplete() {
         AtomicBoolean called = new AtomicBoolean();
         assertEquals(await(rs.of(1, 2, 3)
-            .onError(failure -> called.set(true))
-            .toList()
-            .run(getEngine())), Arrays.asList(1, 2, 3));
+                .onError(failure -> called.set(true))
+                .toList()
+                .run(getEngine())), Arrays.asList(1, 2, 3));
         assertFalse(called.get());
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void onCompleteStageShouldPropagateRuntimeExceptions() {
         await(rs.of("foo")
-            .onComplete(() -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine()));
+                .onComplete(() -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine()));
     }
 
     @Test
     public void onCompleteStageShouldNotBeCalledWhenTheStreamFailed() {
         AtomicBoolean called = new AtomicBoolean();
         await(rs.failed(new QuietRuntimeException("failed"))
-            .onComplete(() -> called.set(true))
-            .toList()
-            .run(getEngine())
-            .exceptionally(t -> Collections.emptyList())
-        );
+                .onComplete(() -> called.set(true))
+                .toList()
+                .run(getEngine())
+                .exceptionally(t -> Collections.emptyList()));
         assertFalse(called.get());
     }
 
@@ -104,11 +102,10 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onErrorStageShouldBeCalledWhenTheStreamFailed() {
         AtomicReference<Throwable> called = new AtomicReference<>();
         await(rs.failed(new QuietRuntimeException("failed"))
-            .onError(called::set)
-            .toList()
-            .run(getEngine())
-            .exceptionally(t -> Collections.emptyList())
-        );
+                .onError(called::set)
+                .toList()
+                .run(getEngine())
+                .exceptionally(t -> Collections.emptyList()));
         assertNotNull(called.get());
         assertTrue(called.get().getMessage().equalsIgnoreCase("failed"));
     }
@@ -117,14 +114,13 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onErrorStageShouldBeCalledWhenTheStreamFailedBecauseOfAnIntermediateStage() {
         AtomicReference<Throwable> called = new AtomicReference<>();
         await(rs.of(1, 2, 3)
-            .map(x -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .onError(called::set)
-            .toList()
-            .run(getEngine())
-            .exceptionally(t -> Collections.emptyList())
-        );
+                .map(x -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .onError(called::set)
+                .toList()
+                .run(getEngine())
+                .exceptionally(t -> Collections.emptyList()));
         assertNotNull(called.get());
         assertTrue(called.get().getMessage().equalsIgnoreCase("failed"));
     }
@@ -133,11 +129,10 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onTerminateStageShouldBeCalledWhenTheStreamFailed() {
         AtomicBoolean called = new AtomicBoolean();
         await(rs.failed(new QuietRuntimeException("failed"))
-            .onTerminate(() -> called.set(true))
-            .toList()
-            .run(getEngine())
-            .exceptionally(t -> Collections.emptyList())
-        );
+                .onTerminate(() -> called.set(true))
+                .toList()
+                .run(getEngine())
+                .exceptionally(t -> Collections.emptyList()));
         assertTrue(called.get());
     }
 
@@ -145,25 +140,24 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onTerminateStageShouldBeCalledWhenTheStreamFailedBecauseOfAnIntermediateStage() {
         AtomicBoolean called = new AtomicBoolean();
         await(rs.of(1, 2, 3)
-            .map(x -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .onTerminate(() -> called.set(true))
-            .toList()
-            .run(getEngine())
-            .exceptionally(t -> Collections.emptyList())
-        );
+                .map(x -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .onTerminate(() -> called.set(true))
+                .toList()
+                .run(getEngine())
+                .exceptionally(t -> Collections.emptyList()));
         assertTrue(called.get());
     }
 
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void onTerminateStageShouldPropagateRuntimeExceptions() {
         await(rs.of("foo")
-            .onTerminate(() -> {
-                throw new QuietRuntimeException("failed");
-            })
-            .toList()
-            .run(getEngine()));
+                .onTerminate(() -> {
+                    throw new QuietRuntimeException("failed");
+                })
+                .toList()
+                .run(getEngine()));
     }
 
     @Test
@@ -172,11 +166,10 @@ public class OnStagesVerification extends AbstractStageVerification {
         AtomicBoolean onCompleteCalled = new AtomicBoolean();
 
         await(rs.empty()
-            .onComplete(() -> onCompleteCalled.set(true))
-            .onTerminate(() -> onTerminateCalled.set(true))
-            .toList()
-            .run(getEngine())
-        );
+                .onComplete(() -> onCompleteCalled.set(true))
+                .onTerminate(() -> onTerminateCalled.set(true))
+                .toList()
+                .run(getEngine()));
         assertTrue(onTerminateCalled.get());
         assertTrue(onCompleteCalled.get());
     }
@@ -187,12 +180,11 @@ public class OnStagesVerification extends AbstractStageVerification {
         AtomicReference<Throwable> onErrorCalled = new AtomicReference<>();
 
         await(rs.failed(new QuietRuntimeException("failed"))
-            .onError(onErrorCalled::set)
-            .onTerminate(() -> onTerminateCalled.set(true))
-            .toList()
-            .run(getEngine())
-            .exceptionally(t -> Collections.emptyList())
-        );
+                .onError(onErrorCalled::set)
+                .onTerminate(() -> onTerminateCalled.set(true))
+                .toList()
+                .run(getEngine())
+                .exceptionally(t -> Collections.emptyList()));
         assertTrue(onTerminateCalled.get());
         assertEquals(onErrorCalled.get().getMessage(), "failed");
     }
@@ -201,20 +193,19 @@ public class OnStagesVerification extends AbstractStageVerification {
     public void onTerminateShouldBeCalledWhenTheStreamIsCancelledFromDownstream() {
         CompletableFuture<Void> onTerminateCalled = new CompletableFuture<>();
         rs.of(1)
-            .flatMapCompletionStage(i -> new CompletableFuture())
-            .onTerminate(() -> onTerminateCalled.complete(null))
-            .cancel()
-            .run(getEngine());
+                .flatMapCompletionStage(i -> new CompletableFuture())
+                .onTerminate(() -> onTerminateCalled.complete(null))
+                .cancel()
+                .run(getEngine());
         await(onTerminateCalled);
     }
 
     @Override
     List<Object> reactiveStreamsTckVerifiers() {
         return Arrays.asList(
-            new OnCompleteVerification(),
-            new OnTerminateVerification(),
-            new OnErrorVerification()
-        );
+                new OnCompleteVerification(),
+                new OnTerminateVerification(),
+                new OnErrorVerification());
     }
 
     public class OnCompleteVerification extends StageProcessorVerification<Integer> {
@@ -227,7 +218,7 @@ public class OnStagesVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new QuietRuntimeException("failed"))
-                .onComplete(noop).buildRs(getEngine());
+                    .onComplete(noop).buildRs(getEngine());
         }
 
         @Override
@@ -246,7 +237,7 @@ public class OnStagesVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new QuietRuntimeException("failed"))
-                .onTerminate(noop).buildRs(getEngine());
+                    .onTerminate(noop).buildRs(getEngine());
         }
 
         @Override
@@ -266,8 +257,8 @@ public class OnStagesVerification extends AbstractStageVerification {
         @Override
         public Publisher<Integer> createFailedPublisher() {
             return rs.<Integer>failed(new QuietRuntimeException("failed"))
-                .onError(x -> {
-                }).buildRs(getEngine());
+                    .onError(x -> {
+                    }).buildRs(getEngine());
         }
 
         @Override

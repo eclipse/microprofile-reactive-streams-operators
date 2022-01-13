@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,14 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
@@ -27,14 +35,6 @@ import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 public class ReactiveStreamsFactoryImpl implements ReactiveStreamsFactory {
 
@@ -46,7 +46,7 @@ public class ReactiveStreamsFactoryImpl implements ReactiveStreamsFactory {
     @Override
     public <T> PublisherBuilder<T> of(T t) {
         return new PublisherBuilderImpl<>(new Stages.Of(Collections.singletonList(
-            Objects.requireNonNull(t, "Reactive Streams does not support null elements"))));
+                Objects.requireNonNull(t, "Reactive Streams does not support null elements"))));
     }
 
     @Override
@@ -103,11 +103,10 @@ public class ReactiveStreamsFactoryImpl implements ReactiveStreamsFactory {
 
     @Override
     public <T> PublisherBuilder<T> concat(PublisherBuilder<? extends T> a,
-                                                 PublisherBuilder<? extends T> b) {
+            PublisherBuilder<? extends T> b) {
         return new PublisherBuilderImpl<>(new Stages.Concat(
-            ReactiveStreamsGraphBuilder.rsBuilderToGraph(a),
-            ReactiveStreamsGraphBuilder.rsBuilderToGraph(b)
-        ));
+                ReactiveStreamsGraphBuilder.rsBuilderToGraph(a),
+                ReactiveStreamsGraphBuilder.rsBuilderToGraph(b)));
     }
 
     @Override
@@ -122,11 +121,11 @@ public class ReactiveStreamsFactoryImpl implements ReactiveStreamsFactory {
 
     @Override
     public <T, R> ProcessorBuilder<T, R> coupled(SubscriberBuilder<? super T, ?> subscriber,
-        PublisherBuilder<? extends R> publisher) {
+            PublisherBuilder<? extends R> publisher) {
         Graph sGraph = ReactiveStreamsGraphBuilder.rsBuilderToGraph(Objects.requireNonNull(subscriber,
-            "Subscriber must not be null"));
+                "Subscriber must not be null"));
         Graph pGraph = ReactiveStreamsGraphBuilder.rsBuilderToGraph(Objects.requireNonNull(publisher,
-            "Publisher must not be null"));
+                "Publisher must not be null"));
         return new ProcessorBuilderImpl<>(new Stages.Coupled(sGraph, pGraph), null);
     }
 

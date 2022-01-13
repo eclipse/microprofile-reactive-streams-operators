@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,15 +19,6 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.core;
 
-import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
-import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,6 +31,15 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
 final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder implements ProcessorBuilder<T, R> {
 
@@ -78,7 +78,8 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     }
 
     @Override
-    public <S> ProcessorBuilder<T, S> flatMapCompletionStage(Function<? super R, ? extends CompletionStage<? extends S>> mapper) {
+    public <S> ProcessorBuilder<T, S> flatMapCompletionStage(
+            Function<? super R, ? extends CompletionStage<? extends S>> mapper) {
         return addStage(new Stages.FlatMapCompletionStage((Function) mapper));
     }
 
@@ -111,11 +112,10 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     public SubscriberBuilder<T, Void> forEach(Consumer<? super R> action) {
         Objects.requireNonNull(action, "Action must not be null");
         return collect(Collector.<R, Void, Void>of(
-            () -> null,
-            (n, r) -> action.accept(r),
-            (v1, v2) -> null,
-            v -> null
-        ));
+                () -> null,
+                (n, r) -> action.accept(r),
+                (v1, v2) -> null,
+                v -> null));
     }
 
     @Override
@@ -181,13 +181,17 @@ final class ProcessorBuilderImpl<T, R> extends ReactiveStreamsGraphBuilder imple
     }
 
     @Override
-    public ProcessorBuilder<T, R> onErrorResumeWith(Function<Throwable, ? extends PublisherBuilder<? extends R>> errorHandler) {
-        return addStage(new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::rsBuilderToGraph)));
+    public ProcessorBuilder<T, R> onErrorResumeWith(
+            Function<Throwable, ? extends PublisherBuilder<? extends R>> errorHandler) {
+        return addStage(
+                new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::rsBuilderToGraph)));
     }
 
     @Override
-    public ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(Function<Throwable, ? extends Publisher<? extends R>> errorHandler) {
-        return addStage(new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::publisherToGraph)));
+    public ProcessorBuilder<T, R> onErrorResumeWithRsPublisher(
+            Function<Throwable, ? extends Publisher<? extends R>> errorHandler) {
+        return addStage(
+                new Stages.OnErrorResumeWith(errorHandler.andThen(ReactiveStreamsGraphBuilder::publisherToGraph)));
     }
 
     @Override

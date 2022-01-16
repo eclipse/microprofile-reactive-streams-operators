@@ -16,6 +16,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+[[release_notes_30]]
+== Release Notes for MicroProfile Reactive Streams Operator 3.0
+A full list of changes delivered in the 3.0 release can be found at link:https://github.com/eclipse/microprofile-reactive-streams-operators/milestone/8[MicroProfile Reactive Streams Operators 3.0 Milestone].
+
+==== Incompatible Changes
+This release aligns with Jakarta EE 9.1, so it won't work with earlier versions of Jakarta or Java EE.
+
+==== API/SPI Changes
+There are no functional changes introduced in this release, except updating the dependencies from javax to jakarta.
 
 [[release_notes_20]]
 == Release Notes for MicroProfile Reactive Streams Operator 2.0
@@ -34,8 +43,3 @@ A full list of changes delivered in the 2.0 release can be found at link:https:/
 - Javadoc clarification: (link:https://github.com/eclipse/microprofile-reactive-streams-operators/issues/135[#135]) (link:https://github.com/eclipse/microprofile-reactive-streams-operators/issues/137[#137])(link:https://github.com/eclipse/microprofile-reactive-streams-operators/issues/142[#142]) (link:https://github.com/eclipse/microprofile-reactive-streams-operators/issues/129[#129])
 - TCK clarification: (link:https://github.com/eclipse/microprofile-reactive-streams-operators/issues/141[#141])
 
-[[release_notes_21]]
-== Release Notes for MicroProfile Reactive Streams Operator 2.1
-
-=== Other Changes
-- Update to Jakarta EE 9.1 APIs for MP 5.0 (link:https://github.com/eclipse/microprofile-reactive-streams-operators/issues/169[#169])

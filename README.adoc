@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 Contributors to the Eclipse Foundation
+// Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -52,6 +52,7 @@ The following Implementations are available:
 * https://github.com/lightbend/microprofile-reactive-streams/tree/master/zerodep[Zero Dependency] - intended as a possible reference implementation for when this is proposed to the JDK, but not the reference implementation for MicroProfile as MicroProfile does not have reference implementations.
 * https://github.com/smallrye/smallrye-reactive-streams-operators[SmallRye] - based on RxJava 2 and Eclipse Vert.x.
 * https://github.com/smallrye/smallrye-mutiny/tree/main/reactive-streams-operators[Reactive Streams Operators implementation based on SmallRye Mutiny]
+* https://helidon.io/docs/v2/#/mp/reactivestreams/03_rsoperators[Helidon Microprofile Reactive Streams Operators]
 
 == Design
 

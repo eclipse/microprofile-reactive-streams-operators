@@ -31,10 +31,14 @@
     <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <inceptionYear>2018</inceptionYear>
+    </properties>
+
     <name>Eclipse MicroProfile Reactive Streams Operators</name>
     <description>Eclipse MicroProfile Reactive Streams Operators :: Parent POM</description>
 
-    <url>http://microprofile.io</url>
+
 
     <developers>
         <developer>
@@ -56,20 +60,6 @@
         <url>https://github.com/eclipse/microprofile-reactive-streams-operators</url>
         <tag>HEAD</tag>
     </scm>
-
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <name>Sonatype OSSRH - Release Staging Area</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <name>Sonatype OSSRH Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <uniqueVersion>true</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
 
     <modules>
         <module>api</module>

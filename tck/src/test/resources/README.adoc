@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -16,5 +16,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+image:https://badges.gitter.im/eclipse/microprofile-reactive.svg[link="https://gitter.im/eclipse/microprofile-reactive"]
 
-# Rest Client for MicroProfile
+= Unit Test for MicroProfile Reactive Streams Operators
+
+This test is a unit test and it runs when building MicroProfile Reactive Stream Operators.

@@ -20,6 +20,8 @@ package org.eclipse.microprofile.reactive.streams.operators.spi;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ServiceLoader;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
@@ -77,17 +79,31 @@ public class ReactiveStreamsFactoryResolver {
         }
 
         if (instance == null) {
-            ServiceLoader<ReactiveStreamsFactory> sl = ServiceLoader.load(
-                    ReactiveStreamsFactory.class, cl);
-            for (ReactiveStreamsFactory spi : sl) {
-                if (instance != null) {
-                    throw new IllegalStateException(
-                            "Multiple ReactiveStreamsFactory implementations found: "
-                                    + spi.getClass().getName() + " and "
-                                    + instance.getClass().getName());
-                } else {
-                    instance = spi;
+            try {
+                AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+                    ServiceLoader<ReactiveStreamsFactory> sl = ServiceLoader.load(
+                            ReactiveStreamsFactory.class, cl);
+                    for (ReactiveStreamsFactory spi : sl) {
+                        if (instance != null) {
+                            throw new IllegalStateException(
+                                    "Multiple ReactiveStreamsFactory implementations found: "
+                                            + spi.getClass().getName() + " and "
+                                            + instance.getClass().getName());
+                        } else {
+                            instance = spi;
+                        }
+                    }
+                    return null;
+                });
+            } catch (PrivilegedActionException e) {
+                Throwable t = e.getCause();
+                if (t instanceof RuntimeException) {
+                    throw (RuntimeException) t;
                 }
+                if (t instanceof Error) {
+                    throw (Error) t;
+                }
+                throw new RuntimeException(t);
             }
         }
         return instance;

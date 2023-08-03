@@ -155,7 +155,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -163,7 +163,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -171,7 +171,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -179,7 +179,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -187,7 +187,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -195,7 +195,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream.
      */
     @Override
@@ -203,7 +203,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream, R is the result type of the
      *         collector's reduction operation.
      */
@@ -211,7 +211,7 @@ public interface PublisherBuilder<T>
     <R, A> CompletionRunner<R> collect(Collector<? super T, A, R> collector);
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream which emits the collected result.
      */
     @Override
@@ -219,7 +219,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the stream that emits the list.
      */
     @Override
@@ -246,7 +246,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the composed stream.
      */
     @Override
@@ -254,7 +254,7 @@ public interface PublisherBuilder<T>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link CompletionRunner} that can be used to run the composed stream.
      */
     @Override
@@ -282,7 +282,7 @@ public interface PublisherBuilder<T>
      * Build this stream, using the supplied {@link ReactiveStreamsEngine}. This method is designed for the use case
      * where you have to supply a paritcular {@link ReactiveStreamsEngine}. Most cases you should use
      * {@link #buildRs()}.
-     * 
+     *
      * @param engine
      *            The engine to run the stream with.
      * @return A {@link Publisher} that will run this stream.

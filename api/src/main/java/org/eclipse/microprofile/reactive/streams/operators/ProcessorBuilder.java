@@ -158,7 +158,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A {@link SubscriberBuilder} that will invoke the action for each element of the stream.
      */
     @Override
@@ -166,7 +166,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} for the stream.
      */
     @Override
@@ -174,7 +174,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} for the stream.
      */
     @Override
@@ -182,7 +182,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} for the reduction.
      */
     @Override
@@ -190,7 +190,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} for the reduction.
      */
     @Override
@@ -198,7 +198,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} that will emit the collected result.
      */
     @Override
@@ -206,7 +206,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} that will emit the collected result.
      */
     @Override
@@ -214,7 +214,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder} that will emit the list.
      */
     @Override
@@ -222,7 +222,7 @@ public interface ProcessorBuilder<T, R>
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return A new {@link SubscriberBuilder}.
      */
     @Override

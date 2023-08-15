@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -86,6 +86,22 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
         if (engine != null) {
             shutdownEngine(engine);
         }
+        if (executorService != null) {
+            shutdownExecutorService(executorService);
+        }
+    }
+
+    /**
+     * Override this to provide a different ScheduledExecutorService
+     */
+    protected ScheduledExecutorService createExecutorService() {
+        return Executors.newScheduledThreadPool(4);
+    }
+
+    /**
+     * Override this to customize the shutdown of a ScheduledExecutorService
+     */
+    protected void shutdownExecutorService(ScheduledExecutorService executorService) {
         executorService.shutdown();
     }
 
@@ -93,7 +109,7 @@ public abstract class ReactiveStreamsTck<E extends ReactiveStreamsEngine> {
     public Object[] allTests() {
         engine = createEngine();
         rs = createFactory();
-        executorService = Executors.newScheduledThreadPool(4);
+        executorService = createExecutorService();
 
         ReactiveStreamsApiVerification apiVerification = new ReactiveStreamsApiVerification(rs);
         ReactiveStreamsSpiVerification spiVerification =

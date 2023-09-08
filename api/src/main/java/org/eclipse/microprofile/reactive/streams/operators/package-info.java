@@ -65,7 +65,7 @@
  * you want to output it as a comma separated list of lines to publish to an HTTP client request body, which expects a
  * {@link org.reactivestreams.Publisher} of {@link java.nio.ByteBuffer}. Here's how this might be implemented:
  * <p>
- * 
+ *
  * <pre>
  *   Publisher&lt;Row&gt; rowsPublisher = ...;
  *

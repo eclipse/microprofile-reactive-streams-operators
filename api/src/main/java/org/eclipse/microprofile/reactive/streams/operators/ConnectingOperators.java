@@ -78,7 +78,7 @@ public interface ConnectingOperators<T> {
      * in, so the resulting stream should only be run once. For the same reason, the processor passed in should not have
      * any active subscriptions and should not be used in more than one call to this method.
      *
-     * 
+     *
      * @param processor
      *            The processor builder to connect.
      * @return A stream builder that represents the passed in processor builder's outlet.

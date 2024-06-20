@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,7 @@
 
 package org.eclipse.microprofile.reactive.streams.operators.tck.arquillian;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,15 +38,14 @@ import org.reactivestreams.tck.TestEnvironment;
 import org.testng.IClassListener;
 import org.testng.IMethodInstance;
 import org.testng.IMethodInterceptor;
-import org.testng.IObjectFactory;
 import org.testng.ITestClass;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestNGListener;
+import org.testng.ITestObjectFactory;
 import org.testng.ITestResult;
 import org.testng.TestNG;
 import org.testng.annotations.Test;
-import org.testng.internal.ObjectFactoryImpl;
 
 import jakarta.inject.Inject;
 
@@ -78,18 +78,40 @@ public class ReactiveStreamsArquillianTck extends Arquillian {
     @Inject
     private ReactiveStreamsCdiTck tck;
 
+    private class TCKObjectFactory implements ITestObjectFactory {
+        @Override
+        public <T> T newInstance(Class<T> cls, Object... parameters) {
+            if (cls.equals(ReactiveStreamsCdiTck.class)) {
+                return (T) tck;
+            } else {
+                return ITestObjectFactory.super.newInstance(cls, parameters);
+            }
+        }
+
+        @Override
+        public <T> T newInstance(String clsName, Object... parameters) {
+            if (clsName.equals(ReactiveStreamsCdiTck.class.getName())) {
+                return (T) tck;
+            } else {
+                return ITestObjectFactory.super.newInstance(clsName, parameters);
+            }
+        }
+
+        @Override
+        public <T> T newInstance(Constructor<T> constructor, Object... parameters) {
+            if (constructor.getDeclaringClass().equals(ReactiveStreamsCdiTck.class)) {
+                return (T) tck;
+            } else {
+                return ITestObjectFactory.super.newInstance(constructor, parameters);
+            }
+        }
+    }
+
     @Test
     public void runAllTckTests() throws Throwable {
         TestNG testng = new TestNG();
 
-        ObjectFactoryImpl delegate = new ObjectFactoryImpl();
-        testng.setObjectFactory((IObjectFactory) (constructor, params) -> {
-            if (constructor.getDeclaringClass().equals(ReactiveStreamsCdiTck.class)) {
-                return tck;
-            } else {
-                return delegate.newInstance(constructor, params);
-            }
-        });
+        testng.setObjectFactory(new TCKObjectFactory());
 
         testng.setUseDefaultListeners(false);
         ResultListener resultListener = new ResultListener();

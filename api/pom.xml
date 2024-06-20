@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ~ Copyright (c) 2018, 2022 Contributors to the Eclipse Foundation
+  ~ Copyright (c) 2018, 2023 Contributors to the Eclipse Foundation
   ~
   ~ See the NOTICE file(s) distributed with this work for additional
   ~ information regarding copyright ownership.
@@ -28,7 +28,7 @@
     </parent>
 
     <properties>
-        <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+        <frontend-maven-plugin.version>1.11.0</frontend-maven-plugin.version>
         <bnd.baseline.include.distribution.management>false</bnd.baseline.include.distribution.management>
     </properties>
 
